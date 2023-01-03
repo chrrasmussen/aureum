@@ -7,13 +7,13 @@ use std::str;
 use test_case::{TestAssertion, TestCase, TestOutput};
 
 /// Golden test runner
-#[derive(Parser, Debug)]
+#[derive(Parser)]
 struct Args {
     /// Path to test config
     path: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Deserialize)]
 struct TestConfig {
     test_program: String,
     test_arguments: Option<Vec<String>>,
