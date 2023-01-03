@@ -1,0 +1,5 @@
+test_program = "/bin/echo"
+test_arguments = ["-n", "Hello world"]
+test_stdin = ""
+
+expected_stdout = "Hello world"
