@@ -18,7 +18,9 @@ struct TestConfig {
     test_program: String,
     test_arguments: Vec<String>,
     test_stdin: String,
-    expected_stdout: String,
+    expected_stdout: Option<String>,
+    expected_stderr: Option<String>,
+    expected_exit_code: Option<i32>,
 }
 
 fn main() {
@@ -53,6 +55,12 @@ fn main() {
     let stderr_string = String::from_utf8(buf).unwrap();
 
     let exit_status = child.wait().unwrap();
+    let exit_code = exit_status.code().unwrap();
 
-    println!("{} - {} '{}' '{}'", if stdout_string == test_config.expected_stdout { "ok" } else { "not ok" }, exit_status.code().unwrap(), stdout_string, stderr_string);
+    let is_success =
+        test_config.expected_stdout.map(|x| { x == stdout_string }).unwrap_or(true) &&
+        test_config.expected_stderr.map(|x| { x == stderr_string }).unwrap_or(true) &&
+        test_config.expected_exit_code.map(|x| { x == exit_code }).unwrap_or(true);
+
+    println!("{} - {} '{}' '{}'", if is_success { "ok" } else { "not ok" }, exit_code, stdout_string, stderr_string);
 }

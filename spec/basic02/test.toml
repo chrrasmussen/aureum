@@ -1,0 +1,10 @@
+test_program = "/bin/bash"
+test_arguments = []
+test_stdin = """
+#!/usr/bin/env bash
+set -e
+
+exit 42
+"""
+
+expected_exit_code = 42
