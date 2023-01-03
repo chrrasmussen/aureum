@@ -1,0 +1,10 @@
+test_program = "/bin/bash"
+test_arguments = []
+test_stdin = """
+#!/usr/bin/env bash
+set -e
+
+>&2 echo -n error
+"""
+
+expected_stderr = "error"
