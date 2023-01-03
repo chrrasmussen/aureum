@@ -16,8 +16,8 @@ struct Args {
 #[derive(Debug, Deserialize)]
 struct TestConfig {
     test_program: String,
-    test_arguments: Vec<String>,
-    test_stdin: String,
+    test_arguments: Option<Vec<String>>,
+    test_stdin: Option<String>,
     expected_stdout: Option<String>,
     expected_stderr: Option<String>,
     expected_exit_code: Option<i32>,
@@ -31,16 +31,17 @@ fn main() {
     let test_config: TestConfig = toml::from_str(&toml_str).unwrap();
 
     let mut cmd = Command::new(test_config.test_program);
-    cmd.args(test_config.test_arguments);
+    cmd.args(test_config.test_arguments.unwrap_or(vec![]));
     cmd.stdin(Stdio::piped());
     cmd.stdout(Stdio::piped());
     cmd.stderr(Stdio::piped());
 
     let mut child = cmd.spawn().unwrap();
 
-    let mut stdin = child.stdin.take().unwrap();
-    stdin.write_all(test_config.test_stdin.as_bytes()).unwrap();
-    drop(stdin);
+    if let Some(stdin_string) = test_config.test_stdin {
+        let mut stdin = child.stdin.take().unwrap();
+        stdin.write_all(stdin_string.as_bytes()).unwrap();
+    }
 
     let mut stdout = child.stdout.take().unwrap();
     let mut buf: Vec<u8> = vec![];
