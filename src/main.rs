@@ -2,6 +2,7 @@ mod test_case;
 
 use clap::Parser;
 use serde::Deserialize;
+use std::env::{var, VarError};
 use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
@@ -73,7 +74,9 @@ impl TestConfig {
 }
 
 #[derive(Debug)]
+#[allow(dead_code)]
 enum TestConfigError {
+    FailedToFetchEnvVar { var_name: String, error: VarError },
     FailedToParseString(String),
     ExpectationRequired,
     IOError(io::Error),
@@ -85,6 +88,7 @@ enum ConfigValue<T> {
     Literal(T),
     WrappedLiteral { value: T },
     ReadFromFile { file: String },
+    FetchFromEnv { env: String },
 }
 
 impl<T> ConfigValue<T>
@@ -98,6 +102,16 @@ where
             Self::ReadFromFile { file } => {
                 let path = current_dir.join(file);
                 let str = fs::read_to_string(path).map_err(TestConfigError::IOError)?;
+                let value = str
+                    .parse()
+                    .map_err(|_err| TestConfigError::FailedToParseString(str))?;
+                Ok(value)
+            }
+            Self::FetchFromEnv { env } => {
+                let str = var(&env).map_err(|err| TestConfigError::FailedToFetchEnvVar {
+                    var_name: env,
+                    error: err,
+                })?;
                 let value = str
                     .parse()
                     .map_err(|_err| TestConfigError::FailedToParseString(str))?;
