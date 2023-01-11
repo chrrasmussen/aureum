@@ -4,6 +4,7 @@ use clap::Parser;
 use serde::Deserialize;
 use std::fs;
 use std::io;
+use std::path::{Path, PathBuf};
 use std::str::FromStr;
 use test_case::{TestAssertion, TestCase, TestOutput};
 
@@ -25,30 +26,36 @@ struct TestConfig {
 }
 
 impl TestConfig {
-    fn to_test_case(self) -> Result<TestCase, TestConfigError> {
-        let program = self.test_program.read()?;
+    fn to_test_case<P>(self, path: P) -> Result<TestCase, TestConfigError>
+    where
+        P: Into<PathBuf>,
+    {
+        let source_file = path.into();
+        let current_dir = source_file.as_path().parent().unwrap_or(Path::new("."));
+
+        let program = self.test_program.read(current_dir)?;
 
         let mut arguments = vec![];
         for arg in self.test_arguments.unwrap_or(vec![]) {
-            arguments.push(arg.read()?)
+            arguments.push(arg.read(current_dir)?)
         }
 
         let stdin: Option<String>;
         if let Some(test_stdin) = self.test_stdin {
-            stdin = Some(test_stdin.read()?)
+            stdin = Some(test_stdin.read(current_dir)?)
         } else {
             stdin = None
         }
 
         let mut assertions = vec![];
         if let Some(stdout) = self.expected_stdout {
-            assertions.push(TestAssertion::AssertStdout(stdout.read()?))
+            assertions.push(TestAssertion::AssertStdout(stdout.read(current_dir)?))
         }
         if let Some(stderr) = self.expected_stderr {
-            assertions.push(TestAssertion::AssertStderr(stderr.read()?))
+            assertions.push(TestAssertion::AssertStderr(stderr.read(current_dir)?))
         }
         if let Some(exit_code) = self.expected_exit_code {
-            assertions.push(TestAssertion::AssertExitCode(exit_code.read()?))
+            assertions.push(TestAssertion::AssertExitCode(exit_code.read(current_dir)?))
         }
 
         if assertions.len() == 0 {
@@ -56,6 +63,7 @@ impl TestConfig {
         }
 
         Ok(TestCase {
+            source_file,
             program,
             arguments,
             stdin,
@@ -83,12 +91,13 @@ impl<T> ConfigValue<T>
 where
     T: FromStr,
 {
-    fn read(self) -> Result<T, TestConfigError> {
+    fn read(self, current_dir: &Path) -> Result<T, TestConfigError> {
         match self {
             Self::Literal(value) => Ok(value),
             Self::WrappedLiteral { value } => Ok(value),
             Self::ReadFromFile { file } => {
-                let str = fs::read_to_string(file).map_err(TestConfigError::IOError)?;
+                let path = current_dir.join(file);
+                let str = fs::read_to_string(path).map_err(TestConfigError::IOError)?;
                 let value = str
                     .parse()
                     .map_err(|_err| TestConfigError::FailedToParseString(str))?;
@@ -101,10 +110,10 @@ where
 fn main() {
     let args = Args::parse();
 
-    let toml_str = fs::read_to_string(args.path).expect("Should have been able to read the file");
+    let toml_str = fs::read_to_string(&args.path).expect("Should have been able to read the file");
     let test_config: TestConfig = toml::from_str(&toml_str).unwrap();
 
-    let test_case = test_config.to_test_case().unwrap();
+    let test_case = test_config.to_test_case(&args.path).unwrap();
     let test_output = test_case::run(&test_case).unwrap();
 
     let is_success = test_case

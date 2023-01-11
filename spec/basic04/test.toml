@@ -1,0 +1,4 @@
+test_program = "/bin/echo"
+test_arguments = ["-n", "Hello world"]
+
+expected_stdout = { file = "test.stdout" }

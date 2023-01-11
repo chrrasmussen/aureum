@@ -1,7 +1,9 @@
 use std::io::{self, Read, Write};
+use std::path::PathBuf;
 use std::process::{Command, Stdio};
 
 pub struct TestCase {
+    pub source_file: PathBuf,
     pub program: String,
     pub arguments: Vec<String>,
     pub stdin: Option<String>,
