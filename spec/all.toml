@@ -1,0 +1,20 @@
+test_program = "/bin/bash"
+test_arguments = []
+test_stdin = { file = "run-all.sh" }
+
+expected_stdout = """
+ok - 0 'Hello world' ''
+ok - 42 '' ''
+ok - 0 '' 'error'
+ok - 0 'Hello world' ''
+ok - 0 'Hello world' ''
+ok - 2 '' 'error: The following required arguments were not provided:
+  <PATH>
+
+Usage: aureum <PATH>
+
+For more information try '--help'
+'
+"""
+expected_stderr = ""
+expected_status_code = 0

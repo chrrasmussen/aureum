@@ -1,5 +1,5 @@
 use std::io::{self, Read, Write};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
 pub struct TestCase {
@@ -30,7 +30,10 @@ pub enum TestError {
 }
 
 pub fn run(test_case: &TestCase) -> Result<TestOutput, TestError> {
+    let current_dir = test_case.source_file.parent().unwrap_or(Path::new("."));
+
     let mut cmd = Command::new(&test_case.program);
+    cmd.current_dir(current_dir);
     cmd.args(&test_case.arguments);
     cmd.stdin(Stdio::piped());
     cmd.stdout(Stdio::piped());
