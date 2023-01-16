@@ -6,6 +6,20 @@ use std::io;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
 
+pub fn from_str(str: &str) -> Result<TestConfig, TestConfigError> {
+    toml::from_str(&str).map_err(TestConfigError::InvalidConfig)
+}
+
+#[derive(Debug)]
+#[allow(dead_code)]
+pub enum TestConfigError {
+    InvalidConfig(toml::de::Error),
+    FailedToFetchEnvVar { var_name: String, error: VarError },
+    FailedToParseString(String),
+    ExpectationRequired,
+    IOError(io::Error),
+}
+
 #[derive(Deserialize)]
 pub struct TestConfig {
     test_program: ConfigValue<String>,
@@ -61,15 +75,6 @@ impl TestConfig {
             assertions,
         })
     }
-}
-
-#[derive(Debug)]
-#[allow(dead_code)]
-pub enum TestConfigError {
-    FailedToFetchEnvVar { var_name: String, error: VarError },
-    FailedToParseString(String),
-    ExpectationRequired,
-    IOError(io::Error),
 }
 
 #[derive(Deserialize)]

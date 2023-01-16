@@ -4,7 +4,6 @@ mod test_config;
 use clap::Parser;
 use std::fs;
 use test_case::{TestAssertion, TestOutput};
-use test_config::TestConfig;
 
 /// Golden test runner
 #[derive(Parser)]
@@ -17,7 +16,7 @@ fn main() {
     let args = Args::parse();
 
     let toml_str = fs::read_to_string(&args.path).expect("Should have been able to read the file");
-    let test_config: TestConfig = toml::from_str(&toml_str).unwrap();
+    let test_config = test_config::from_str(&toml_str).unwrap();
 
     let test_case = test_config.to_test_case(&args.path).unwrap();
     let test_output = test_case::run(&test_case).unwrap();
