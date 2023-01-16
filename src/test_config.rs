@@ -11,7 +11,6 @@ pub fn from_str(str: &str) -> Result<TestConfig, TestConfigError> {
 }
 
 #[derive(Debug)]
-#[allow(dead_code)]
 pub enum TestConfigError {
     InvalidConfig(toml::de::Error),
     FailedToFetchEnvVar { var_name: String, error: VarError },
