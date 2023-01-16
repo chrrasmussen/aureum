@@ -22,6 +22,11 @@ pub struct TestOutput {
     pub exit_code: i32,
 }
 
+pub struct TestResult {
+    pub is_success: bool,
+    pub output: TestOutput,
+}
+
 #[derive(Debug)]
 pub enum TestError {
     FailedToDecodeUtf8,
@@ -29,7 +34,7 @@ pub enum TestError {
     IOError(io::Error),
 }
 
-pub fn run(test_case: &TestCase) -> Result<TestOutput, TestError> {
+pub fn run(test_case: &TestCase) -> Result<TestResult, TestError> {
     let current_dir = test_case.source_file.parent().unwrap_or(Path::new("."));
 
     let mut cmd = Command::new(&test_case.program);
@@ -69,11 +74,19 @@ pub fn run(test_case: &TestCase) -> Result<TestOutput, TestError> {
         .code()
         .map_or(Err(TestError::MissingExitCode), Ok)?;
 
-    Ok(TestOutput {
+    let output = TestOutput {
         stdout,
         stderr,
         exit_code,
-    })
+    };
+
+    let assertions = &test_case.assertions;
+
+    let is_success: bool = assertions
+        .into_iter()
+        .all(|assertion| check_assertion(&output, &assertion));
+
+    Ok(TestResult { is_success, output })
 }
 
 fn read_pipe_to_string<T>(pipe: &mut T) -> Result<String, TestError>
@@ -83,4 +96,14 @@ where
     let mut buf: Vec<u8> = vec![];
     pipe.read_to_end(&mut buf).map_err(TestError::IOError)?;
     String::from_utf8(buf).map_or(Err(TestError::FailedToDecodeUtf8), Ok)
+}
+
+fn check_assertion(output: &TestOutput, assertion: &TestAssertion) -> bool {
+    match assertion {
+        TestAssertion::AssertStdout(expected_stdout) => &output.stdout == expected_stdout,
+        TestAssertion::AssertStderr(expected_stderr) => &output.stderr == expected_stderr,
+        TestAssertion::AssertExitCode(expected_exit_code) => {
+            &output.exit_code == expected_exit_code
+        }
+    }
 }
