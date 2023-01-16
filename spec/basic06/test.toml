@@ -1,0 +1,3 @@
+test_program = "./run.sh"
+
+expected_stdout = "Hello world"

@@ -8,6 +8,7 @@ ok - 42 '' ''
 ok - 0 '' 'error'
 ok - 0 'Hello world' ''
 ok - 0 'Hello world' ''
+ok - 0 'Hello world' ''
 ok - 2 '' 'error: The following required arguments were not provided:
   <PATH>
 
