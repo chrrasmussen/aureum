@@ -2,4 +2,4 @@
 
 set -e
 
-AUREUM_EXEC="$PWD/target/debug/aureum" cargo run -- spec/all.toml
+AUREUM_EXEC="$PWD/target/debug/aureum" cargo run -- spec/all.au.toml
