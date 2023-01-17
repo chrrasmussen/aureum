@@ -1,12 +1,6 @@
 test_program = "./run-all.sh"
 
 expected_stdout = """
-ok - 0 'Hello world' ''
-ok - 42 '' ''
-ok - 0 '' 'error'
-ok - 0 'Hello world' ''
-ok - 0 'Hello world' ''
-ok - 0 'Hello world' ''
 ok - 2 '' 'error: The following required arguments were not provided:
   <PATH>
 
@@ -19,6 +13,12 @@ ok - 0 'ok - 0 'Hello world' ''
 ok - 0 'ok - 0 'Test 1' ''
 ok - 0 'Test 2' ''
 ' ''
+ok - 0 'Hello world' ''
+ok - 42 '' ''
+ok - 0 '' 'error'
+ok - 0 'Hello world' ''
+ok - 0 'Hello world' ''
+ok - 0 'Hello world' ''
 """
 expected_stderr = ""
 expected_status_code = 0

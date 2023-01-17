@@ -9,13 +9,13 @@ then
 fi
 
 
+"$AUREUM_EXEC" aureum01/test.au.toml
+"$AUREUM_EXEC" aureum02/test.au.toml
+"$AUREUM_EXEC" aureum03/test.au.toml
+
 "$AUREUM_EXEC" basic01/test.au.toml
 "$AUREUM_EXEC" basic02/test.au.toml
 "$AUREUM_EXEC" basic03/test.au.toml
 "$AUREUM_EXEC" basic04/test.au.toml
 AUREUM_TEST_HELLO_WORLD="Hello world" "$AUREUM_EXEC" basic05/test.au.toml
 "$AUREUM_EXEC" basic06/test.au.toml
-
-"$AUREUM_EXEC" aureum01/test.au.toml
-"$AUREUM_EXEC" aureum02/test.au.toml
-"$AUREUM_EXEC" aureum03/test.au.toml
