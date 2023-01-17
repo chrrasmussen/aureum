@@ -1,4 +1,5 @@
-test_program = "./run-all.sh"
+test_program = { env = "AUREUM_EXEC" }
+test_arguments = ["spec"]
 
 expected_stdout = """
 ok - 2 '' 'error: The following required arguments were not provided:
