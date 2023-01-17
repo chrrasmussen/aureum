@@ -23,6 +23,7 @@ pub enum TestConfigError {
 
 #[derive(Deserialize)]
 pub struct TestConfig {
+    test_name: Option<ConfigValue<String>>,
     test_program: ConfigValue<String>,
     test_arguments: Option<Vec<ConfigValue<String>>>,
     test_stdin: Option<ConfigValue<String>>,
@@ -37,8 +38,14 @@ impl TestConfig {
         P: Into<PathBuf>,
     {
         let source_file = path.into();
-        let name = name_from_path(&source_file).unwrap_or(String::from(MISSING_TEST_NAME));
         let current_dir = source_file.as_path().parent().unwrap_or(Path::new("."));
+
+        let name: String;
+        if let Some(test_name) = self.test_name {
+            name = test_name.read(current_dir)?
+        } else {
+            name = name_from_path(&source_file).unwrap_or(String::from(MISSING_TEST_NAME))
+        }
 
         let program = self.test_program.read(current_dir)?;
 

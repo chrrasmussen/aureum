@@ -3,16 +3,17 @@ test_arguments = ["spec"]
 
 expected_stdout = """
 TAP version 14
-1..9
+1..10
 ok 1 - no-args [./spec/aureum/no-args.au.toml]
-ok 2 - expect-exit-code [./spec/basic/expect-exit-code.au.toml]
-ok 3 - expect-stderr [./spec/basic/expect-stderr.au.toml]
-ok 4 - expect-stdout [./spec/basic/expect-stdout.au.toml]
-ok 5 - read-env-var [./spec/basic/read-env-var.au.toml]
-ok 6 - read-external-file [./spec/basic/read-external-file.au.toml]
-ok 7 - run-bash [./spec/basic/run-bash.au.toml]
-ok 8 - test-dir [./spec/glob/test-dir.au.toml]
-ok 9 - test-single-file [./spec/glob/test-single-file.au.toml]
+ok 2 - My custom name [./spec/basic/custom-name.au.toml]
+ok 3 - expect-exit-code [./spec/basic/expect-exit-code.au.toml]
+ok 4 - expect-stderr [./spec/basic/expect-stderr.au.toml]
+ok 5 - expect-stdout [./spec/basic/expect-stdout.au.toml]
+ok 6 - read-env-var [./spec/basic/read-env-var.au.toml]
+ok 7 - read-external-file [./spec/basic/read-external-file.au.toml]
+ok 8 - run-bash [./spec/basic/run-bash.au.toml]
+ok 9 - test-dir [./spec/glob/test-dir.au.toml]
+ok 10 - test-single-file [./spec/glob/test-single-file.au.toml]
 """
 expected_stderr = ""
 expected_status_code = 0
