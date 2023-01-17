@@ -1,7 +1,0 @@
-test_program = { env = "AUREUM_EXEC" }
-test_arguments = ["tests/*.toml"]
-
-expected_stdout = """
-ok 1 - ./tests/test1.toml
-ok 2 - ./tests/test2.toml
-"""
