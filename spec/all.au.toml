@@ -14,6 +14,8 @@ Usage: aureum <PATH>
 
 For more information try '--help'
 '
+ok - 0 'ok - 0 'Hello world' ''
+' ''
 """
 expected_stderr = ""
 expected_status_code = 0

@@ -46,7 +46,14 @@ fn locate_test_files(path: &str, test_files: &mut Vec<PathBuf>) {
         for entry in entries {
             if let Ok(e) = entry {
                 if e.is_file() {
-                    test_files.push(e)
+                    let test_file: PathBuf;
+                    if e.is_relative() {
+                        test_file = PathBuf::from(".").join(e)
+                    } else {
+                        test_file = e
+                    }
+
+                    test_files.push(test_file)
                 } else if e.is_dir() {
                     // Look for `.au.toml` files in directory (recursively)
                     if let Some(search_path) = e.join("**/*.au.toml").to_str() {
