@@ -3,7 +3,8 @@ mod test_config;
 
 use clap::Parser;
 use glob::glob;
-use std::{fs, path::PathBuf};
+use std::{fs, io, path::PathBuf};
+use test_case::{TestCase, TestError, TestResult};
 
 /// Golden test runner
 #[derive(Parser)]
@@ -18,24 +19,48 @@ fn main() {
     let mut test_files = vec![];
     locate_test_files(&args.path, &mut test_files);
 
+    let mut test_cases = vec![];
+    let mut failing_configs = vec![];
+
     for test_file in test_files {
-        let toml_str =
-            fs::read_to_string(&test_file).expect("Should have been able to read the file");
-        let test_config = test_config::from_str(&toml_str).unwrap();
+        match test_case_from_file(&test_file) {
+            Ok(test_case) => test_cases.push(test_case),
+            Err(err) => failing_configs.push((test_file.clone(), err)),
+        }
+    }
 
-        let test_case = test_config.to_test_case(&test_file).unwrap();
-        let test_result = test_case::run(&test_case).unwrap();
+    for test_case in test_cases {
+        let test_result = test_case::run(&test_case);
 
+        print_test_result(&test_case, &test_result);
+    }
+
+    // TODO: Print failing configs
+}
+
+enum TestFileError {
+    FailedToParseTestConfig(test_config::TestConfigError),
+    FailedToReadTestCases(test_config::TestConfigError),
+    IOError(io::Error),
+}
+
+fn test_case_from_file(test_file: &PathBuf) -> Result<TestCase, TestFileError> {
+    let toml_content = fs::read_to_string(test_file).map_err(TestFileError::IOError)?;
+    let test_config =
+        test_config::from_str(&toml_content).map_err(TestFileError::FailedToParseTestConfig)?;
+    test_config
+        .to_test_case(test_file)
+        .map_err(TestFileError::FailedToReadTestCases)
+}
+
+fn print_test_result(_case: &TestCase, result: &Result<TestResult, TestError>) {
+    if let Ok(result) = result {
         println!(
             "{} - {} '{}' '{}'",
-            if test_result.is_success {
-                "ok"
-            } else {
-                "not ok"
-            },
-            test_result.output.exit_code,
-            test_result.output.stdout,
-            test_result.output.stderr
+            if result.is_success { "ok" } else { "not ok" },
+            result.output.exit_code,
+            result.output.stdout,
+            result.output.stderr
         )
     }
 }
