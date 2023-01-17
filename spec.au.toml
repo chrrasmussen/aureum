@@ -12,9 +12,9 @@ ok 5 - expect-stdout [./spec/basic/expect-stdout.au.toml]
 ok 6 - read-env-var [./spec/basic/read-env-var.au.toml]
 ok 7 - read-external-file [./spec/basic/read-external-file.au.toml]
 ok 8 - run-bash [./spec/basic/run-bash.au.toml]
-ok 9 - test-dir [./spec/glob/test-dir.au.toml]
-ok 10 - test-multiple-files [./spec/glob/test-multiple-files.au.toml]
-ok 11 - test-single-file [./spec/glob/test-single-file.au.toml]
+ok 9 - multiple-files [./spec/glob/multiple-files.au.toml]
+ok 10 - single-dir [./spec/glob/single-dir.au.toml]
+ok 11 - single-file [./spec/glob/single-file.au.toml]
 ok 12 - two-tests [./spec/multi/two-tests.au.toml]
 """
 expected_stderr = ""
