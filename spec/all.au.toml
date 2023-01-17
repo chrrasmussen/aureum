@@ -1,6 +1,4 @@
-test_program = "/bin/bash"
-test_arguments = []
-test_stdin = { file = "run-all.sh" }
+test_program = "./run-all.sh"
 
 expected_stdout = """
 ok - 0 'Hello world' ''
