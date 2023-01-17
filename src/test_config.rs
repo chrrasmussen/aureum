@@ -17,6 +17,7 @@ pub enum TestConfigError {
     InvalidConfig(toml::de::Error),
     FailedToFetchEnvVar { var_name: String, error: VarError },
     FailedToParseString(String),
+    ProgramRequired,
     ExpectationRequired,
     IOError(io::Error),
 }
@@ -24,7 +25,7 @@ pub enum TestConfigError {
 #[derive(Deserialize)]
 pub struct TestConfig {
     test_name: Option<ConfigValue<String>>,
-    test_program: ConfigValue<String>,
+    test_program: Option<ConfigValue<String>>,
     test_arguments: Option<Vec<ConfigValue<String>>>,
     test_stdin: Option<ConfigValue<String>>,
     expected_stdout: Option<ConfigValue<String>>,
@@ -47,7 +48,12 @@ impl TestConfig {
             name = name_from_path(&source_file).unwrap_or(String::from(MISSING_TEST_NAME))
         }
 
-        let program = self.test_program.read(current_dir)?;
+        let program: String;
+        if let Some(test_program) = self.test_program {
+            program = test_program.read(current_dir)?
+        } else {
+            return Err(TestConfigError::ProgramRequired)
+        }
 
         let mut arguments = vec![];
         for arg in self.test_arguments.unwrap_or(vec![]) {
