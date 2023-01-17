@@ -4,6 +4,6 @@ test_arguments = ["test-dir/*.toml"]
 expected_stdout = """
 TAP version 14
 1..2
-ok 1 - ./test-dir/test1.toml
-ok 2 - ./test-dir/test2.toml
+ok 1 - test1 [./test-dir/test1.toml]
+ok 2 - test2 [./test-dir/test2.toml]
 """

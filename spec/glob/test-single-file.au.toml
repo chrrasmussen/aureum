@@ -4,5 +4,5 @@ test_arguments = ["test-single-file.toml"]
 expected_stdout = """
 TAP version 14
 1..1
-ok 1 - ./test-single-file.toml
+ok 1 - test-single-file [./test-single-file.toml]
 """

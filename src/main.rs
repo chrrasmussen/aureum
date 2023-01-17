@@ -68,7 +68,7 @@ fn print_test_case_result(
         Err(_) => is_success = false,
     }
 
-    let message = case.source_file.display().to_string();
+    let message = format!("{} [{}]", case.name, case.source_file.display().to_string());
     if is_success {
         tap_format::print_ok(test_number, &message)
     } else {

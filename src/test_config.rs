@@ -6,6 +6,8 @@ use std::io;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
 
+const MISSING_TEST_NAME: &str = "Missing test name";
+
 pub fn from_str(str: &str) -> Result<TestConfig, TestConfigError> {
     toml::from_str(&str).map_err(TestConfigError::InvalidConfig)
 }
@@ -35,6 +37,7 @@ impl TestConfig {
         P: Into<PathBuf>,
     {
         let source_file = path.into();
+        let name = name_from_path(&source_file).unwrap_or(String::from(MISSING_TEST_NAME));
         let current_dir = source_file.as_path().parent().unwrap_or(Path::new("."));
 
         let program = self.test_program.read(current_dir)?;
@@ -68,6 +71,7 @@ impl TestConfig {
 
         Ok(TestCase {
             source_file,
+            name,
             program,
             arguments,
             stdin,
@@ -113,4 +117,19 @@ where
             }
         }
     }
+}
+
+fn name_from_path(path: &Path) -> Option<String> {
+    let file_name = path.file_name()?.to_string_lossy().to_string();
+
+    let name: String;
+    if let Some(n) = file_name.strip_suffix(".au.toml") {
+        name = String::from(n)
+    } else if let Some(n) = file_name.strip_suffix(".toml") {
+        name = String::from(n)
+    } else {
+        name = file_name
+    }
+
+    Some(name)
 }
