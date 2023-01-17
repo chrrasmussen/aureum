@@ -24,8 +24,8 @@ fn main() {
     let mut failing_configs = vec![];
 
     for test_file in test_files {
-        match test_case_from_file(&test_file) {
-            Ok(test_case) => test_cases.push(test_case),
+        match test_cases_from_file(&test_file) {
+            Ok(sub_tests) => test_cases.extend(sub_tests),
             Err(err) => failing_configs.push((test_file.clone(), err)),
         }
     }
@@ -48,12 +48,12 @@ enum TestFileError {
     IOError(io::Error),
 }
 
-fn test_case_from_file(test_file: &PathBuf) -> Result<TestCase, TestFileError> {
+fn test_cases_from_file(test_file: &PathBuf) -> Result<Vec<TestCase>, TestFileError> {
     let toml_content = fs::read_to_string(test_file).map_err(TestFileError::IOError)?;
     let test_config =
         test_config::from_str(&toml_content).map_err(TestFileError::FailedToParseTestConfig)?;
     test_config
-        .to_test_case(test_file)
+        .to_test_cases(test_file)
         .map_err(TestFileError::FailedToReadTestCases)
 }
 

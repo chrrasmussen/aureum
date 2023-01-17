@@ -1,0 +1,9 @@
+test_program = "/bin/echo"
+
+[[tests]]
+test_arguments = ["-n", "Test 1"]
+expected_stdout = "Test 1"
+
+[[tests]]
+test_arguments = ["-n", "Test 2"]
+expected_stdout = "Test 2"

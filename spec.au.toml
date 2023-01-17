@@ -3,7 +3,7 @@ test_arguments = ["spec"]
 
 expected_stdout = """
 TAP version 14
-1..10
+1..11
 ok 1 - no-args [./spec/aureum/no-args.au.toml]
 ok 2 - My custom name [./spec/basic/custom-name.au.toml]
 ok 3 - expect-exit-code [./spec/basic/expect-exit-code.au.toml]
@@ -14,6 +14,7 @@ ok 7 - read-external-file [./spec/basic/read-external-file.au.toml]
 ok 8 - run-bash [./spec/basic/run-bash.au.toml]
 ok 9 - test-dir [./spec/glob/test-dir.au.toml]
 ok 10 - test-single-file [./spec/glob/test-single-file.au.toml]
+ok 11 - two-tests [./spec/multi/two-tests.au.toml]
 """
 expected_stderr = ""
 expected_status_code = 0

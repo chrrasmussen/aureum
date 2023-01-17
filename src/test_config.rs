@@ -22,7 +22,7 @@ pub enum TestConfigError {
     IOError(io::Error),
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 pub struct TestConfig {
     test_name: Option<ConfigValue<String>>,
     test_program: Option<ConfigValue<String>>,
@@ -31,16 +31,33 @@ pub struct TestConfig {
     expected_stdout: Option<ConfigValue<String>>,
     expected_stderr: Option<ConfigValue<String>>,
     expected_exit_code: Option<ConfigValue<i32>>,
+    tests: Option<Vec<TestConfig>>,
 }
 
 impl TestConfig {
-    pub fn to_test_case<P>(self, path: P) -> Result<TestCase, TestConfigError>
+    pub fn to_test_cases<P>(self, path: P) -> Result<Vec<TestCase>, TestConfigError>
     where
         P: Into<PathBuf>,
     {
         let source_file = path.into();
         let current_dir = source_file.as_path().parent().unwrap_or(Path::new("."));
 
+        let test_configs = split_test_configs(self);
+
+        let mut test_cases = vec![];
+        for test_config in test_configs {
+            let test_case = test_config.to_test_case(source_file.clone(), current_dir)?;
+            test_cases.push(test_case)
+        }
+
+        Ok(test_cases)
+    }
+
+    fn to_test_case(
+        self,
+        source_file: PathBuf,
+        current_dir: &Path,
+    ) -> Result<TestCase, TestConfigError> {
         let name: String;
         if let Some(test_name) = self.test_name {
             name = test_name.read(current_dir)?
@@ -52,7 +69,7 @@ impl TestConfig {
         if let Some(test_program) = self.test_program {
             program = test_program.read(current_dir)?
         } else {
-            return Err(TestConfigError::ProgramRequired)
+            return Err(TestConfigError::ProgramRequired);
         }
 
         let mut arguments = vec![];
@@ -93,7 +110,42 @@ impl TestConfig {
     }
 }
 
-#[derive(Deserialize)]
+// Currently only merges a single level
+fn split_test_configs(base_config: TestConfig) -> Vec<TestConfig> {
+    if let Some(tests) = base_config.tests.clone() {
+        let mut test_configs = vec![];
+        for sub_config in tests.into_iter() {
+            let merged_test_config = merge_test_configs(base_config.clone(), sub_config);
+            test_configs.push(merged_test_config)
+        }
+        test_configs
+    } else {
+        vec![base_config]
+    }
+}
+
+fn merge_test_configs(base_config: TestConfig, prioritized_config: TestConfig) -> TestConfig {
+    TestConfig {
+        test_name: prioritized_config.test_name.or(base_config.test_name),
+        test_program: prioritized_config.test_program.or(base_config.test_program),
+        test_arguments: prioritized_config
+            .test_arguments
+            .or(base_config.test_arguments),
+        test_stdin: prioritized_config.test_stdin.or(base_config.test_stdin),
+        expected_stdout: prioritized_config
+            .expected_stdout
+            .or(base_config.expected_stdout),
+        expected_stderr: prioritized_config
+            .expected_stderr
+            .or(base_config.expected_stderr),
+        expected_exit_code: prioritized_config
+            .expected_exit_code
+            .or(base_config.expected_exit_code),
+        tests: prioritized_config.tests, // Do not propagate tests from `base_config`
+    }
+}
+
+#[derive(Deserialize, Clone)]
 #[serde(untagged)]
 enum ConfigValue<T> {
     Literal(T),
