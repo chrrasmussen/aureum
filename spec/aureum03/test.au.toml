@@ -1,0 +1,7 @@
+test_program = { env = "AUREUM_EXEC" }
+test_arguments = ["tests/*.toml"]
+
+expected_stdout = """
+ok - 0 'Test 1' ''
+ok - 0 'Test 2' ''
+"""

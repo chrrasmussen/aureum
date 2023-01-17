@@ -16,6 +16,9 @@ For more information try '--help'
 '
 ok - 0 'ok - 0 'Hello world' ''
 ' ''
+ok - 0 'ok - 0 'Test 1' ''
+ok - 0 'Test 2' ''
+' ''
 """
 expected_stderr = ""
 expected_status_code = 0

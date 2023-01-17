@@ -18,3 +18,4 @@ AUREUM_MY_CUSTOM_ENV_VAR="Hello world" "$AUREUM_EXEC" basic05/test.au.toml
 
 "$AUREUM_EXEC" aureum01/test.au.toml
 "$AUREUM_EXEC" aureum02/test.au.toml
+"$AUREUM_EXEC" aureum03/test.au.toml
