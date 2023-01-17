@@ -1,6 +1,7 @@
 test_program = { env = "AUREUM_EXEC" }
 test_arguments = []
 
+expected_stdout = ""
 expected_stderr = """
 error: The following required arguments were not provided:
   <PATHS>...
@@ -9,3 +10,4 @@ Usage: aureum <PATHS>...
 
 For more information try '--help'
 """
+expected_exit_code = 2

@@ -7,3 +7,5 @@ TAP version 14
 ok 1 - test-multiple-files1 [./test-multiple-files1.toml]
 ok 2 - test-multiple-files2 [./test-multiple-files2.toml]
 """
+expected_stderr = ""
+expected_exit_code = 0

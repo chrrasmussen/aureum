@@ -7,3 +7,5 @@ TAP version 14
 ok 1 - test1 [./two-tests.toml]
 ok 2 - test2 [./two-tests.toml]
 """
+expected_stderr = ""
+expected_exit_code = 0
