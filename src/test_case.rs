@@ -80,10 +80,9 @@ pub fn run(test_case: &TestCase) -> Result<TestResult, TestError> {
         exit_code,
     };
 
-    let assertions = &test_case.assertions;
-
-    let is_success: bool = assertions
-        .into_iter()
+    let is_success: bool = test_case
+        .assertions
+        .iter()
         .all(|assertion| check_assertion(&output, &assertion));
 
     Ok(TestResult { is_success, output })
