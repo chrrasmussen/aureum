@@ -30,6 +30,9 @@ fn main() {
         }
     }
 
+    tap_format::print_version();
+    tap_format::print_plan(1, test_cases.len());
+
     for (i, test_case) in test_cases.iter().enumerate() {
         let test_result = test_case::run(&test_case);
 

@@ -2,6 +2,8 @@ test_program = { env = "AUREUM_EXEC" }
 test_arguments = ["spec"]
 
 expected_stdout = """
+TAP version 14
+1..9
 ok 1 - ./spec/aureum/no-args.au.toml
 ok 2 - ./spec/basic/expect-exit-code.au.toml
 ok 3 - ./spec/basic/expect-stderr.au.toml

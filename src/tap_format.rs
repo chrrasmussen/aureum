@@ -1,3 +1,7 @@
+pub fn print_version() {
+    println!("TAP version 14")
+}
+
 pub fn print_plan(start: usize, end: usize) {
     println!("{}..{}", start, end)
 }
@@ -18,6 +22,7 @@ pub fn print_diagnostics(diagnostics: &str) {
     println!("{}", indent_lines(&code_block, 2));
 }
 
+#[allow(dead_code)]
 pub fn print_bail_out(message: &str) {
     println!("Bail out! {}", message)
 }
