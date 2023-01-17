@@ -29,10 +29,10 @@ fn main() {
         }
     }
 
-    for test_case in test_cases {
+    for (i, test_case) in test_cases.iter().enumerate() {
         let test_result = test_case::run(&test_case);
 
-        print_test_result(&test_case, &test_result);
+        print_test_result(i + 1, &test_case, &test_result);
     }
 
     // TODO: Print failing configs
@@ -53,16 +53,19 @@ fn test_case_from_file(test_file: &PathBuf) -> Result<TestCase, TestFileError> {
         .map_err(TestFileError::FailedToReadTestCases)
 }
 
-fn print_test_result(_case: &TestCase, result: &Result<TestResult, TestError>) {
-    if let Ok(result) = result {
-        println!(
-            "{} - {} '{}' '{}'",
-            if result.is_success { "ok" } else { "not ok" },
-            result.output.exit_code,
-            result.output.stdout,
-            result.output.stderr
-        )
+fn print_test_result(index: usize, case: &TestCase, result: &Result<TestResult, TestError>) {
+    let is_success: bool;
+    match result {
+        Ok(test_result) => is_success = test_result.is_success,
+        Err(_) => is_success = false,
     }
+
+    println!(
+        "{} {} - {}",
+        if is_success { "ok" } else { "not ok" },
+        index,
+        case.source_file.display(),
+    )
 }
 
 fn locate_test_files(path: &str, test_files: &mut Vec<PathBuf>) {

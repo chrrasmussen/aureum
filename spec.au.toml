@@ -2,24 +2,15 @@ test_program = { env = "AUREUM_EXEC" }
 test_arguments = ["spec"]
 
 expected_stdout = """
-ok - 2 '' 'error: The following required arguments were not provided:
-  <PATH>
-
-Usage: aureum <PATH>
-
-For more information try '--help'
-'
-ok - 0 'ok - 0 'Hello world' ''
-' ''
-ok - 0 'ok - 0 'Test 1' ''
-ok - 0 'Test 2' ''
-' ''
-ok - 0 'Hello world' ''
-ok - 42 '' ''
-ok - 0 '' 'error'
-ok - 0 'Hello world' ''
-ok - 0 'Hello world' ''
-ok - 0 'Hello world' ''
+ok 1 - ./spec/aureum01/test.au.toml
+ok 2 - ./spec/aureum02/test.au.toml
+ok 3 - ./spec/aureum03/test.au.toml
+ok 4 - ./spec/basic01/test.au.toml
+ok 5 - ./spec/basic02/test.au.toml
+ok 6 - ./spec/basic03/test.au.toml
+ok 7 - ./spec/basic04/test.au.toml
+ok 8 - ./spec/basic05/test.au.toml
+ok 9 - ./spec/basic06/test.au.toml
 """
 expected_stderr = ""
 expected_status_code = 0
