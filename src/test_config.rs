@@ -1,5 +1,6 @@
 use crate::test_case::{TestAssertion, TestCase};
 use serde::Deserialize;
+use std::collections::BTreeMap;
 use std::env::{var, VarError};
 use std::fs;
 use std::io;
@@ -31,7 +32,7 @@ pub struct TestConfig {
     expected_stdout: Option<ConfigValue<String>>,
     expected_stderr: Option<ConfigValue<String>>,
     expected_exit_code: Option<ConfigValue<i32>>,
-    tests: Option<Vec<TestConfig>>,
+    tests: Option<BTreeMap<String, TestConfig>>,
 }
 
 impl TestConfig {
@@ -114,8 +115,12 @@ impl TestConfig {
 fn split_test_configs(base_config: TestConfig) -> Vec<TestConfig> {
     if let Some(tests) = base_config.tests.clone() {
         let mut test_configs = vec![];
-        for sub_config in tests.into_iter() {
-            let merged_test_config = merge_test_configs(base_config.clone(), sub_config);
+        for (name, sub_config) in tests.into_iter() {
+            let named_sub_config = TestConfig {
+                test_name: sub_config.test_name.or(Some(ConfigValue::Literal(name))),
+                ..sub_config
+            };
+            let merged_test_config = merge_test_configs(base_config.clone(), named_sub_config);
             test_configs.push(merged_test_config)
         }
         test_configs
