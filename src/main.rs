@@ -10,15 +10,18 @@ use test_case::{TestCase, TestError, TestResult};
 /// Golden test runner
 #[derive(Parser)]
 struct Args {
-    /// Path to test config
-    path: String,
+    /// Paths to test configs
+    #[structopt(required = true)]
+    paths: Vec<String>,
 }
 
 fn main() {
     let args = Args::parse();
 
     let mut test_files = vec![];
-    locate_test_files(&args.path, &mut test_files);
+    for path in &args.paths {
+        locate_test_files(path, &mut test_files);
+    }
 
     let mut test_cases = vec![];
     let mut failing_configs = vec![];
