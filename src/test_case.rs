@@ -4,7 +4,7 @@ use std::process::{Command, Stdio};
 
 pub struct TestCase {
     pub source_file: PathBuf,
-    pub name: String,
+    pub description: String,
     pub program: String,
     pub arguments: Vec<String>,
     pub stdin: Option<String>,

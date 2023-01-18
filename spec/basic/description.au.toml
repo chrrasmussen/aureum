@@ -1,4 +1,4 @@
-test_name = "My custom name"
+test_description = "My description"
 test_program = "/bin/echo"
 test_arguments = ["-n", "Hello world"]
 

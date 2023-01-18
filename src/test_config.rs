@@ -7,8 +7,6 @@ use std::io;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
 
-const MISSING_TEST_NAME: &str = "Missing test name";
-
 pub fn from_str(str: &str) -> Result<TestConfig, TestConfigError> {
     toml::from_str(&str).map_err(TestConfigError::InvalidConfig)
 }
@@ -25,7 +23,7 @@ pub enum TestConfigError {
 
 #[derive(Deserialize, Clone)]
 pub struct TestConfig {
-    test_name: Option<ConfigValue<String>>,
+    test_description: Option<ConfigValue<String>>,
     test_program: Option<ConfigValue<String>>,
     test_arguments: Option<Vec<ConfigValue<String>>>,
     test_stdin: Option<ConfigValue<String>>,
@@ -59,11 +57,11 @@ impl TestConfig {
         source_file: PathBuf,
         current_dir: &Path,
     ) -> Result<TestCase, TestConfigError> {
-        let name: String;
-        if let Some(test_name) = self.test_name {
-            name = test_name.read(current_dir)?
+        let description: String;
+        if let Some(test_name) = self.test_description {
+            description = test_name.read(current_dir)?
         } else {
-            name = name_from_path(&source_file).unwrap_or(String::from(MISSING_TEST_NAME))
+            description = name_from_path(&source_file).unwrap_or(String::from(""))
         }
 
         let program: String;
@@ -102,7 +100,7 @@ impl TestConfig {
 
         Ok(TestCase {
             source_file,
-            name,
+            description,
             program,
             arguments,
             stdin,
@@ -117,7 +115,9 @@ fn split_test_configs(base_config: TestConfig) -> Vec<TestConfig> {
         let mut test_configs = vec![];
         for (name, sub_config) in tests.into_iter() {
             let named_sub_config = TestConfig {
-                test_name: sub_config.test_name.or(Some(ConfigValue::Literal(name))),
+                test_description: sub_config
+                    .test_description
+                    .or(Some(ConfigValue::Literal(name))),
                 ..sub_config
             };
             let merged_test_config = merge_test_configs(base_config.clone(), named_sub_config);
@@ -131,7 +131,9 @@ fn split_test_configs(base_config: TestConfig) -> Vec<TestConfig> {
 
 fn merge_test_configs(base_config: TestConfig, prioritized_config: TestConfig) -> TestConfig {
     TestConfig {
-        test_name: prioritized_config.test_name.or(base_config.test_name),
+        test_description: prioritized_config
+            .test_description
+            .or(base_config.test_description),
         test_program: prioritized_config.test_program.or(base_config.test_program),
         test_arguments: prioritized_config
             .test_arguments
