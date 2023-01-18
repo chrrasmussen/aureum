@@ -6,12 +6,22 @@ pub fn print_plan(start: usize, end: usize) {
     println!("{}..{}", start, end)
 }
 
-pub fn print_ok(test_number: usize, message: &str) {
-    println!("ok {} - {}", test_number, message)
+pub fn print_ok(test_number: usize, message: &str, indent_level: usize) {
+    println!(
+        "ok {:>indent$} - {}",
+        test_number,
+        message,
+        indent = indent_level
+    )
 }
 
-pub fn print_not_ok(test_number: usize, message: &str, diagnostics: &str) {
-    println!("not ok {} - {}", test_number, message);
+pub fn print_not_ok(test_number: usize, message: &str, diagnostics: &str, indent_level: usize) {
+    println!(
+        "not ok {:>indent$} - {}",
+        test_number,
+        message,
+        indent = indent_level
+    );
     if diagnostics.is_empty() == false {
         print_diagnostics(diagnostics)
     }

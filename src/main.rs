@@ -52,7 +52,8 @@ fn main() {
             }
         }
 
-        print_test_case_result(i + 1, &test_case, &test_result);
+        let indent_level = test_cases.len().to_string().len();
+        print_test_case_result(i + 1, &test_case, &test_result, indent_level);
     }
 
     // TODO: Print failing configs
@@ -81,6 +82,7 @@ fn print_test_case_result(
     test_number: usize,
     case: &TestCase,
     result: &Result<TestResult, TestError>,
+    indent_level: usize,
 ) {
     let is_success: bool;
     match result {
@@ -94,9 +96,9 @@ fn print_test_case_result(
         case.source_file.display().to_string()
     );
     if is_success {
-        tap_format::print_ok(test_number, &message)
+        tap_format::print_ok(test_number, &message, indent_level)
     } else {
-        tap_format::print_not_ok(test_number, &message, "")
+        tap_format::print_not_ok(test_number, &message, "", indent_level)
     }
 }
 
