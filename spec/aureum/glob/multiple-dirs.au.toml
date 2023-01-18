@@ -8,10 +8,10 @@ test_arguments = [
 expected_stdout = """
 TAP version 14
 1..4
-ok 1 - test1 [./multiple-dirs1/test1.toml]
-ok 2 - test2 [./multiple-dirs1/test2.toml]
-ok 3 - test1 [./multiple-dirs2/test1.toml]
-ok 4 - test2 [./multiple-dirs2/test2.toml]
+ok     1 - ./multiple-dirs1/test1.toml
+ok     2 - ./multiple-dirs1/test2.toml
+ok     3 - ./multiple-dirs2/test1.toml
+ok     4 - ./multiple-dirs2/test2.toml
 """
 expected_stderr = ""
 expected_exit_code = 0

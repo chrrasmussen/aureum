@@ -90,11 +90,20 @@ fn print_test_case_result(
         Err(_) => is_success = false,
     }
 
-    let message = format!(
-        "{} [{}]",
-        case.description,
-        case.source_file.display().to_string()
-    );
+    let message: String;
+    if let Some(description) = &case.description {
+        message = format!(
+            "{} # {}",
+            case.source_file.display().to_string(),
+            description,
+        );
+    } else {
+        message = format!(
+            "{}",
+            case.source_file.display().to_string(),
+        );
+    }
+
     if is_success {
         tap_format::print_ok(test_number, &message, indent_level)
     } else {

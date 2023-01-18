@@ -4,7 +4,7 @@ test_arguments = ["single-file.toml"]
 expected_stdout = """
 TAP version 14
 1..1
-ok 1 - single-file [./single-file.toml]
+ok     1 - ./single-file.toml
 """
 expected_stderr = ""
 expected_exit_code = 0

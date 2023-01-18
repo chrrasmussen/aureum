@@ -8,7 +8,7 @@ pub fn print_plan(start: usize, end: usize) {
 
 pub fn print_ok(test_number: usize, message: &str, indent_level: usize) {
     println!(
-        "ok {:>indent$} - {}",
+        "ok     {:>indent$} - {}",
         test_number,
         message,
         indent = indent_level

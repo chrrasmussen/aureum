@@ -57,11 +57,9 @@ impl TestConfig {
         source_file: PathBuf,
         current_dir: &Path,
     ) -> Result<TestCase, TestConfigError> {
-        let description: String;
-        if let Some(test_name) = self.test_description {
-            description = test_name.read(current_dir)?
-        } else {
-            description = name_from_path(&source_file).unwrap_or(String::from(""))
+        let mut description = None;
+        if let Some(test_description) = self.test_description {
+            description = Some(test_description.read(current_dir)?)
         }
 
         let program: String;
@@ -189,19 +187,4 @@ where
             }
         }
     }
-}
-
-fn name_from_path(path: &Path) -> Option<String> {
-    let file_name = path.file_name()?.to_string_lossy().to_string();
-
-    let name: String;
-    if let Some(n) = file_name.strip_suffix(".au.toml") {
-        name = String::from(n)
-    } else if let Some(n) = file_name.strip_suffix(".toml") {
-        name = String::from(n)
-    } else {
-        name = file_name
-    }
-
-    Some(name)
 }
