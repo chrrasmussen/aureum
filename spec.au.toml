@@ -16,7 +16,7 @@ ok 9 - multiple-dirs [./spec/glob/multiple-dirs.au.toml]
 ok 10 - multiple-files [./spec/glob/multiple-files.au.toml]
 ok 11 - single-dir [./spec/glob/single-dir.au.toml]
 ok 12 - single-file [./spec/glob/single-file.au.toml]
-ok 13 - two-tests [./spec/multi/two-tests.au.toml]
+ok 13 - two-levels [./spec/multi/two-levels.au.toml]
 """
 expected_stderr = ""
 expected_status_code = 0

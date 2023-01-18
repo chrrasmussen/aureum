@@ -1,11 +1,11 @@
 test_program = { env = "AUREUM_EXEC" }
-test_arguments = ["two-tests.toml"]
+test_arguments = ["two-levels.toml"]
 
 expected_stdout = """
 TAP version 14
 1..2
-ok 1 - test1 [./two-tests.toml]
-ok 2 - test2 [./two-tests.toml]
+ok 1 - test1 [./two-levels.toml]
+ok 2 - test2 [./two-levels.toml]
 """
 expected_stderr = ""
 expected_exit_code = 0
