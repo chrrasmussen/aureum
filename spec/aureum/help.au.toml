@@ -1,0 +1,14 @@
+test_program = { env = "AUREUM_EXEC" }
+test_arguments = ["--help"]
+
+expected_stdout = """
+Golden test runner
+
+Usage: aureum <PATHS>...
+
+Arguments:
+  <PATHS>...  Paths to test configs
+
+Options:
+  -h, --help  Print help information
+"""
