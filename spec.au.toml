@@ -3,20 +3,21 @@ test_arguments = ["spec"]
 
 expected_stdout = """
 TAP version 14
-1..13
-ok 1 - no-args [./spec/aureum/no-args.au.toml]
-ok 2 - My custom name [./spec/basic/custom-name.au.toml]
-ok 3 - expect-exit-code [./spec/basic/expect-exit-code.au.toml]
-ok 4 - expect-stderr [./spec/basic/expect-stderr.au.toml]
-ok 5 - expect-stdout [./spec/basic/expect-stdout.au.toml]
-ok 6 - read-env-var [./spec/basic/read-env-var.au.toml]
-ok 7 - read-external-file [./spec/basic/read-external-file.au.toml]
-ok 8 - run-bash [./spec/basic/run-bash.au.toml]
-ok 9 - multiple-dirs [./spec/glob/multiple-dirs.au.toml]
-ok 10 - multiple-files [./spec/glob/multiple-files.au.toml]
-ok 11 - single-dir [./spec/glob/single-dir.au.toml]
-ok 12 - single-file [./spec/glob/single-file.au.toml]
-ok 13 - two-levels [./spec/multi/two-levels.au.toml]
+1..14
+ok 1 - failing-test [./spec/aureum/failing-test.au.toml]
+ok 2 - no-args [./spec/aureum/no-args.au.toml]
+ok 3 - My custom name [./spec/basic/custom-name.au.toml]
+ok 4 - expect-exit-code [./spec/basic/expect-exit-code.au.toml]
+ok 5 - expect-stderr [./spec/basic/expect-stderr.au.toml]
+ok 6 - expect-stdout [./spec/basic/expect-stdout.au.toml]
+ok 7 - read-env-var [./spec/basic/read-env-var.au.toml]
+ok 8 - read-external-file [./spec/basic/read-external-file.au.toml]
+ok 9 - run-bash [./spec/basic/run-bash.au.toml]
+ok 10 - multiple-dirs [./spec/glob/multiple-dirs.au.toml]
+ok 11 - multiple-files [./spec/glob/multiple-files.au.toml]
+ok 12 - single-dir [./spec/glob/single-dir.au.toml]
+ok 13 - single-file [./spec/glob/single-file.au.toml]
+ok 14 - two-levels [./spec/multi/two-levels.au.toml]
 """
 expected_stderr = ""
 expected_status_code = 0

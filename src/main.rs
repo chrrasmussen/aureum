@@ -5,8 +5,11 @@ mod test_config;
 use clap::Parser;
 use glob::glob;
 use std::collections::BTreeSet;
+use std::process::exit;
 use std::{fs, io, path::PathBuf};
 use test_case::{TestCase, TestError, TestResult};
+
+const EXIT_CODE_ON_FAILURE: i32 = 1;
 
 /// Golden test runner
 #[derive(Parser)]
@@ -37,13 +40,26 @@ fn main() {
     tap_format::print_version();
     tap_format::print_plan(1, test_cases.len());
 
+    let mut any_failing_tests = false;
+
     for (i, test_case) in test_cases.iter().enumerate() {
         let test_result = test_case::run(&test_case);
+
+        // Check if any tests have failed
+        if let Ok(result) = &test_result {
+            if result.is_success == false {
+                any_failing_tests = true
+            }
+        }
 
         print_test_case_result(i + 1, &test_case, &test_result);
     }
 
     // TODO: Print failing configs
+
+    if any_failing_tests {
+        exit(EXIT_CODE_ON_FAILURE)
+    }
 }
 
 enum TestFileError {
