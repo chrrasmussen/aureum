@@ -4,6 +4,7 @@ mod test_config;
 
 use clap::Parser;
 use glob::glob;
+use std::collections::BTreeSet;
 use std::{fs, io, path::PathBuf};
 use test_case::{TestCase, TestError, TestResult};
 
@@ -18,7 +19,7 @@ struct Args {
 fn main() {
     let args = Args::parse();
 
-    let mut test_files = vec![];
+    let mut test_files = BTreeSet::new();
     for path in &args.paths {
         locate_test_files(path, &mut test_files);
     }
@@ -79,7 +80,7 @@ fn print_test_case_result(
     }
 }
 
-fn locate_test_files(path: &str, test_files: &mut Vec<PathBuf>) {
+fn locate_test_files(path: &str, test_files: &mut BTreeSet<PathBuf>) {
     // Skip invalid patterns (Should it warn the user?)
     if let Ok(entries) = glob(path) {
         for entry in entries {
@@ -92,7 +93,7 @@ fn locate_test_files(path: &str, test_files: &mut Vec<PathBuf>) {
                         test_file = e
                     }
 
-                    test_files.push(test_file)
+                    test_files.insert(test_file);
                 } else if e.is_dir() {
                     // Look for `.au.toml` files in directory (recursively)
                     if let Some(search_path) = e.join("**/*.au.toml").to_str() {

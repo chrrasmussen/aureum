@@ -1,5 +1,9 @@
 test_program = { env = "AUREUM_EXEC" }
-test_arguments = ["multiple-dirs1/*.toml", "multiple-dirs2/*.toml"]
+test_arguments = [
+  "multiple-dirs1/*.toml",
+  "multiple-dirs2/*.toml",
+  "multiple-dirs1/*.toml", # This argument is redundant, but it tests that the paths are deduplicated.
+]
 
 expected_stdout = """
 TAP version 14
