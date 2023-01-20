@@ -7,7 +7,7 @@ use glob::glob;
 use std::collections::BTreeSet;
 use std::process::exit;
 use std::{fs, io, path::PathBuf};
-use test_case::{TestCase, TestError, TestOutput};
+use test_case::{RunError, TestCase, TestResult};
 
 const EXIT_CODE_ON_FAILURE: i32 = 1;
 
@@ -82,7 +82,7 @@ fn test_cases_from_file(test_file: &PathBuf) -> Result<Vec<TestCase>, TestFileEr
 fn print_test_case_result(
     test_number: usize,
     case: &TestCase,
-    result: &Result<TestOutput, TestError>,
+    result: &Result<TestResult, RunError>,
     indent_level: usize,
 ) {
     let is_success: bool;

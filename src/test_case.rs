@@ -14,19 +14,19 @@ pub struct TestCase {
     pub expected_exit_code: Option<i32>,
 }
 
-pub struct TestOutput {
-    pub stdout: TestResult<String>,
-    pub stderr: TestResult<String>,
-    pub exit_code: TestResult<i32>,
+pub struct TestResult {
+    pub stdout: ValueComparison<String>,
+    pub stderr: ValueComparison<String>,
+    pub exit_code: ValueComparison<i32>,
 }
 
-pub enum TestResult<T> {
+pub enum ValueComparison<T> {
     NotChecked,
     Matches(T),
     Diff { expected: T, got: T },
 }
 
-impl<T> TestResult<T> {
+impl<T> ValueComparison<T> {
     pub fn is_success(&self) -> bool {
         match self {
             Self::NotChecked => true,
@@ -40,13 +40,13 @@ impl<T> TestResult<T> {
 }
 
 #[derive(Debug)]
-pub enum TestError {
+pub enum RunError {
     FailedToDecodeUtf8,
     MissingExitCode,
     IOError(io::Error),
 }
 
-pub fn run(test_case: TestCase) -> Result<TestOutput, TestError> {
+pub fn run(test_case: TestCase) -> Result<TestResult, RunError> {
     let current_dir = test_case.source_file.parent().unwrap_or(Path::new("."));
 
     let mut cmd = Command::new(&test_case.program);
@@ -56,7 +56,7 @@ pub fn run(test_case: TestCase) -> Result<TestOutput, TestError> {
     cmd.stdout(Stdio::piped());
     cmd.stderr(Stdio::piped());
 
-    let mut child = cmd.spawn().map_err(TestError::IOError)?;
+    let mut child = cmd.spawn().map_err(RunError::IOError)?;
 
     if let Some(stdin_string) = &test_case.stdin {
         let mut stdin = child
@@ -65,7 +65,7 @@ pub fn run(test_case: TestCase) -> Result<TestOutput, TestError> {
             .expect("Stdin should be configured to pipe");
         stdin
             .write_all(stdin_string.as_bytes())
-            .map_err(TestError::IOError)?;
+            .map_err(RunError::IOError)?;
     }
 
     let stdout = read_pipe_to_string(
@@ -81,39 +81,39 @@ pub fn run(test_case: TestCase) -> Result<TestOutput, TestError> {
             .expect("Stderr should be configured to pipe"),
     )?;
 
-    let exit_status = child.wait().map_err(TestError::IOError)?;
+    let exit_status = child.wait().map_err(RunError::IOError)?;
     let exit_code = exit_status
         .code()
-        .map_or(Err(TestError::MissingExitCode), Ok)?;
+        .map_or(Err(RunError::MissingExitCode), Ok)?;
 
-    Ok(TestOutput {
+    Ok(TestResult {
         stdout: compare_result(test_case.expected_stdout, stdout),
         stderr: compare_result(test_case.expected_stderr, stderr),
         exit_code: compare_result(test_case.expected_exit_code, exit_code),
     })
 }
 
-pub fn expectations_fulfilled(result: &TestOutput) -> bool {
+pub fn expectations_fulfilled(result: &TestResult) -> bool {
     result.stdout.is_success() && result.stderr.is_success() && result.exit_code.is_success()
 }
 
-fn compare_result<T: PartialEq>(expected: Option<T>, got: T) -> TestResult<T> {
+fn compare_result<T: PartialEq>(expected: Option<T>, got: T) -> ValueComparison<T> {
     if let Some(expected) = expected {
         if expected == got {
-            TestResult::Matches(got)
+            ValueComparison::Matches(got)
         } else {
-            TestResult::Diff { expected, got }
+            ValueComparison::Diff { expected, got }
         }
     } else {
-        TestResult::NotChecked
+        ValueComparison::NotChecked
     }
 }
 
-fn read_pipe_to_string<T>(pipe: &mut T) -> Result<String, TestError>
+fn read_pipe_to_string<T>(pipe: &mut T) -> Result<String, RunError>
 where
     T: Read,
 {
     let mut buf: Vec<u8> = vec![];
-    pipe.read_to_end(&mut buf).map_err(TestError::IOError)?;
-    String::from_utf8(buf).map_or(Err(TestError::FailedToDecodeUtf8), Ok)
+    pipe.read_to_end(&mut buf).map_err(RunError::IOError)?;
+    String::from_utf8(buf).map_or(Err(RunError::FailedToDecodeUtf8), Ok)
 }
