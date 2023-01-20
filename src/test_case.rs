@@ -8,13 +8,9 @@ pub struct TestCase {
     pub program: String,
     pub arguments: Vec<String>,
     pub stdin: Option<String>,
-    pub assertions: Vec<TestAssertion>,
-}
-
-pub enum TestAssertion {
-    AssertStdout(String),
-    AssertStderr(String),
-    AssertExitCode(i32),
+    pub expected_stdout: Option<String>,
+    pub expected_stderr: Option<String>,
+    pub expected_exit_code: Option<i32>,
 }
 
 pub struct TestOutput {
@@ -81,10 +77,19 @@ pub fn run(test_case: &TestCase) -> Result<TestResult, TestError> {
         exit_code,
     };
 
-    let is_success: bool = test_case
-        .assertions
-        .iter()
-        .all(|assertion| check_assertion(&output, &assertion));
+    let stdout_result = test_case
+        .expected_stdout
+        .as_ref()
+        .map_or(true, |x| x == &output.stdout);
+    let stderr_result = test_case
+        .expected_stderr
+        .as_ref()
+        .map_or(true, |x| x == &output.stderr);
+    let exit_code_result = test_case
+        .expected_exit_code
+        .map_or(true, |x| x == output.exit_code);
+
+    let is_success = stdout_result && stderr_result && exit_code_result;
 
     Ok(TestResult { is_success, output })
 }
@@ -96,14 +101,4 @@ where
     let mut buf: Vec<u8> = vec![];
     pipe.read_to_end(&mut buf).map_err(TestError::IOError)?;
     String::from_utf8(buf).map_or(Err(TestError::FailedToDecodeUtf8), Ok)
-}
-
-fn check_assertion(output: &TestOutput, assertion: &TestAssertion) -> bool {
-    match assertion {
-        TestAssertion::AssertStdout(expected_stdout) => &output.stdout == expected_stdout,
-        TestAssertion::AssertStderr(expected_stderr) => &output.stderr == expected_stderr,
-        TestAssertion::AssertExitCode(expected_exit_code) => {
-            &output.exit_code == expected_exit_code
-        }
-    }
 }

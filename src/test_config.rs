@@ -1,4 +1,4 @@
-use crate::test_case::{TestAssertion, TestCase};
+use crate::test_case::TestCase;
 use serde::Deserialize;
 use std::collections::BTreeMap;
 use std::env::{var, VarError};
@@ -73,18 +73,11 @@ impl TestConfig {
 
         let stdin = read_from_config_value(self.test_stdin, current_dir)?;
 
-        let mut assertions = vec![];
-        if let Some(stdout) = self.expected_stdout {
-            assertions.push(TestAssertion::AssertStdout(stdout.read(current_dir)?))
-        }
-        if let Some(stderr) = self.expected_stderr {
-            assertions.push(TestAssertion::AssertStderr(stderr.read(current_dir)?))
-        }
-        if let Some(exit_code) = self.expected_exit_code {
-            assertions.push(TestAssertion::AssertExitCode(exit_code.read(current_dir)?))
-        }
+        let expected_stdout = read_from_config_value(self.expected_stdout, current_dir)?;
+        let expected_stderr = read_from_config_value(self.expected_stderr, current_dir)?;
+        let expected_exit_code = read_from_config_value(self.expected_exit_code, current_dir)?;
 
-        if assertions.len() == 0 {
+        if expected_stdout == None && expected_stderr == None && expected_exit_code == None {
             return Err(TestConfigError::ExpectationRequired);
         }
 
@@ -94,7 +87,9 @@ impl TestConfig {
             program,
             arguments,
             stdin,
-            assertions,
+            expected_stdout,
+            expected_stderr,
+            expected_exit_code,
         })
     }
 }
