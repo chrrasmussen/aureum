@@ -2,6 +2,7 @@ use std::io::{self, Read, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
+#[derive(Clone)]
 pub struct TestCase {
     pub source_file: PathBuf,
     pub description: Option<String>,
@@ -14,14 +15,28 @@ pub struct TestCase {
 }
 
 pub struct TestOutput {
-    pub stdout: String,
-    pub stderr: String,
-    pub exit_code: i32,
+    pub stdout: TestResult<String>,
+    pub stderr: TestResult<String>,
+    pub exit_code: TestResult<i32>,
 }
 
-pub struct TestResult {
-    pub is_success: bool,
-    pub output: TestOutput,
+pub enum TestResult<T> {
+    NotChecked,
+    Matches(T),
+    Diff { expected: T, got: T },
+}
+
+impl<T> TestResult<T> {
+    pub fn is_success(&self) -> bool {
+        match self {
+            Self::NotChecked => true,
+            Self::Matches(_) => true,
+            Self::Diff {
+                expected: _,
+                got: _,
+            } => false,
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -31,7 +46,7 @@ pub enum TestError {
     IOError(io::Error),
 }
 
-pub fn run(test_case: &TestCase) -> Result<TestResult, TestError> {
+pub fn run(test_case: TestCase) -> Result<TestOutput, TestError> {
     let current_dir = test_case.source_file.parent().unwrap_or(Path::new("."));
 
     let mut cmd = Command::new(&test_case.program);
@@ -71,27 +86,27 @@ pub fn run(test_case: &TestCase) -> Result<TestResult, TestError> {
         .code()
         .map_or(Err(TestError::MissingExitCode), Ok)?;
 
-    let output = TestOutput {
-        stdout,
-        stderr,
-        exit_code,
-    };
+    Ok(TestOutput {
+        stdout: compare_result(test_case.expected_stdout, stdout),
+        stderr: compare_result(test_case.expected_stderr, stderr),
+        exit_code: compare_result(test_case.expected_exit_code, exit_code),
+    })
+}
 
-    let stdout_result = test_case
-        .expected_stdout
-        .as_ref()
-        .map_or(true, |x| x == &output.stdout);
-    let stderr_result = test_case
-        .expected_stderr
-        .as_ref()
-        .map_or(true, |x| x == &output.stderr);
-    let exit_code_result = test_case
-        .expected_exit_code
-        .map_or(true, |x| x == output.exit_code);
+pub fn expectations_fulfilled(result: &TestOutput) -> bool {
+    result.stdout.is_success() && result.stderr.is_success() && result.exit_code.is_success()
+}
 
-    let is_success = stdout_result && stderr_result && exit_code_result;
-
-    Ok(TestResult { is_success, output })
+fn compare_result<T: PartialEq>(expected: Option<T>, got: T) -> TestResult<T> {
+    if let Some(expected) = expected {
+        if expected == got {
+            TestResult::Matches(got)
+        } else {
+            TestResult::Diff { expected, got }
+        }
+    } else {
+        TestResult::NotChecked
+    }
 }
 
 fn read_pipe_to_string<T>(pipe: &mut T) -> Result<String, TestError>

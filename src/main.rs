@@ -7,7 +7,7 @@ use glob::glob;
 use std::collections::BTreeSet;
 use std::process::exit;
 use std::{fs, io, path::PathBuf};
-use test_case::{TestCase, TestError, TestResult};
+use test_case::{TestCase, TestError, TestOutput};
 
 const EXIT_CODE_ON_FAILURE: i32 = 1;
 
@@ -42,17 +42,18 @@ fn main() {
 
     let mut any_failing_tests = false;
 
-    for (i, test_case) in test_cases.iter().enumerate() {
-        let test_result = test_case::run(&test_case);
+    let indent_level = test_cases.len().to_string().len();
+
+    for (i, test_case) in test_cases.into_iter().enumerate() {
+        let test_result = test_case::run(test_case.clone());
 
         // Check if any tests have failed
         if let Ok(result) = &test_result {
-            if result.is_success == false {
+            if test_case::expectations_fulfilled(result) == false {
                 any_failing_tests = true
             }
         }
 
-        let indent_level = test_cases.len().to_string().len();
         print_test_case_result(i + 1, &test_case, &test_result, indent_level);
     }
 
@@ -81,12 +82,12 @@ fn test_cases_from_file(test_file: &PathBuf) -> Result<Vec<TestCase>, TestFileEr
 fn print_test_case_result(
     test_number: usize,
     case: &TestCase,
-    result: &Result<TestResult, TestError>,
+    result: &Result<TestOutput, TestError>,
     indent_level: usize,
 ) {
     let is_success: bool;
     match result {
-        Ok(test_result) => is_success = test_result.is_success,
+        Ok(test_result) => is_success = test_case::expectations_fulfilled(test_result),
         Err(_) => is_success = false,
     }
 
