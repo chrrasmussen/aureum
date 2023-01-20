@@ -57,14 +57,11 @@ impl TestConfig {
         source_file: PathBuf,
         current_dir: &Path,
     ) -> Result<TestCase, TestConfigError> {
-        let mut description = None;
-        if let Some(test_description) = self.test_description {
-            description = Some(test_description.read(current_dir)?)
-        }
+        let description = read_from_config_value(self.test_description, current_dir)?;
 
         let program: String;
-        if let Some(test_program) = self.test_program {
-            program = test_program.read(current_dir)?
+        if let Some(p) = read_from_config_value(self.test_program, current_dir)? {
+            program = p
         } else {
             return Err(TestConfigError::ProgramRequired);
         }
@@ -74,12 +71,7 @@ impl TestConfig {
             arguments.push(arg.read(current_dir)?)
         }
 
-        let stdin: Option<String>;
-        if let Some(test_stdin) = self.test_stdin {
-            stdin = Some(test_stdin.read(current_dir)?)
-        } else {
-            stdin = None
-        }
+        let stdin = read_from_config_value(self.test_stdin, current_dir)?;
 
         let mut assertions = vec![];
         if let Some(stdout) = self.expected_stdout {
@@ -104,6 +96,20 @@ impl TestConfig {
             stdin,
             assertions,
         })
+    }
+}
+
+fn read_from_config_value<T>(
+    config_value: Option<ConfigValue<T>>,
+    current_dir: &Path,
+) -> Result<Option<T>, TestConfigError>
+where
+    T: FromStr,
+{
+    if let Some(config_value) = config_value {
+        Ok(Some(config_value.read(current_dir)?))
+    } else {
+        Ok(None)
     }
 }
 

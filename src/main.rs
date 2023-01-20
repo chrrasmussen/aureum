@@ -98,10 +98,7 @@ fn print_test_case_result(
             description,
         );
     } else {
-        message = format!(
-            "{}",
-            case.source_file.display().to_string(),
-        );
+        message = format!("{}", case.source_file.display().to_string(),);
     }
 
     if is_success {
