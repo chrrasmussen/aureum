@@ -102,7 +102,10 @@ fn compare_result<T: PartialEq + Clone>(expected: &Option<T>, got: T) -> ValueCo
         if expected == &got {
             ValueComparison::Matches(got)
         } else {
-            ValueComparison::Diff { expected: expected.clone(), got }
+            ValueComparison::Diff {
+                expected: expected.clone(),
+                got,
+            }
         }
     } else {
         ValueComparison::NotChecked
