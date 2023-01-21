@@ -46,7 +46,7 @@ pub enum RunError {
     IOError(io::Error),
 }
 
-pub fn run(test_case: TestCase) -> Result<TestResult, RunError> {
+pub fn run(test_case: &TestCase) -> Result<TestResult, RunError> {
     let current_dir = test_case.source_file.parent().unwrap_or(Path::new("."));
 
     let mut cmd = Command::new(&test_case.program);
@@ -87,9 +87,9 @@ pub fn run(test_case: TestCase) -> Result<TestResult, RunError> {
         .map_or(Err(RunError::MissingExitCode), Ok)?;
 
     Ok(TestResult {
-        stdout: compare_result(test_case.expected_stdout, stdout),
-        stderr: compare_result(test_case.expected_stderr, stderr),
-        exit_code: compare_result(test_case.expected_exit_code, exit_code),
+        stdout: compare_result(&test_case.expected_stdout, stdout),
+        stderr: compare_result(&test_case.expected_stderr, stderr),
+        exit_code: compare_result(&test_case.expected_exit_code, exit_code),
     })
 }
 
@@ -97,12 +97,12 @@ pub fn expectations_fulfilled(result: &TestResult) -> bool {
     result.stdout.is_success() && result.stderr.is_success() && result.exit_code.is_success()
 }
 
-fn compare_result<T: PartialEq>(expected: Option<T>, got: T) -> ValueComparison<T> {
+fn compare_result<T: PartialEq + Clone>(expected: &Option<T>, got: T) -> ValueComparison<T> {
     if let Some(expected) = expected {
-        if expected == got {
+        if expected == &got {
             ValueComparison::Matches(got)
         } else {
-            ValueComparison::Diff { expected, got }
+            ValueComparison::Diff { expected: expected.clone(), got }
         }
     } else {
         ValueComparison::NotChecked

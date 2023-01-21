@@ -17,12 +17,8 @@ pub fn run_test_cases(
     run_in_parallel: bool,
 ) -> bool {
     let run = |(i, test_case)| -> bool {
-        report_test_result(
-            report_config,
-            i,
-            test_case,
-            test_case::run(test_case.clone()),
-        )
+        let result = test_case::run(test_case);
+        report_test_result(report_config, i, test_case, result)
     };
 
     if run_in_parallel {
