@@ -4,7 +4,25 @@ use rayon::prelude::*;
 
 pub struct ReportConfig {
     pub number_of_tests: usize,
+    pub format: ReportFormat,
 }
+
+pub enum ReportFormat {
+    Tap,
+}
+
+#[derive(PartialEq, Clone)]
+pub enum TestStatus {
+    Passed,
+    Failed,
+}
+
+#[derive(Clone)]
+pub struct TestSummary {
+    pub test_case: TestCase,
+    pub test_status: TestStatus,
+}
+
 
 pub fn report_start(report_config: &ReportConfig) {
     tap_format::print_version();
@@ -15,10 +33,10 @@ pub fn run_test_cases(
     report_config: &ReportConfig,
     test_cases: &[TestCase],
     run_in_parallel: bool,
-) -> bool {
-    let run = |(i, test_case)| -> bool {
+) -> Vec<TestSummary> {
+    let run = |(i, test_case)| -> Vec<TestSummary> {
         let result = test_case::run(test_case);
-        report_test_result(report_config, i, test_case, result)
+        vec![report_test_result(report_config, i, test_case, result)]
     };
 
     if run_in_parallel {
@@ -26,13 +44,13 @@ pub fn run_test_cases(
             .par_iter()
             .enumerate()
             .map(run)
-            .reduce(|| true, |x, y| x && y)
+            .reduce(|| vec![], |x, y| [x, y].concat())
     } else {
         test_cases
             .iter()
             .enumerate()
             .map(run)
-            .fold(true, |x, y| x && y)
+            .fold(vec![], |x, y| [x, y].concat())
     }
 }
 
@@ -41,17 +59,17 @@ fn report_test_result(
     index: usize,
     test_case: &TestCase,
     result: Result<TestResult, RunError>,
-) -> bool {
+) -> TestSummary {
     let test_number_indent_level = report_config.number_of_tests.to_string().len();
     print_test_case_result(index + 1, &test_case, &result, test_number_indent_level);
 
     if let Ok(result) = &result {
         if test_case::expectations_fulfilled(result) {
-            return true;
+            return TestSummary { test_case: test_case.clone(), test_status: TestStatus::Passed };
         }
     }
 
-    false
+    TestSummary { test_case: test_case.clone(), test_status: TestStatus::Failed }
 }
 
 fn print_test_case_result(

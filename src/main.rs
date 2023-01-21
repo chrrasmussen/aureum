@@ -5,8 +5,10 @@ mod test_runner;
 
 use clap::Parser;
 use glob::glob;
+use test_runner::{ReportFormat, ReportConfig, TestStatus};
 use std::collections::BTreeSet;
 use std::process::exit;
+use std::str::FromStr;
 use std::{fs, io, path::PathBuf};
 use test_case::TestCase;
 
@@ -16,8 +18,36 @@ const EXIT_CODE_ON_FAILURE: i32 = 1;
 #[derive(Parser)]
 struct Args {
     /// Paths to test configs
-    #[structopt(required = true)]
+    #[arg(required = true)]
     paths: Vec<String>,
+
+    /// Options: tap
+    #[arg(long, default_value = "tap")]
+    output_format: OutputFormat,
+}
+
+#[derive(Clone)]
+enum OutputFormat {
+    Tap,
+}
+
+impl FromStr for OutputFormat {
+    type Err = &'static str;
+
+    fn from_str(format: &str) -> Result<Self, Self::Err> {
+        match format {
+            "tap" => Ok(OutputFormat::Tap),
+            _ => Err("Invalid output format"),
+        }
+    }
+}
+
+impl OutputFormat {
+    fn to_report_format(&self) -> ReportFormat {
+        match self {
+            Self::Tap => ReportFormat::Tap,
+        }
+    }
 }
 
 fn main() {
@@ -47,13 +77,15 @@ fn main() {
         eprintln!("{}: Unable to parse test config", test_config_path.display());
     }
 
-    let report_config = test_runner::ReportConfig {
+    let report_config = ReportConfig {
         number_of_tests: test_cases.len(),
+        format: args.output_format.to_report_format(),
     };
 
     test_runner::report_start(&report_config);
-    let all_tests_passed = test_runner::run_test_cases(&report_config, &test_cases, false);
+    let test_summaries = test_runner::run_test_cases(&report_config, &test_cases, false);
 
+    let all_tests_passed = test_summaries.iter().fold(true, |acc, t| acc && t.test_status == TestStatus::Passed);
     if failing_configs.is_empty() == false || all_tests_passed == false {
         exit(EXIT_CODE_ON_FAILURE)
     }

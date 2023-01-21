@@ -1,0 +1,34 @@
+test_program = { env = "AUREUM_EXEC" }
+
+
+[tests.tap-passing]
+test_arguments = ["--output-format", "tap", "helpers/passing-test.toml"]
+expected_stdout = """
+TAP version 14
+1..1
+ok     1 - ./helpers/passing-test.toml
+"""
+expected_stderr = ""
+expected_exit_code = 0
+
+
+[tests.tap-failing]
+test_arguments = ["--output-format", "tap", "helpers/failing-test.toml"]
+expected_stdout = """
+TAP version 14
+1..1
+not ok 1 - ./helpers/failing-test.toml
+"""
+expected_stderr = ""
+expected_exit_code = 1
+
+
+[tests.unknown]
+test_arguments = ["--output-format", "UNKNOWN", "helpers/passing-test.toml"]
+expected_stdout = ""
+expected_stderr = """
+error: Invalid value 'UNKNOWN' for '--output-format <OUTPUT_FORMAT>': Invalid output format
+
+For more information try '--help'
+"""
+expected_exit_code = 2

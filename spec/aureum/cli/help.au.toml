@@ -4,11 +4,12 @@ test_arguments = ["--help"]
 expected_stdout = """
 Golden test runner
 
-Usage: aureum <PATHS>...
+Usage: aureum [OPTIONS] <PATHS>...
 
 Arguments:
   <PATHS>...  Paths to test configs
 
 Options:
-  -h, --help  Print help information
+      --output-format <OUTPUT_FORMAT>  Options: tap [default: tap]
+  -h, --help                           Print help information
 """
