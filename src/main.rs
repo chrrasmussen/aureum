@@ -28,6 +28,11 @@ fn main() {
         locate_test_files(path, &mut test_files);
     }
 
+    if test_files.is_empty() {
+        eprintln!("No test configs found for the given path(s)");
+        exit(EXIT_CODE_ON_FAILURE);
+    }
+
     let mut test_cases = vec![];
     let mut failing_configs = vec![];
 
