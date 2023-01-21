@@ -7,3 +7,13 @@ test_arguments = ["AUREUM-THIS-FILE-DOES-NOT-EXIST"]
 expected_stderr = """
 No test configs found for the given path(s)
 """
+
+[tests.invalid-test-config]
+test_arguments = ["helpers/invalid-test-config.toml"]
+expected_stdout = """
+TAP version 14
+1..0
+"""
+expected_stderr = """
+./helpers/invalid-test-config.toml: Unable to parse test config
+"""

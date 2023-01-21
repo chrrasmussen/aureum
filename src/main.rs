@@ -43,22 +43,24 @@ fn main() {
         }
     }
 
+    for (test_config_path, _err) in &failing_configs {
+        eprintln!("{}: Unable to parse test config", test_config_path.display());
+    }
+
     let report_config = test_runner::ReportConfig {
         number_of_tests: test_cases.len(),
     };
 
     test_runner::report_start(&report_config);
-    let all_successful = test_runner::run_test_cases(&report_config, &test_cases, false);
+    let all_tests_passed = test_runner::run_test_cases(&report_config, &test_cases, false);
 
-    // TODO: Print failing configs
-
-    if all_successful == false {
+    if failing_configs.is_empty() == false || all_tests_passed == false {
         exit(EXIT_CODE_ON_FAILURE)
     }
 }
 
 enum TestFileError {
-    FailedToParseTestConfig(test_config::TestConfigError),
+    FailedToParseTestConfig(test_config::ParseTestConfigError),
     FailedToReadTestCases(test_config::TestConfigError),
     IOError(io::Error),
 }

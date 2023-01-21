@@ -7,13 +7,16 @@ use std::io;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
 
-pub fn from_str(str: &str) -> Result<TestConfig, TestConfigError> {
-    toml::from_str(&str).map_err(TestConfigError::InvalidConfig)
+pub fn from_str(str: &str) -> Result<TestConfig, ParseTestConfigError> {
+    toml::from_str(&str).map_err(|err| ParseTestConfigError { inner: err })
+}
+
+pub struct ParseTestConfigError {
+    pub inner: toml::de::Error,
 }
 
 #[derive(Debug)]
 pub enum TestConfigError {
-    InvalidConfig(toml::de::Error),
     FailedToFetchEnvVar { var_name: String, error: VarError },
     FailedToParseString(String),
     ProgramRequired,

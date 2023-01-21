@@ -3,23 +3,24 @@ test_arguments = ["spec"]
 
 expected_stdout = """
 TAP version 14
-1..16
+1..17
 ok      1 - ./spec/aureum/cli/failing-test.au.toml
 ok      2 - ./spec/aureum/cli/help.au.toml
 ok      3 - ./spec/aureum/cli/no-args.au.toml
-ok      4 - ./spec/aureum/error/error.au.toml # missing-test-config
-ok      5 - ./spec/aureum/glob/multiple-dirs.au.toml
-ok      6 - ./spec/aureum/glob/multiple-files.au.toml
-ok      7 - ./spec/aureum/glob/single-dir.au.toml
-ok      8 - ./spec/aureum/glob/single-file.au.toml
-ok      9 - ./spec/aureum/nested/two-levels.au.toml
-ok     10 - ./spec/basic/description.au.toml # My description
-ok     11 - ./spec/basic/expect-exit-code.au.toml
-ok     12 - ./spec/basic/expect-stderr.au.toml
-ok     13 - ./spec/basic/expect-stdout.au.toml
-ok     14 - ./spec/basic/read-env-var.au.toml
-ok     15 - ./spec/basic/read-external-file.au.toml
-ok     16 - ./spec/basic/run-bash.au.toml
+ok      4 - ./spec/aureum/error/error.au.toml # invalid-test-config
+ok      5 - ./spec/aureum/error/error.au.toml # missing-test-config
+ok      6 - ./spec/aureum/glob/multiple-dirs.au.toml
+ok      7 - ./spec/aureum/glob/multiple-files.au.toml
+ok      8 - ./spec/aureum/glob/single-dir.au.toml
+ok      9 - ./spec/aureum/glob/single-file.au.toml
+ok     10 - ./spec/aureum/nested/two-levels.au.toml
+ok     11 - ./spec/basic/description.au.toml # My description
+ok     12 - ./spec/basic/expect-exit-code.au.toml
+ok     13 - ./spec/basic/expect-stderr.au.toml
+ok     14 - ./spec/basic/expect-stdout.au.toml
+ok     15 - ./spec/basic/read-env-var.au.toml
+ok     16 - ./spec/basic/read-external-file.au.toml
+ok     17 - ./spec/basic/run-bash.au.toml
 """
 expected_stderr = ""
 expected_status_code = 0
