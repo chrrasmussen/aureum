@@ -4,6 +4,7 @@ mod test_config;
 
 use clap::Parser;
 use glob::glob;
+use rayon::prelude::*;
 use std::collections::BTreeSet;
 use std::process::exit;
 use std::{fs, io, path::PathBuf};
@@ -17,6 +18,10 @@ struct Args {
     /// Paths to test configs
     #[structopt(required = true)]
     paths: Vec<String>,
+}
+
+struct ReportConfig {
+    number_of_tests: usize,
 }
 
 fn main() {
@@ -37,31 +42,70 @@ fn main() {
         }
     }
 
-    tap_format::print_version();
-    tap_format::print_plan(1, test_cases.len());
+    let report_config = ReportConfig {
+        number_of_tests: test_cases.len(),
+    };
 
-    let mut any_failing_tests = false;
-
-    let indent_level = test_cases.len().to_string().len();
-
-    for (i, test_case) in test_cases.into_iter().enumerate() {
-        let test_result = test_case::run(test_case.clone());
-
-        // Check if any tests have failed
-        if let Ok(result) = &test_result {
-            if test_case::expectations_fulfilled(result) == false {
-                any_failing_tests = true
-            }
-        }
-
-        print_test_case_result(i + 1, &test_case, &test_result, indent_level);
-    }
+    report_start(&report_config);
+    let all_successful = run_test_cases(&report_config, &test_cases, false);
 
     // TODO: Print failing configs
 
-    if any_failing_tests {
+    if all_successful == false {
         exit(EXIT_CODE_ON_FAILURE)
     }
+}
+
+fn run_test_cases(
+    report_config: &ReportConfig,
+    test_cases: &[TestCase],
+    run_in_parallel: bool,
+) -> bool {
+    let run = |(i, test_case)| -> bool {
+        report_test_result(
+            report_config,
+            i,
+            test_case,
+            test_case::run(test_case.clone()),
+        )
+    };
+
+    if run_in_parallel {
+        test_cases
+            .par_iter()
+            .enumerate()
+            .map(run)
+            .reduce(|| true, |x, y| x && y)
+    } else {
+        test_cases
+            .iter()
+            .enumerate()
+            .map(run)
+            .fold(true, |x, y| x && y)
+    }
+}
+
+fn report_start(report_config: &ReportConfig) {
+    tap_format::print_version();
+    tap_format::print_plan(1, report_config.number_of_tests);
+}
+
+fn report_test_result(
+    report_config: &ReportConfig,
+    index: usize,
+    test_case: &TestCase,
+    result: Result<TestResult, RunError>,
+) -> bool {
+    let test_number_indent_level = report_config.number_of_tests.to_string().len();
+    print_test_case_result(index + 1, &test_case, &result, test_number_indent_level);
+
+    if let Ok(result) = &result {
+        if test_case::expectations_fulfilled(result) {
+            return true;
+        }
+    }
+
+    false
 }
 
 enum TestFileError {
