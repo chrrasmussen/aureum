@@ -5,12 +5,12 @@ mod test_runner;
 
 use clap::Parser;
 use glob::glob;
-use test_runner::{ReportFormat, ReportConfig, TestStatus};
 use std::collections::BTreeSet;
 use std::process::exit;
 use std::str::FromStr;
 use std::{fs, io, path::PathBuf};
 use test_case::TestCase;
+use test_runner::{ReportConfig, ReportFormat, TestStatus};
 
 const EXIT_CODE_ON_FAILURE: i32 = 1;
 
@@ -21,13 +21,14 @@ struct Args {
     #[arg(required = true)]
     paths: Vec<String>,
 
-    /// Options: tap
+    /// Options: summary, tap
     #[arg(long, default_value = "tap")]
     output_format: OutputFormat,
 }
 
 #[derive(Clone)]
 enum OutputFormat {
+    Summary,
     Tap,
 }
 
@@ -36,6 +37,7 @@ impl FromStr for OutputFormat {
 
     fn from_str(format: &str) -> Result<Self, Self::Err> {
         match format {
+            "summary" => Ok(OutputFormat::Summary),
             "tap" => Ok(OutputFormat::Tap),
             _ => Err("Invalid output format"),
         }
@@ -45,6 +47,7 @@ impl FromStr for OutputFormat {
 impl OutputFormat {
     fn to_report_format(&self) -> ReportFormat {
         match self {
+            Self::Summary => ReportFormat::Summary,
             Self::Tap => ReportFormat::Tap,
         }
     }
@@ -74,7 +77,10 @@ fn main() {
     }
 
     for (test_config_path, _err) in &failing_configs {
-        eprintln!("{}: Unable to parse test config", test_config_path.display());
+        eprintln!(
+            "{}: Unable to parse test config",
+            test_config_path.display()
+        );
     }
 
     let report_config = ReportConfig {
@@ -84,8 +90,11 @@ fn main() {
 
     test_runner::report_start(&report_config);
     let test_summaries = test_runner::run_test_cases(&report_config, &test_cases, false);
+    test_runner::report_summary(&report_config, &test_summaries);
 
-    let all_tests_passed = test_summaries.iter().fold(true, |acc, t| acc && t.test_status == TestStatus::Passed);
+    let all_tests_passed = test_summaries
+        .iter()
+        .fold(true, |acc, t| acc && t.test_status == TestStatus::Passed);
     if failing_configs.is_empty() == false || all_tests_passed == false {
         exit(EXIT_CODE_ON_FAILURE)
     }

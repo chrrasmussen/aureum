@@ -10,6 +10,6 @@ Arguments:
   <PATHS>...  Paths to test configs
 
 Options:
-      --output-format <OUTPUT_FORMAT>  Options: tap [default: tap]
+      --output-format <OUTPUT_FORMAT>  Options: summary, tap [default: tap]
   -h, --help                           Print help information
 """

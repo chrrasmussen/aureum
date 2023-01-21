@@ -1,6 +1,30 @@
 test_program = { env = "AUREUM_EXEC" }
 
 
+[tests.summary-passing]
+test_arguments = ["--output-format", "summary", "helpers/passing-test.toml"]
+expected_stdout = """
+✅ ./helpers/passing-test.toml
+
+Completed running 1 tests.
+All tests passed.
+"""
+expected_stderr = ""
+expected_exit_code = 0
+
+
+[tests.summary-failing]
+test_arguments = ["--output-format", "summary", "helpers/failing-test.toml"]
+expected_stdout = """
+❌ ./helpers/failing-test.toml
+
+Completed running 1 tests.
+1 failures.
+"""
+expected_stderr = ""
+expected_exit_code = 1
+
+
 [tests.tap-passing]
 test_arguments = ["--output-format", "tap", "helpers/passing-test.toml"]
 expected_stdout = """
