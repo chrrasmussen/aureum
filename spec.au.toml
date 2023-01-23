@@ -2,30 +2,31 @@ test_program = { env = "AUREUM_EXEC" }
 test_arguments = ["spec"]
 
 expected_stdout = """
-TAP version 14
-1..22
-ok      1 - ./spec/aureum/cli/failing-test.au.toml
-ok      2 - ./spec/aureum/cli/help.au.toml
-ok      3 - ./spec/aureum/cli/no-args.au.toml
-ok      4 - ./spec/aureum/cli/output-format.au.toml # summary-failing
-ok      5 - ./spec/aureum/cli/output-format.au.toml # summary-passing
-ok      6 - ./spec/aureum/cli/output-format.au.toml # tap-failing
-ok      7 - ./spec/aureum/cli/output-format.au.toml # tap-passing
-ok      8 - ./spec/aureum/cli/output-format.au.toml # unknown
-ok      9 - ./spec/aureum/error/error.au.toml # invalid-test-config
-ok     10 - ./spec/aureum/error/error.au.toml # missing-test-config
-ok     11 - ./spec/aureum/glob/multiple-dirs.au.toml
-ok     12 - ./spec/aureum/glob/multiple-files.au.toml
-ok     13 - ./spec/aureum/glob/single-dir.au.toml
-ok     14 - ./spec/aureum/glob/single-file.au.toml
-ok     15 - ./spec/aureum/nested/two-levels.au.toml
-ok     16 - ./spec/basic/description.au.toml # My description
-ok     17 - ./spec/basic/expect-exit-code.au.toml
-ok     18 - ./spec/basic/expect-stderr.au.toml
-ok     19 - ./spec/basic/expect-stdout.au.toml
-ok     20 - ./spec/basic/read-env-var.au.toml
-ok     21 - ./spec/basic/read-external-file.au.toml
-ok     22 - ./spec/basic/run-bash.au.toml
+✅ ./spec/aureum/cli/failing-test.au.toml
+✅ ./spec/aureum/cli/help.au.toml
+✅ ./spec/aureum/cli/no-args.au.toml
+✅ ./spec/aureum/cli/output-format.au.toml - summary-failing
+✅ ./spec/aureum/cli/output-format.au.toml - summary-passing
+✅ ./spec/aureum/cli/output-format.au.toml - tap-failing
+✅ ./spec/aureum/cli/output-format.au.toml - tap-passing
+✅ ./spec/aureum/cli/output-format.au.toml - unknown
+✅ ./spec/aureum/error/error.au.toml - invalid-test-config
+✅ ./spec/aureum/error/error.au.toml - missing-test-config
+✅ ./spec/aureum/glob/multiple-dirs.au.toml
+✅ ./spec/aureum/glob/multiple-files.au.toml
+✅ ./spec/aureum/glob/single-dir.au.toml
+✅ ./spec/aureum/glob/single-file.au.toml
+✅ ./spec/aureum/nested/two-levels.au.toml
+✅ ./spec/basic/description.au.toml - My description
+✅ ./spec/basic/expect-exit-code.au.toml
+✅ ./spec/basic/expect-stderr.au.toml
+✅ ./spec/basic/expect-stdout.au.toml
+✅ ./spec/basic/read-env-var.au.toml
+✅ ./spec/basic/read-external-file.au.toml
+✅ ./spec/basic/run-bash.au.toml
+
+Completed running 22 tests.
+All tests passed.
 """
 expected_stderr = ""
 expected_status_code = 0

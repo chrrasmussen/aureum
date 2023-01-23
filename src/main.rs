@@ -22,7 +22,7 @@ struct Args {
     paths: Vec<String>,
 
     /// Options: summary, tap
-    #[arg(long, default_value = "tap")]
+    #[arg(long, default_value = "summary")]
     output_format: OutputFormat,
 }
 

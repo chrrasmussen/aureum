@@ -11,8 +11,9 @@ No test configs found for the given path(s)
 [tests.invalid-test-config]
 test_arguments = ["helpers/invalid-test-config.toml"]
 expected_stdout = """
-TAP version 14
-1..0
+
+Completed running 0 tests.
+All tests passed.
 """
 expected_stderr = """
 ./helpers/invalid-test-config.toml: Unable to parse test config

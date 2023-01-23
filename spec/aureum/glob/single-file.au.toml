@@ -2,9 +2,10 @@ test_program = { env = "AUREUM_EXEC" }
 test_arguments = ["single-file.toml"]
 
 expected_stdout = """
-TAP version 14
-1..1
-ok     1 - ./single-file.toml
+✅ ./single-file.toml
+
+Completed running 1 tests.
+All tests passed.
 """
 expected_stderr = ""
 expected_exit_code = 0

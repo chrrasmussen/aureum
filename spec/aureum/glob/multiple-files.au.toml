@@ -2,10 +2,11 @@ test_program = { env = "AUREUM_EXEC" }
 test_arguments = ["multiple-files1.toml", "multiple-files2.toml"]
 
 expected_stdout = """
-TAP version 14
-1..2
-ok     1 - ./multiple-files1.toml
-ok     2 - ./multiple-files2.toml
+✅ ./multiple-files1.toml
+✅ ./multiple-files2.toml
+
+Completed running 2 tests.
+All tests passed.
 """
 expected_stderr = ""
 expected_exit_code = 0

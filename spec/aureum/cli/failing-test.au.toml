@@ -2,9 +2,10 @@ test_program = { env = "AUREUM_EXEC" }
 test_arguments = ["helpers/failing-test.toml"]
 
 expected_stdout = """
-TAP version 14
-1..1
-not ok 1 - ./helpers/failing-test.toml
+❌ ./helpers/failing-test.toml
+
+Completed running 1 tests.
+1 failures.
 """
 expected_stderr = ""
 expected_exit_code = 1
