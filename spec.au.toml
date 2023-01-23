@@ -5,13 +5,13 @@ expected_stdout = """
 ✅ ./spec/aureum/cli/failing-test.au.toml
 ✅ ./spec/aureum/cli/help.au.toml
 ✅ ./spec/aureum/cli/no-args.au.toml
-✅ ./spec/aureum/cli/output-format.au.toml - summary-failing
-✅ ./spec/aureum/cli/output-format.au.toml - summary-passing
-✅ ./spec/aureum/cli/output-format.au.toml - tap-failing
-✅ ./spec/aureum/cli/output-format.au.toml - tap-passing
-✅ ./spec/aureum/cli/output-format.au.toml - unknown
-✅ ./spec/aureum/error/error.au.toml - invalid-test-config
-✅ ./spec/aureum/error/error.au.toml - missing-test-config
+✅ ./spec/aureum/cli/output-format.au.toml:summary-failing
+✅ ./spec/aureum/cli/output-format.au.toml:summary-passing
+✅ ./spec/aureum/cli/output-format.au.toml:tap-failing
+✅ ./spec/aureum/cli/output-format.au.toml:tap-passing
+✅ ./spec/aureum/cli/output-format.au.toml:unknown
+✅ ./spec/aureum/error/error.au.toml:invalid-test-config
+✅ ./spec/aureum/error/error.au.toml:missing-test-config
 ✅ ./spec/aureum/glob/multiple-dirs.au.toml
 ✅ ./spec/aureum/glob/multiple-files.au.toml
 ✅ ./spec/aureum/glob/single-dir.au.toml

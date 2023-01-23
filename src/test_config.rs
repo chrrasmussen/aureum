@@ -47,8 +47,8 @@ impl TestConfig {
         let test_configs = split_test_configs(self);
 
         let mut test_cases = vec![];
-        for test_config in test_configs {
-            let test_case = test_config.to_test_case(source_file.clone(), current_dir)?;
+        for (id_path, test_config) in test_configs {
+            let test_case = test_config.to_test_case(source_file.clone(), id_path, current_dir)?;
             test_cases.push(test_case)
         }
 
@@ -58,6 +58,7 @@ impl TestConfig {
     fn to_test_case(
         self,
         source_file: PathBuf,
+        id_path: Vec<String>,
         current_dir: &Path,
     ) -> Result<TestCase, TestConfigError> {
         let description = read_from_config_value(self.test_description, current_dir)?;
@@ -86,6 +87,7 @@ impl TestConfig {
 
         Ok(TestCase {
             source_file,
+            id_path,
             description,
             program,
             arguments,
@@ -112,22 +114,18 @@ where
 }
 
 // Currently only merges a single level
-fn split_test_configs(base_config: TestConfig) -> Vec<TestConfig> {
+fn split_test_configs(base_config: TestConfig) -> Vec<(Vec<String>, TestConfig)> {
     if let Some(tests) = base_config.tests.clone() {
         let mut test_configs = vec![];
+
         for (name, sub_config) in tests.into_iter() {
-            let named_sub_config = TestConfig {
-                test_description: sub_config
-                    .test_description
-                    .or(Some(ConfigValue::Literal(name))),
-                ..sub_config
-            };
-            let merged_test_config = merge_test_configs(base_config.clone(), named_sub_config);
-            test_configs.push(merged_test_config)
+            let merged_test_config = merge_test_configs(base_config.clone(), sub_config);
+            test_configs.push((vec![name], merged_test_config))
         }
+
         test_configs
     } else {
-        vec![base_config]
+        vec![(vec![], base_config)]
     }
 }
 

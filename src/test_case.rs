@@ -5,6 +5,7 @@ use std::process::{Command, Stdio};
 #[derive(Clone)]
 pub struct TestCase {
     pub source_file: PathBuf,
+    pub id_path: Vec<String>,
     pub description: Option<String>,
     pub program: String,
     pub arguments: Vec<String>,
@@ -12,6 +13,18 @@ pub struct TestCase {
     pub expected_stdout: Option<String>,
     pub expected_stderr: Option<String>,
     pub expected_exit_code: Option<i32>,
+}
+
+impl TestCase {
+    pub fn id(&self) -> String {
+        let file_path = self.source_file.display();
+
+        if self.id_path.is_empty() {
+            file_path.to_string()
+        } else {
+            format!("{}:{}", file_path, self.id_path.join("."))
+        }
+    }
 }
 
 pub struct TestResult {

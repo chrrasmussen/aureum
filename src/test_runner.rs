@@ -125,13 +125,11 @@ fn print_test_case_result(
         Err(_) => is_success = false,
     }
 
-    let test_id = id_for_test_case(test_case);
-
     let message: String;
     if let Some(description) = &test_case.description {
-        message = format!("{} # {}", test_id, description);
+        message = format!("{} # {}", test_case.id(), description);
     } else {
-        message = format!("{}", test_id);
+        message = format!("{}", test_case.id());
     }
 
     if is_success {
@@ -142,7 +140,7 @@ fn print_test_case_result(
 }
 
 fn print_test_summary(test_summary: &TestSummary) {
-    let test_id = id_for_test_case(&test_summary.test_case);
+    let test_id = test_summary.test_case.id();
 
     let message: String;
     if let Some(description) = &test_summary.test_case.description {
@@ -157,8 +155,4 @@ fn print_test_summary(test_summary: &TestSummary) {
     } else {
         println!("❌ {}", message)
     }
-}
-
-fn id_for_test_case(test_case: &TestCase) -> String {
-    test_case.source_file.display().to_string()
 }
