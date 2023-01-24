@@ -2,11 +2,13 @@ test_program = { env = "AUREUM_TEST_EXEC" }
 expected_stdout = ""
 expected_exit_code = 1
 
+
 [tests.missing-test-config]
 test_arguments = ["AUREUM-THIS-FILE-DOES-NOT-EXIST"]
 expected_stderr = """
 No test configs found for the given path(s)
 """
+
 
 [tests.invalid-test-config]
 test_arguments = ["helpers/invalid-test-config.toml"]

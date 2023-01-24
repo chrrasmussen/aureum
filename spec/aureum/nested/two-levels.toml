@@ -1,8 +1,10 @@
 test_program = "/bin/echo"
 
+
 [tests.test1]
 test_arguments = ["-n", "Test 1"]
 expected_stdout = "Test 1"
+
 
 [tests.test2]
 test_arguments = ["-n", "Test 2"]
