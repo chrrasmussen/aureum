@@ -7,6 +7,8 @@ use std::io;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
 
+// READ TOML
+
 pub fn from_str(str: &str) -> Result<TestConfig, ParseTestConfigError> {
     toml::from_str(&str).map_err(|err| ParseTestConfigError { inner: err })
 }
@@ -15,14 +17,7 @@ pub struct ParseTestConfigError {
     pub inner: toml::de::Error,
 }
 
-#[derive(Debug)]
-pub enum TestConfigError {
-    FailedToFetchEnvVar { var_name: String, error: VarError },
-    FailedToParseString(String),
-    ProgramRequired,
-    ExpectationRequired,
-    IOError(io::Error),
-}
+// TOML STRUCTURE
 
 #[derive(Deserialize, Clone)]
 pub struct TestConfig {
@@ -34,6 +29,26 @@ pub struct TestConfig {
     expected_stderr: Option<ConfigValue<String>>,
     expected_exit_code: Option<ConfigValue<i32>>,
     tests: Option<BTreeMap<String, TestConfig>>,
+}
+
+#[derive(Deserialize, Clone)]
+#[serde(untagged)]
+enum ConfigValue<T> {
+    Literal(T),
+    WrappedLiteral { value: T },
+    ReadFromFile { file: String },
+    FetchFromEnv { env: String },
+}
+
+// IMPLEMENTATION
+
+#[derive(Debug)]
+pub enum TestConfigError {
+    FailedToFetchEnvVar { var_name: String, error: VarError },
+    FailedToParseString(String),
+    ProgramRequired,
+    ExpectationRequired,
+    IOError(io::Error),
 }
 
 impl TestConfig {
@@ -150,15 +165,6 @@ fn merge_test_configs(base_config: TestConfig, prioritized_config: TestConfig) -
             .or(base_config.expected_exit_code),
         tests: prioritized_config.tests, // Do not propagate tests from `base_config`
     }
-}
-
-#[derive(Deserialize, Clone)]
-#[serde(untagged)]
-enum ConfigValue<T> {
-    Literal(T),
-    WrappedLiteral { value: T },
-    ReadFromFile { file: String },
-    FetchFromEnv { env: String },
 }
 
 impl<T> ConfigValue<T>
