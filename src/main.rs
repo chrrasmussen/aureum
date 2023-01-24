@@ -10,9 +10,8 @@ mod test_runner;
 use cli::{Args, OutputFormat, TestPath};
 use glob::glob;
 use std::collections::BTreeMap;
+use std::path::PathBuf;
 use std::process::exit;
-use std::{fs, io, path::PathBuf};
-use test_case::TestCase;
 use test_id_container::TestIdContainer;
 use test_runner::{ReportConfig, ReportFormat, TestStatus};
 
@@ -35,7 +34,7 @@ fn main() {
     let mut failing_configs = vec![];
 
     for test_file in test_files {
-        match test_cases_from_file(&test_file) {
+        match test_config::test_cases_from_file(&test_file) {
             Ok(sub_tests) => test_cases.extend(sub_tests),
             Err(err) => failing_configs.push((test_file.clone(), err)),
         }
@@ -64,30 +63,6 @@ fn main() {
     if failing_configs.is_empty() == false || all_tests_passed == false {
         exit(EXIT_CODE_ON_FAILURE)
     }
-}
-
-enum TestFileError {
-    FailedToParseTestConfig(test_config::ParseTestConfigError),
-    FailedToReadTestCases(test_config::TestConfigError),
-    IOError(io::Error),
-}
-
-fn get_report_format(args: &Args) -> ReportFormat {
-    match args.output_format {
-        OutputFormat::Summary => ReportFormat::Summary {
-            show_all_tests: args.show_all_tests,
-        },
-        OutputFormat::Tap => ReportFormat::Tap,
-    }
-}
-
-fn test_cases_from_file(test_file: &PathBuf) -> Result<Vec<TestCase>, TestFileError> {
-    let toml_content = fs::read_to_string(test_file).map_err(TestFileError::IOError)?;
-    let test_config =
-        test_config::from_str(&toml_content).map_err(TestFileError::FailedToParseTestConfig)?;
-    test_config
-        .to_test_cases(test_file)
-        .map_err(TestFileError::FailedToReadTestCases)
 }
 
 pub fn expand_test_paths(test_paths: &[TestPath]) -> BTreeMap<PathBuf, TestIdContainer> {
@@ -141,4 +116,13 @@ fn locate_test_files(path: &str) -> Result<Vec<PathBuf>, LocateFileError> {
     }
 
     Ok(output)
+}
+
+fn get_report_format(args: &Args) -> ReportFormat {
+    match args.output_format {
+        OutputFormat::Summary => ReportFormat::Summary {
+            show_all_tests: args.show_all_tests,
+        },
+        OutputFormat::Tap => ReportFormat::Tap,
+    }
 }

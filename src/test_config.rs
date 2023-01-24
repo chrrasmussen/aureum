@@ -2,27 +2,39 @@ use crate::file_util;
 use crate::test_case::TestCase;
 use crate::test_id::TestId;
 use serde::Deserialize;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::env::{var, VarError};
 use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
 
-// READ TOML
+// READ TEST CONFIG
 
-pub fn from_str(str: &str) -> Result<TestConfig, ParseTestConfigError> {
-    toml::from_str(&str).map_err(|err| ParseTestConfigError { inner: err })
+pub enum TestConfigError {
+    FailedToParseTestConfig(toml::de::Error),
+    FailedToGatherData(TestConfigDataError),
+    FailedToCreateTestCases(CreateTestCaseError),
+    IOError(io::Error),
 }
 
-pub struct ParseTestConfigError {
-    pub inner: toml::de::Error,
+pub fn test_cases_from_file(path: &PathBuf) -> Result<Vec<TestCase>, TestConfigError> {
+    let toml_content = fs::read_to_string(path).map_err(TestConfigError::IOError)?;
+    let test_config = toml::from_str::<TestConfig>(&toml_content)
+        .map_err(TestConfigError::FailedToParseTestConfig)?;
+    let requirements = test_config.get_requirements();
+    let test_dir = file_util::parent_dir(path);
+    let data = gather_requirements(&requirements, &test_dir)
+        .map_err(TestConfigError::FailedToGatherData)?;
+    test_config
+        .to_test_cases(path, &data)
+        .map_err(TestConfigError::FailedToCreateTestCases)
 }
 
 // TOML STRUCTURE
 
 #[derive(Deserialize, Clone)]
-pub struct TestConfig {
+struct TestConfig {
     test_description: Option<ConfigValue<String>>,
     test_program: Option<ConfigValue<String>>,
     test_arguments: Option<Vec<ConfigValue<String>>>,
@@ -42,34 +54,145 @@ enum ConfigValue<T> {
     FetchFromEnv { env: String },
 }
 
-// IMPLEMENTATION
+// REQUIREMENTS
 
-pub enum TestConfigError {
-    FailedToFetchEnvVar { var_name: String, error: VarError },
-    FailedToParseString(String),
-    ProgramRequired,
-    ExpectationRequired,
-    IOError(io::Error),
+#[derive(PartialEq, PartialOrd, Eq, Ord)]
+pub enum TestConfigRequirement {
+    LocalFile(String),
+    EnvVar(String),
 }
 
 impl TestConfig {
-    pub fn to_test_cases<P>(self, path: P) -> Result<Vec<TestCase>, TestConfigError>
+    fn get_requirements(&self) -> BTreeSet<TestConfigRequirement> {
+        let mut requirements = BTreeSet::new();
+
+        add_requirement(&mut requirements, &self.test_description);
+        add_requirement(&mut requirements, &self.test_program);
+        add_requirement(&mut requirements, &self.test_stdin);
+        add_requirement(&mut requirements, &self.expected_stdout);
+        add_requirement(&mut requirements, &self.expected_stderr);
+        add_requirement(&mut requirements, &self.expected_exit_code);
+
+        if let Some(arguments) = &self.test_arguments {
+            for argument in arguments {
+                let requirement = get_requirement(argument);
+                requirements.extend(requirement)
+            }
+        }
+
+        if let Some(tests) = &self.tests {
+            for (_, sub_test_config) in tests {
+                let mut sub_requirements = sub_test_config.get_requirements();
+                requirements.append(&mut sub_requirements)
+            }
+        }
+
+        requirements
+    }
+}
+
+fn add_requirement<T>(
+    requirements: &mut BTreeSet<TestConfigRequirement>,
+    value: &Option<ConfigValue<T>>,
+) {
+    requirements.extend(value.as_ref().and_then(get_requirement));
+}
+
+fn get_requirement<T>(config_value: &ConfigValue<T>) -> Option<TestConfigRequirement> {
+    match config_value {
+        ConfigValue::Literal(_) => None,
+        ConfigValue::WrappedLiteral { value: _ } => None,
+        ConfigValue::ReadFromFile { file: filename } => {
+            Some(TestConfigRequirement::LocalFile(filename.clone()))
+        }
+        ConfigValue::FetchFromEnv { env: var_name } => {
+            Some(TestConfigRequirement::EnvVar(var_name.clone()))
+        }
+    }
+}
+
+// READ CONTENT
+
+struct TestConfigData {
+    files: BTreeMap<String, String>,
+    env: BTreeMap<String, String>,
+}
+
+impl TestConfigData {
+    fn new() -> TestConfigData {
+        TestConfigData {
+            env: BTreeMap::new(),
+            files: BTreeMap::new(),
+        }
+    }
+}
+
+pub enum TestConfigDataError {
+    FailedToFetchEnvVar { var_name: String, error: VarError },
+    IOError(io::Error),
+}
+
+fn read_locale_file(path: &String, current_dir: &Path) -> Result<String, TestConfigDataError> {
+    let path = current_dir.join(path);
+    fs::read_to_string(path).map_err(TestConfigDataError::IOError)
+}
+
+fn read_from_env(var_name: &String) -> Result<String, TestConfigDataError> {
+    var(var_name).map_err(|err| TestConfigDataError::FailedToFetchEnvVar {
+        var_name: var_name.to_owned(),
+        error: err,
+    })
+}
+
+fn gather_requirements(
+    requirements: &BTreeSet<TestConfigRequirement>,
+    current_dir: &Path,
+) -> Result<TestConfigData, TestConfigDataError> {
+    let mut data = TestConfigData::new();
+
+    for requirement in requirements {
+        match requirement {
+            TestConfigRequirement::LocalFile(path) => {
+                data.files
+                    .insert(path.to_owned(), read_locale_file(path, current_dir)?);
+            }
+            TestConfigRequirement::EnvVar(var_name) => {
+                data.env
+                    .insert(var_name.to_owned(), read_from_env(var_name)?);
+            }
+        }
+    }
+
+    Ok(data)
+}
+
+// CREATE TEST CASES
+
+pub enum CreateTestCaseError {
+    MissingLocalFile(String),
+    MissingEnvVar(String),
+    FailedToParseString,
+    ProgramRequired,
+    ExpectationRequired,
+}
+
+impl TestConfig {
+    fn to_test_cases<P>(
+        self,
+        path: P,
+        data: &TestConfigData,
+    ) -> Result<Vec<TestCase>, CreateTestCaseError>
     where
         P: AsRef<Path>,
     {
         let source_file = path.as_ref();
-        let current_dir = file_util::parent_dir(source_file);
 
         let test_configs = split_test_configs(self);
 
         let mut test_cases = vec![];
         for (id_path, test_config) in test_configs {
             let test_id = TestId::new(id_path);
-            let test_case = test_config.to_test_case(
-                source_file.to_path_buf(),
-                test_id,
-                current_dir.as_path(),
-            )?;
+            let test_case = test_config.to_test_case(source_file.to_path_buf(), test_id, data)?;
             test_cases.push(test_case)
         }
 
@@ -80,30 +203,30 @@ impl TestConfig {
         self,
         source_file: PathBuf,
         id: TestId,
-        current_dir: &Path,
-    ) -> Result<TestCase, TestConfigError> {
-        let description = read_from_config_value(self.test_description, current_dir)?;
+        data: &TestConfigData,
+    ) -> Result<TestCase, CreateTestCaseError> {
+        let description = read_from_config_value(self.test_description, data)?;
 
         let program: String;
-        if let Some(p) = read_from_config_value(self.test_program, current_dir)? {
+        if let Some(p) = read_from_config_value(self.test_program, data)? {
             program = p
         } else {
-            return Err(TestConfigError::ProgramRequired);
+            return Err(CreateTestCaseError::ProgramRequired);
         }
 
         let mut arguments = vec![];
         for arg in self.test_arguments.unwrap_or(vec![]) {
-            arguments.push(arg.read(current_dir)?)
+            arguments.push(arg.read(data)?)
         }
 
-        let stdin = read_from_config_value(self.test_stdin, current_dir)?;
+        let stdin = read_from_config_value(self.test_stdin, data)?;
 
-        let expected_stdout = read_from_config_value(self.expected_stdout, current_dir)?;
-        let expected_stderr = read_from_config_value(self.expected_stderr, current_dir)?;
-        let expected_exit_code = read_from_config_value(self.expected_exit_code, current_dir)?;
+        let expected_stdout = read_from_config_value(self.expected_stdout, data)?;
+        let expected_stderr = read_from_config_value(self.expected_stderr, data)?;
+        let expected_exit_code = read_from_config_value(self.expected_exit_code, data)?;
 
         if expected_stdout == None && expected_stderr == None && expected_exit_code == None {
-            return Err(TestConfigError::ExpectationRequired);
+            return Err(CreateTestCaseError::ExpectationRequired);
         }
 
         Ok(TestCase {
@@ -122,13 +245,13 @@ impl TestConfig {
 
 fn read_from_config_value<T>(
     config_value: Option<ConfigValue<T>>,
-    current_dir: &Path,
-) -> Result<Option<T>, TestConfigError>
+    data: &TestConfigData,
+) -> Result<Option<T>, CreateTestCaseError>
 where
     T: FromStr,
 {
     if let Some(config_value) = config_value {
-        Ok(Some(config_value.read(current_dir)?))
+        Ok(Some(config_value.read(data)?))
     } else {
         Ok(None)
     }
@@ -177,27 +300,29 @@ impl<T> ConfigValue<T>
 where
     T: FromStr,
 {
-    fn read(self, current_dir: &Path) -> Result<T, TestConfigError> {
+    fn read(self, data: &TestConfigData) -> Result<T, CreateTestCaseError> {
         match self {
             Self::Literal(value) => Ok(value),
             Self::WrappedLiteral { value } => Ok(value),
-            Self::ReadFromFile { file } => {
-                let path = current_dir.join(file);
-                let str = fs::read_to_string(path).map_err(TestConfigError::IOError)?;
-                let value = str
-                    .parse()
-                    .map_err(|_err| TestConfigError::FailedToParseString(str))?;
-                Ok(value)
+            Self::ReadFromFile { file: file_path } => {
+                if let Some(str) = data.files.get(&file_path) {
+                    let value = str
+                        .parse()
+                        .map_err(|_err| CreateTestCaseError::FailedToParseString)?;
+                    Ok(value)
+                } else {
+                    Err(CreateTestCaseError::MissingLocalFile(file_path))
+                }
             }
-            Self::FetchFromEnv { env } => {
-                let str = var(&env).map_err(|err| TestConfigError::FailedToFetchEnvVar {
-                    var_name: env,
-                    error: err,
-                })?;
-                let value = str
-                    .parse()
-                    .map_err(|_err| TestConfigError::FailedToParseString(str))?;
-                Ok(value)
+            Self::FetchFromEnv { env: var_name } => {
+                if let Some(str) = data.env.get(&var_name) {
+                    let value = str
+                        .parse()
+                        .map_err(|_err| CreateTestCaseError::FailedToParseString)?;
+                    Ok(value)
+                } else {
+                    Err(CreateTestCaseError::MissingEnvVar(var_name))
+                }
             }
         }
     }
