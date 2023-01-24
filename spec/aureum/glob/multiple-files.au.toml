@@ -1,9 +1,9 @@
 test_program = { env = "AUREUM_EXEC" }
-test_arguments = ["multiple-files1.toml", "multiple-files2.toml"]
+test_arguments = ["helpers/dir1/test1.toml", "helpers/dir1/test2.toml"]
 
 expected_stdout = """
-✅ ./multiple-files1.toml
-✅ ./multiple-files2.toml
+✅ ./helpers/dir1/test1.toml
+✅ ./helpers/dir1/test2.toml
 
 Completed running 2 tests.
 All tests passed.

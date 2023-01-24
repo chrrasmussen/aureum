@@ -1,8 +1,8 @@
 test_program = { env = "AUREUM_EXEC" }
-test_arguments = ["single-file.toml"]
+test_arguments = ["helpers/dir1/test1.toml"]
 
 expected_stdout = """
-✅ ./single-file.toml
+✅ ./helpers/dir1/test1.toml
 
 Completed running 1 tests.
 All tests passed.

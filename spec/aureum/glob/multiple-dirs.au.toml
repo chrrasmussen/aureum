@@ -1,15 +1,15 @@
 test_program = { env = "AUREUM_EXEC" }
 test_arguments = [
-  "multiple-dirs1/*.toml",
-  "multiple-dirs2/*.toml",
-  "multiple-dirs1/*.toml", # This argument is redundant, but it tests that the paths are deduplicated.
+  "helpers/dir1/*.toml",
+  "helpers/dir2/*.toml",
+  "helpers/dir1/*.toml", # This argument is redundant, but it tests that the paths are deduplicated.
 ]
 
 expected_stdout = """
-✅ ./multiple-dirs1/test1.toml
-✅ ./multiple-dirs1/test2.toml
-✅ ./multiple-dirs2/test1.toml
-✅ ./multiple-dirs2/test2.toml
+✅ ./helpers/dir1/test1.toml
+✅ ./helpers/dir1/test2.toml
+✅ ./helpers/dir2/test1.toml
+✅ ./helpers/dir2/test2.toml
 
 Completed running 4 tests.
 All tests passed.
