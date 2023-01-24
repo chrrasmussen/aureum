@@ -28,7 +28,7 @@ pub fn print_not_ok(test_number: usize, message: &str, diagnostics: &str, indent
 }
 
 pub fn print_diagnostics(diagnostics: &str) {
-    let code_block = format!("---\n{}\n...", diagnostics);
+    let code_block = format!("---\n{}...", diagnostics);
     println!("{}", indent_lines(&code_block, 2));
 }
 

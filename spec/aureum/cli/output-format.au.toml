@@ -42,6 +42,17 @@ expected_stdout = """
 TAP version 14
 1..1
 not ok 1 - ./helpers/failing-test.toml
+  ---
+  exit-code:
+    expected: 42
+    got: 0
+  stderr:
+    expected: STDERR
+    got: ''
+  stdout:
+    expected: STDOUT
+    got: Hello world
+  ...
 """
 expected_stderr = ""
 expected_exit_code = 1

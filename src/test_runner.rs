@@ -1,6 +1,8 @@
 use crate::tap_format;
-use crate::test_case::{self, RunError, TestCase, TestResult};
+use crate::test_case::{self, RunError, TestCase, TestResult, ValueComparison};
 use rayon::prelude::*;
+use serde_yaml::{self, Number, Value};
+use std::collections::BTreeMap;
 
 pub struct ReportConfig {
     pub number_of_tests: usize,
@@ -134,7 +136,12 @@ fn print_test_case_result(
             if test_result.is_success() {
                 tap_format::print_ok(test_number, &message, indent_level)
             } else {
-                tap_format::print_not_ok(test_number, &message, "", indent_level)
+                tap_format::print_not_ok(
+                    test_number,
+                    &message,
+                    &format_test_result(test_result),
+                    indent_level,
+                )
             }
         }
         Err(_) => {
@@ -159,4 +166,37 @@ fn print_test_summary(test_summary: &TestSummary) {
     } else {
         println!("❌ {}", message)
     }
+}
+
+fn format_test_result(test_result: TestResult) -> String {
+    let mut diagnostics = BTreeMap::new();
+
+    if let ValueComparison::Diff { expected, got } = test_result.stdout {
+        diagnostics.insert("stdout", show_string_diff(expected, got));
+    }
+
+    if let ValueComparison::Diff { expected, got } = test_result.stderr {
+        diagnostics.insert("stderr", show_string_diff(expected, got));
+    }
+
+    if let ValueComparison::Diff { expected, got } = test_result.exit_code {
+        diagnostics.insert("exit-code", show_i32_diff(expected, got));
+    }
+
+    serde_yaml::to_string(&diagnostics).unwrap_or("Failed to convert to YAML".to_owned())
+}
+
+fn show_string_diff(expected: String, got: String) -> BTreeMap<&'static str, Value> {
+    show_diff(Value::String(expected), Value::String(got))
+}
+
+fn show_i32_diff(expected: i32, got: i32) -> BTreeMap<&'static str, Value> {
+    show_diff(
+        Value::Number(Number::from(expected)),
+        Value::Number(Number::from(got)),
+    )
+}
+
+fn show_diff(expected: Value, got: Value) -> BTreeMap<&'static str, Value> {
+    BTreeMap::from([("expected", expected), ("got", got)])
 }

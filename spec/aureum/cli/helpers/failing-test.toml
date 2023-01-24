@@ -1,4 +1,6 @@
 test_program = "/bin/echo"
 test_arguments = ["-n", "Hello world"]
 
-expected_stdout = "DOES NOT MATCH"
+expected_stdout = "STDOUT"
+expected_stderr = "STDERR"
+expected_exit_code = 42
