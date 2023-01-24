@@ -24,6 +24,10 @@ struct Args {
     /// Options: summary, tap
     #[arg(long, default_value = "summary")]
     output_format: OutputFormat,
+
+    /// Show all tests in summary, regardless of test status
+    #[arg(long)]
+    show_all_tests: bool,
 }
 
 #[derive(Clone)]
@@ -40,15 +44,6 @@ impl FromStr for OutputFormat {
             "summary" => Ok(OutputFormat::Summary),
             "tap" => Ok(OutputFormat::Tap),
             _ => Err("Invalid output format"),
-        }
-    }
-}
-
-impl OutputFormat {
-    fn to_report_format(&self) -> ReportFormat {
-        match self {
-            Self::Summary => ReportFormat::Summary,
-            Self::Tap => ReportFormat::Tap,
         }
     }
 }
@@ -85,7 +80,7 @@ fn main() {
 
     let report_config = ReportConfig {
         number_of_tests: test_cases.len(),
-        format: args.output_format.to_report_format(),
+        format: get_report_format(&args),
     };
 
     test_runner::report_start(&report_config);
@@ -104,6 +99,15 @@ enum TestFileError {
     FailedToParseTestConfig(test_config::ParseTestConfigError),
     FailedToReadTestCases(test_config::TestConfigError),
     IOError(io::Error),
+}
+
+fn get_report_format(args: &Args) -> ReportFormat {
+    match args.output_format {
+        OutputFormat::Summary => ReportFormat::Summary {
+            show_all_tests: args.show_all_tests,
+        },
+        OutputFormat::Tap => ReportFormat::Tap,
+    }
 }
 
 fn test_cases_from_file(test_file: &PathBuf) -> Result<Vec<TestCase>, TestFileError> {

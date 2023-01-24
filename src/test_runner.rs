@@ -10,7 +10,7 @@ pub struct ReportConfig {
 }
 
 pub enum ReportFormat {
-    Summary,
+    Summary { show_all_tests: bool },
     Tap,
 }
 
@@ -28,7 +28,7 @@ pub struct TestSummary {
 
 pub fn report_start(report_config: &ReportConfig) {
     match report_config.format {
-        ReportFormat::Summary => {}
+        ReportFormat::Summary { show_all_tests: _ } => {}
         ReportFormat::Tap => {
             tap_format::print_version();
             tap_format::print_plan(1, report_config.number_of_tests);
@@ -85,7 +85,7 @@ fn report_test_case(
     result: Result<TestResult, RunError>,
 ) {
     match report_config.format {
-        ReportFormat::Summary => {}
+        ReportFormat::Summary { show_all_tests: _ } => {}
         ReportFormat::Tap => {
             let test_number_indent_level = report_config.number_of_tests.to_string().len();
             print_test_case_result(index + 1, &test_case, result, test_number_indent_level);
@@ -95,9 +95,12 @@ fn report_test_case(
 
 pub fn report_summary(report_config: &ReportConfig, test_summaries: &[TestSummary]) {
     match report_config.format {
-        ReportFormat::Summary => {
+        ReportFormat::Summary { show_all_tests } => {
             for test_summary in test_summaries {
-                print_test_summary(test_summary);
+                let test_failed = test_summary.test_status == TestStatus::Failed;
+                if show_all_tests || test_failed {
+                    print_test_summary(test_summary);
+                }
             }
 
             let number_of_failed_tests = test_summaries

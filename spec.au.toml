@@ -1,5 +1,5 @@
 test_program = { env = "AUREUM_TEST_EXEC" }
-test_arguments = ["spec"]
+test_arguments = ["--show-all-tests", "spec"]
 
 expected_stdout = """
 ✅ ./spec/aureum/cli/help.au.toml
@@ -9,6 +9,8 @@ expected_stdout = """
 ✅ ./spec/aureum/cli/output-format.au.toml:tap-failing
 ✅ ./spec/aureum/cli/output-format.au.toml:tap-passing
 ✅ ./spec/aureum/cli/output-format.au.toml:unknown
+✅ ./spec/aureum/cli/show-all-tests.au.toml:default
+✅ ./spec/aureum/cli/show-all-tests.au.toml:show-all-tests
 ✅ ./spec/aureum/error/error.au.toml:invalid-test-config
 ✅ ./spec/aureum/error/error.au.toml:missing-test-config
 ✅ ./spec/aureum/glob/glob.au.toml:multiple-dirs
@@ -24,7 +26,7 @@ expected_stdout = """
 ✅ ./spec/basic/read-external-file.au.toml
 ✅ ./spec/basic/run-bash.au.toml
 
-Completed running 21 tests.
+Completed running 23 tests.
 All tests passed.
 """
 expected_stderr = ""
