@@ -1,5 +1,10 @@
 test_program = { env = "AUREUM_TEST_EXEC" }
-test_arguments = ["--run-tests-in-parallell", "helpers/passing-test.toml", "helpers/failing-test.toml"]
+test_arguments = [
+  "--run-tests-in-parallell",
+  "helpers/passing-test.toml",
+  "helpers/failing-test.toml",
+]
+
 expected_stdout = """
 ❌ ./helpers/failing-test.toml
 

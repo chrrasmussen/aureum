@@ -2,7 +2,12 @@ test_program = { env = "AUREUM_TEST_EXEC" }
 
 
 [tests.summary-passing]
-test_arguments = ["--show-all-tests", "--output-format", "summary", "helpers/passing-test.toml"]
+test_arguments = [
+  "--show-all-tests",
+  "--output-format",
+  "summary",
+  "helpers/passing-test.toml",
+]
 expected_stdout = """
 ✅ ./helpers/passing-test.toml
 
@@ -14,7 +19,12 @@ expected_exit_code = 0
 
 
 [tests.summary-failing]
-test_arguments = ["--show-all-tests", "--output-format", "summary", "helpers/failing-test.toml"]
+test_arguments = [
+  "--show-all-tests",
+  "--output-format",
+  "summary",
+  "helpers/failing-test.toml",
+]
 expected_stdout = """
 ❌ ./helpers/failing-test.toml
 

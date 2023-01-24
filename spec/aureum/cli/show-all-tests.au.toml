@@ -2,7 +2,11 @@ test_program = { env = "AUREUM_TEST_EXEC" }
 
 
 [tests.show-all-tests]
-test_arguments = ["--show-all-tests", "helpers/passing-test.toml", "helpers/failing-test.toml"]
+test_arguments = [
+  "--show-all-tests",
+  "helpers/passing-test.toml",
+  "helpers/failing-test.toml",
+]
 expected_stdout = """
 ❌ ./helpers/failing-test.toml
 ✅ ./helpers/passing-test.toml
