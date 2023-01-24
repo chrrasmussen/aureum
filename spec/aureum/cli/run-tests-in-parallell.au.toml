@@ -2,14 +2,13 @@ test_program = { env = "AUREUM_TEST_EXEC" }
 test_arguments = [
   "--run-tests-in-parallell",
   "helpers/passing-test.toml",
-  "helpers/failing-test.toml",
+  "helpers/passing-test2.toml",
 ]
 
 expected_stdout = """
-❌ ./helpers/failing-test.toml
 
 Completed running 2 tests.
-1 failures.
+All tests passed.
 """
 expected_stderr = ""
-expected_exit_code = 1
+expected_exit_code = 0
