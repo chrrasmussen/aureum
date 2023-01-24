@@ -1,0 +1,57 @@
+test_program = { env = "AUREUM_EXEC" }
+
+expected_stderr = ""
+expected_exit_code = 0
+
+
+[tests.single-file]
+test_arguments = ["helpers/dir1/test1.toml"]
+
+expected_stdout = """
+✅ ./helpers/dir1/test1.toml
+
+Completed running 1 tests.
+All tests passed.
+"""
+
+
+[tests.single-dir]
+test_arguments = ["helpers/dir1/*.toml"]
+
+expected_stdout = """
+✅ ./helpers/dir1/test1.toml
+✅ ./helpers/dir1/test2.toml
+
+Completed running 2 tests.
+All tests passed.
+"""
+
+
+[tests.multiple-dirs]
+test_arguments = [
+  "helpers/dir1/*.toml",
+  "helpers/dir2/*.toml",
+  "helpers/dir1/*.toml", # This argument is redundant, but it tests that the paths are deduplicated.
+]
+
+expected_stdout = """
+✅ ./helpers/dir1/test1.toml
+✅ ./helpers/dir1/test2.toml
+✅ ./helpers/dir2/test1.toml
+✅ ./helpers/dir2/test2.toml
+
+Completed running 4 tests.
+All tests passed.
+"""
+
+
+[tests.multiple-files]
+test_arguments = ["helpers/dir1/test1.toml", "helpers/dir1/test2.toml"]
+
+expected_stdout = """
+✅ ./helpers/dir1/test1.toml
+✅ ./helpers/dir1/test2.toml
+
+Completed running 2 tests.
+All tests passed.
+"""

@@ -11,10 +11,10 @@ expected_stdout = """
 ✅ ./spec/aureum/cli/output-format.au.toml:unknown
 ✅ ./spec/aureum/error/error.au.toml:invalid-test-config
 ✅ ./spec/aureum/error/error.au.toml:missing-test-config
-✅ ./spec/aureum/glob/multiple-dirs.au.toml
-✅ ./spec/aureum/glob/multiple-files.au.toml
-✅ ./spec/aureum/glob/single-dir.au.toml
-✅ ./spec/aureum/glob/single-file.au.toml
+✅ ./spec/aureum/glob/glob.au.toml:multiple-dirs
+✅ ./spec/aureum/glob/glob.au.toml:multiple-files
+✅ ./spec/aureum/glob/glob.au.toml:single-dir
+✅ ./spec/aureum/glob/glob.au.toml:single-file
 ✅ ./spec/aureum/nested/two-levels.au.toml
 ✅ ./spec/basic/description.au.toml - My description
 ✅ ./spec/basic/expect-exit-code.au.toml
