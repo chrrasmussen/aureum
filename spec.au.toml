@@ -9,6 +9,7 @@ expected_stdout = """
 ✅ ./spec/aureum/cli/output-format.au.toml:tap-failing
 ✅ ./spec/aureum/cli/output-format.au.toml:tap-passing
 ✅ ./spec/aureum/cli/output-format.au.toml:unknown
+✅ ./spec/aureum/cli/run-tests-in-parallell.au.toml
 ✅ ./spec/aureum/cli/show-all-tests.au.toml:default
 ✅ ./spec/aureum/cli/show-all-tests.au.toml:show-all-tests
 ✅ ./spec/aureum/error/error.au.toml:invalid-test-config
@@ -26,7 +27,7 @@ expected_stdout = """
 ✅ ./spec/basic/read-external-file.au.toml
 ✅ ./spec/basic/run-bash.au.toml
 
-Completed running 23 tests.
+Completed running 24 tests.
 All tests passed.
 """
 expected_stderr = ""

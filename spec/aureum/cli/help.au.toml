@@ -12,5 +12,6 @@ Arguments:
 Options:
       --output-format <OUTPUT_FORMAT>  Options: summary, tap [default: summary]
       --show-all-tests                 Show all tests in summary, regardless of test status
+      --run-tests-in-parallell         Run tests in parallell
   -h, --help                           Print help information
 """

@@ -28,6 +28,10 @@ struct Args {
     /// Show all tests in summary, regardless of test status
     #[arg(long)]
     show_all_tests: bool,
+
+    /// Run tests in parallell
+    #[arg(long)]
+    run_tests_in_parallell: bool,
 }
 
 #[derive(Clone)]
@@ -84,7 +88,7 @@ fn main() {
     };
 
     test_runner::report_start(&report_config);
-    let test_summaries = test_runner::run_test_cases(&report_config, &test_cases, false);
+    let test_summaries = test_runner::run_test_cases(&report_config, &test_cases, args.run_tests_in_parallell);
     test_runner::report_summary(&report_config, &test_summaries);
 
     let all_tests_passed = test_summaries
