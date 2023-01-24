@@ -1,59 +1,21 @@
+mod cli;
 mod tap_format;
 mod test_case;
 mod test_config;
 mod test_runner;
 
-use clap::Parser;
+use cli::{Args, OutputFormat};
 use glob::glob;
 use std::collections::BTreeSet;
 use std::process::exit;
-use std::str::FromStr;
 use std::{fs, io, path::PathBuf};
 use test_case::TestCase;
 use test_runner::{ReportConfig, ReportFormat, TestStatus};
 
 const EXIT_CODE_ON_FAILURE: i32 = 1;
 
-/// Golden test runner
-#[derive(Parser)]
-struct Args {
-    /// Paths to test configs
-    #[arg(required = true)]
-    paths: Vec<String>,
-
-    /// Options: summary, tap
-    #[arg(long, default_value = "summary")]
-    output_format: OutputFormat,
-
-    /// Show all tests in summary, regardless of test status
-    #[arg(long)]
-    show_all_tests: bool,
-
-    /// Run tests in parallell
-    #[arg(long)]
-    run_tests_in_parallell: bool,
-}
-
-#[derive(Clone)]
-enum OutputFormat {
-    Summary,
-    Tap,
-}
-
-impl FromStr for OutputFormat {
-    type Err = &'static str;
-
-    fn from_str(format: &str) -> Result<Self, Self::Err> {
-        match format {
-            "summary" => Ok(OutputFormat::Summary),
-            "tap" => Ok(OutputFormat::Tap),
-            _ => Err("Invalid output format"),
-        }
-    }
-}
-
 fn main() {
-    let args = Args::parse();
+    let args = cli::parse();
 
     let mut test_files = BTreeSet::new();
     for path in &args.paths {
