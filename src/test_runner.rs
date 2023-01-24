@@ -42,25 +42,21 @@ pub fn run_test_cases(
     run_in_parallel: bool,
 ) -> Vec<RunResult> {
     let run = |(i, test_case)| -> Vec<RunResult> {
-        let test_result = test_case::run(test_case);
+        let result = test_case::run(test_case);
 
-        let is_success = test_result
-            .as_ref()
-            .map_or(false, |t| t.is_success())
-            .clone();
-        report_test_case(report_config, i, test_case, test_result);
+        let is_success = result.as_ref().map_or(false, |t| t.is_success());
+        report_test_case(report_config, i, test_case, result);
 
-        if is_success {
-            return vec![RunResult {
-                test_case: test_case.clone(),
-                test_status: TestStatus::Passed,
-            }];
+        let test_status = if is_success {
+            TestStatus::Passed
         } else {
-            vec![RunResult {
-                test_case: test_case.clone(),
-                test_status: TestStatus::Failed,
-            }]
-        }
+            TestStatus::Failed
+        };
+
+        vec![RunResult {
+            test_case: test_case.clone(),
+            test_status,
+        }]
     };
 
     if run_in_parallel {
