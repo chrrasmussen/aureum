@@ -2,7 +2,6 @@ test_program = { env = "AUREUM_EXEC" }
 test_arguments = ["spec"]
 
 expected_stdout = """
-✅ ./spec/aureum/cli/failing-test.au.toml
 ✅ ./spec/aureum/cli/help.au.toml
 ✅ ./spec/aureum/cli/no-args.au.toml
 ✅ ./spec/aureum/cli/output-format.au.toml:summary-failing
@@ -25,7 +24,7 @@ expected_stdout = """
 ✅ ./spec/basic/read-external-file.au.toml
 ✅ ./spec/basic/run-bash.au.toml
 
-Completed running 22 tests.
+Completed running 21 tests.
 All tests passed.
 """
 expected_stderr = ""
