@@ -21,7 +21,7 @@ pub enum TestStatus {
 }
 
 #[derive(Clone)]
-pub struct TestSummary {
+pub struct RunResult {
     pub test_case: TestCase,
     pub test_status: TestStatus,
 }
@@ -40,8 +40,8 @@ pub fn run_test_cases(
     report_config: &ReportConfig,
     test_cases: &[TestCase],
     run_in_parallel: bool,
-) -> Vec<TestSummary> {
-    let run = |(i, test_case)| -> Vec<TestSummary> {
+) -> Vec<RunResult> {
+    let run = |(i, test_case)| -> Vec<RunResult> {
         let test_result = test_case::run(test_case);
 
         let is_success = test_result
@@ -51,12 +51,12 @@ pub fn run_test_cases(
         report_test_case(report_config, i, test_case, test_result);
 
         if is_success {
-            return vec![TestSummary {
+            return vec![RunResult {
                 test_case: test_case.clone(),
                 test_status: TestStatus::Passed,
             }];
         } else {
-            vec![TestSummary {
+            vec![RunResult {
                 test_case: test_case.clone(),
                 test_status: TestStatus::Failed,
             }]
@@ -93,17 +93,17 @@ fn report_test_case(
     }
 }
 
-pub fn report_summary(report_config: &ReportConfig, test_summaries: &[TestSummary]) {
+pub fn report_summary(report_config: &ReportConfig, run_results: &[RunResult]) {
     match report_config.format {
         ReportFormat::Summary { show_all_tests } => {
-            for test_summary in test_summaries {
-                let test_failed = test_summary.test_status == TestStatus::Failed;
+            for run_result in run_results {
+                let test_failed = run_result.test_status == TestStatus::Failed;
                 if show_all_tests || test_failed {
-                    print_test_summary(test_summary);
+                    print_run_result(run_result);
                 }
             }
 
-            let number_of_failed_tests = test_summaries
+            let number_of_failed_tests = run_results
                 .iter()
                 .filter(|t| t.test_status == TestStatus::Failed)
                 .count();
@@ -153,17 +153,17 @@ fn print_test_case_result(
     }
 }
 
-fn print_test_summary(test_summary: &TestSummary) {
-    let test_id = test_summary.test_case.id();
+fn print_run_result(run_result: &RunResult) {
+    let test_id = run_result.test_case.id();
 
     let message: String;
-    if let Some(description) = &test_summary.test_case.description {
+    if let Some(description) = &run_result.test_case.description {
         message = format!("{} - {}", test_id, description);
     } else {
         message = format!("{}", test_id);
     }
 
-    let is_success = test_summary.test_status == TestStatus::Passed;
+    let is_success = run_result.test_status == TestStatus::Passed;
     if is_success {
         println!("✅ {}", message)
     } else {
