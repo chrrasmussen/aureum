@@ -40,22 +40,25 @@ pub fn run_test_cases(
     run_in_parallel: bool,
 ) -> Vec<TestSummary> {
     let run = |(i, test_case)| -> Vec<TestSummary> {
-        let result = test_case::run(test_case);
-        report_test_case(report_config, i, test_case, &result);
+        let test_result = test_case::run(test_case);
 
-        if let Ok(result) = &result {
-            if test_case::expectations_fulfilled(result) {
-                return vec![TestSummary {
-                    test_case: test_case.clone(),
-                    test_status: TestStatus::Passed,
-                }];
-            }
+        let is_success = test_result
+            .as_ref()
+            .map_or(false, |t| t.is_success())
+            .clone();
+        report_test_case(report_config, i, test_case, test_result);
+
+        if is_success {
+            return vec![TestSummary {
+                test_case: test_case.clone(),
+                test_status: TestStatus::Passed,
+            }];
+        } else {
+            vec![TestSummary {
+                test_case: test_case.clone(),
+                test_status: TestStatus::Failed,
+            }]
         }
-
-        vec![TestSummary {
-            test_case: test_case.clone(),
-            test_status: TestStatus::Failed,
-        }]
     };
 
     if run_in_parallel {
@@ -77,13 +80,13 @@ fn report_test_case(
     report_config: &ReportConfig,
     index: usize,
     test_case: &TestCase,
-    result: &Result<TestResult, RunError>,
+    result: Result<TestResult, RunError>,
 ) {
     match report_config.format {
         ReportFormat::Summary => {}
         ReportFormat::Tap => {
             let test_number_indent_level = report_config.number_of_tests.to_string().len();
-            print_test_case_result(index + 1, &test_case, &result, test_number_indent_level);
+            print_test_case_result(index + 1, &test_case, result, test_number_indent_level);
         }
     }
 }
@@ -116,15 +119,9 @@ pub fn report_summary(report_config: &ReportConfig, test_summaries: &[TestSummar
 fn print_test_case_result(
     test_number: usize,
     test_case: &TestCase,
-    result: &Result<TestResult, RunError>,
+    result: Result<TestResult, RunError>,
     indent_level: usize,
 ) {
-    let is_success: bool;
-    match result {
-        Ok(test_result) => is_success = test_case::expectations_fulfilled(test_result),
-        Err(_) => is_success = false,
-    }
-
     let message: String;
     if let Some(description) = &test_case.description {
         message = format!("{} # {}", test_case.id(), description);
@@ -132,10 +129,17 @@ fn print_test_case_result(
         message = format!("{}", test_case.id());
     }
 
-    if is_success {
-        tap_format::print_ok(test_number, &message, indent_level)
-    } else {
-        tap_format::print_not_ok(test_number, &message, "", indent_level)
+    match result {
+        Ok(test_result) => {
+            if test_result.is_success() {
+                tap_format::print_ok(test_number, &message, indent_level)
+            } else {
+                tap_format::print_not_ok(test_number, &message, "", indent_level)
+            }
+        }
+        Err(_) => {
+            tap_format::print_not_ok(test_number, &message, "Failed to run test", indent_level)
+        }
     }
 }
 

@@ -33,6 +33,12 @@ pub struct TestResult {
     pub exit_code: ValueComparison<i32>,
 }
 
+impl TestResult {
+    pub fn is_success(&self) -> bool {
+        self.stdout.is_success() && self.stderr.is_success() && self.exit_code.is_success()
+    }
+}
+
 pub enum ValueComparison<T> {
     NotChecked,
     Matches(T),
@@ -104,10 +110,6 @@ pub fn run(test_case: &TestCase) -> Result<TestResult, RunError> {
         stderr: compare_result(&test_case.expected_stderr, stderr),
         exit_code: compare_result(&test_case.expected_exit_code, exit_code),
     })
-}
-
-pub fn expectations_fulfilled(result: &TestResult) -> bool {
-    result.stdout.is_success() && result.stderr.is_success() && result.exit_code.is_success()
 }
 
 fn compare_result<T: PartialEq + Clone>(expected: &Option<T>, got: T) -> ValueComparison<T> {
