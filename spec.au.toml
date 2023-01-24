@@ -1,4 +1,4 @@
-test_program = { env = "AUREUM_EXEC" }
+test_program = { env = "AUREUM_TEST_EXEC" }
 test_arguments = ["spec"]
 
 expected_stdout = """
