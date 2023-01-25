@@ -5,7 +5,7 @@ mod test_config;
 mod test_id;
 mod test_runner;
 
-use cli::{Args, OutputFormat};
+use cli::{Args, OutputFormat, TestPath};
 use glob::glob;
 use std::collections::BTreeSet;
 use std::process::exit;
@@ -19,8 +19,8 @@ fn main() {
     let args = cli::parse();
 
     let mut test_files = BTreeSet::new();
-    for path in &args.paths {
-        locate_test_files(path, &mut test_files);
+    for path in globs_to_paths(&args.paths) {
+        locate_test_files(path.as_str(), &mut test_files);
     }
 
     if test_files.is_empty() {
@@ -85,6 +85,25 @@ fn test_cases_from_file(test_file: &PathBuf) -> Result<Vec<TestCase>, TestFileEr
     test_config
         .to_test_cases(test_file)
         .map_err(TestFileError::FailedToReadTestCases)
+}
+
+fn globs_to_paths(test_paths: &[TestPath]) -> Vec<String> {
+    let mut paths = vec![];
+
+    for test_path in test_paths {
+        match test_path {
+            TestPath::Pipe => {}
+            TestPath::Glob(path) => {
+                paths.push(path.clone());
+            }
+            TestPath::SpecificFile {
+                file_path: _,
+                test_id: _,
+            } => {}
+        }
+    }
+
+    paths
 }
 
 fn locate_test_files(path: &str, test_files: &mut BTreeSet<PathBuf>) {
