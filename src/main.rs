@@ -9,7 +9,7 @@ mod test_runner;
 
 use cli::{Args, OutputFormat, TestPath};
 use glob::glob;
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeMap;
 use std::process::exit;
 use std::{fs, io, path::PathBuf};
 use test_case::TestCase;
@@ -90,24 +90,6 @@ fn test_cases_from_file(test_file: &PathBuf) -> Result<Vec<TestCase>, TestFileEr
         .map_err(TestFileError::FailedToReadTestCases)
 }
 
-fn locate_test_files(path: &str, test_files: &mut BTreeSet<PathBuf>) {
-    // Skip invalid patterns (Should it warn the user?)
-    if let Ok(entries) = glob(path) {
-        for entry in entries {
-            if let Ok(e) = entry {
-                if e.is_file() {
-                    test_files.insert(e);
-                } else if e.is_dir() {
-                    // Look for `.au.toml` files in directory (recursively)
-                    if let Some(search_path) = e.join("**/*.au.toml").to_str() {
-                        locate_test_files(search_path, test_files)
-                    }
-                }
-            }
-        }
-    }
-}
-
 pub fn expand_test_paths(test_paths: &[TestPath]) -> BTreeMap<PathBuf, TestIdContainer> {
     let mut test_files = BTreeMap::new();
 
@@ -115,11 +97,11 @@ pub fn expand_test_paths(test_paths: &[TestPath]) -> BTreeMap<PathBuf, TestIdCon
         match test_path {
             TestPath::Pipe => {} // Skip
             TestPath::Glob(path) => {
-                let mut glob_test_files = BTreeSet::new();
-                locate_test_files(path.as_str(), &mut glob_test_files);
-
-                for glob_test_file in glob_test_files {
-                    test_files.insert(glob_test_file, TestIdContainer::full());
+                // TODO: Handle error case
+                if let Ok(found_test_files) = locate_test_files(path.as_str()) {
+                    for found_test_file in found_test_files {
+                        test_files.insert(found_test_file, TestIdContainer::full());
+                    }
                 }
             }
             TestPath::SpecificFile { file_path, test_id } => {
@@ -134,4 +116,29 @@ pub fn expand_test_paths(test_paths: &[TestPath]) -> BTreeMap<PathBuf, TestIdCon
     }
 
     test_files
+}
+
+enum LocateFileError {
+    InvalidPattern(glob::PatternError),
+    InvalidEntry(glob::GlobError),
+}
+
+fn locate_test_files(path: &str) -> Result<Vec<PathBuf>, LocateFileError> {
+    let mut output = vec![];
+
+    let entries = glob(path).map_err(LocateFileError::InvalidPattern)?;
+    for entry in entries {
+        let e = entry.map_err(LocateFileError::InvalidEntry)?;
+        if e.is_file() {
+            output.push(e);
+        } else if e.is_dir() {
+            // Look for `.au.toml` files in directory (recursively)
+            if let Some(search_path) = e.join("**/*.au.toml").to_str() {
+                let found_test_files = locate_test_files(search_path)?;
+                output.extend(found_test_files);
+            }
+        }
+    }
+
+    Ok(output)
 }
