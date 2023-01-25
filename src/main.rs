@@ -27,7 +27,7 @@ fn main() {
         .collect::<Vec<_>>();
 
     if test_files.is_empty() {
-        eprintln!("No test configs found for the given path(s)");
+        eprintln!("No test configs found for the given paths");
         exit(EXIT_CODE_ON_FAILURE);
     }
 
