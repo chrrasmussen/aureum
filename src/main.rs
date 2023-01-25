@@ -3,14 +3,16 @@ mod tap_format;
 mod test_case;
 mod test_config;
 mod test_id;
+mod test_id_container;
 mod test_runner;
 
 use cli::{Args, OutputFormat, TestPath};
 use glob::glob;
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 use std::process::exit;
 use std::{fs, io, path::PathBuf};
 use test_case::TestCase;
+use test_id_container::TestIdContainer;
 use test_runner::{ReportConfig, ReportFormat, TestStatus};
 
 const EXIT_CODE_ON_FAILURE: i32 = 1;
@@ -18,10 +20,10 @@ const EXIT_CODE_ON_FAILURE: i32 = 1;
 fn main() {
     let args = cli::parse();
 
-    let mut test_files = BTreeSet::new();
-    for path in globs_to_paths(&args.paths) {
-        locate_test_files(path.as_str(), &mut test_files);
-    }
+    let test_files = expand_test_paths(&args.paths)
+        .keys()
+        .cloned()
+        .collect::<Vec<_>>();
 
     if test_files.is_empty() {
         eprintln!("No test configs found for the given path(s)");
@@ -87,25 +89,6 @@ fn test_cases_from_file(test_file: &PathBuf) -> Result<Vec<TestCase>, TestFileEr
         .map_err(TestFileError::FailedToReadTestCases)
 }
 
-fn globs_to_paths(test_paths: &[TestPath]) -> Vec<String> {
-    let mut paths = vec![];
-
-    for test_path in test_paths {
-        match test_path {
-            TestPath::Pipe => {}
-            TestPath::Glob(path) => {
-                paths.push(path.clone());
-            }
-            TestPath::SpecificFile {
-                file_path: _,
-                test_id: _,
-            } => {}
-        }
-    }
-
-    paths
-}
-
 fn locate_test_files(path: &str, test_files: &mut BTreeSet<PathBuf>) {
     // Skip invalid patterns (Should it warn the user?)
     if let Ok(entries) = glob(path) {
@@ -129,4 +112,32 @@ fn locate_test_files(path: &str, test_files: &mut BTreeSet<PathBuf>) {
             }
         }
     }
+}
+
+pub fn expand_test_paths(test_paths: &[TestPath]) -> BTreeMap<PathBuf, TestIdContainer> {
+    let mut test_files = BTreeMap::new();
+
+    for test_path in test_paths {
+        match test_path {
+            TestPath::Pipe => {} // Skip
+            TestPath::Glob(path) => {
+                let mut glob_test_files = BTreeSet::new();
+                locate_test_files(path.as_str(), &mut glob_test_files);
+
+                for glob_test_file in glob_test_files {
+                    test_files.insert(glob_test_file, TestIdContainer::full());
+                }
+            }
+            TestPath::SpecificFile { file_path, test_id } => {
+                test_files
+                    .entry(file_path.clone())
+                    .and_modify(|test_ids: &mut TestIdContainer| {
+                        test_ids.add(test_id.clone());
+                    })
+                    .or_insert(TestIdContainer::empty());
+            }
+        }
+    }
+
+    test_files
 }
