@@ -55,7 +55,7 @@ fn main() {
 
     test_runner::report_start(&report_config);
     let run_results =
-        test_runner::run_test_cases(&report_config, &test_cases, args.run_tests_in_parallell);
+        test_runner::run_test_cases(&report_config, &test_cases, args.run_tests_in_parallel);
     test_runner::report_summary(&report_config, &run_results);
 
     let all_tests_passed = run_results

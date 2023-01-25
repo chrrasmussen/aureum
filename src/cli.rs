@@ -22,9 +22,9 @@ pub struct Args {
     #[arg(long)]
     pub show_all_tests: bool,
 
-    /// Run tests in parallell
+    /// Run tests in parallel
     #[arg(long)]
-    pub run_tests_in_parallell: bool,
+    pub run_tests_in_parallel: bool,
 }
 
 #[derive(PartialEq, Eq, PartialOrd, Ord, Clone)]

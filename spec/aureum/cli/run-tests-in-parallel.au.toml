@@ -1,6 +1,6 @@
 test_program = { env = "AUREUM_TEST_EXEC" }
 test_arguments = [
-  "--run-tests-in-parallell",
+  "--run-tests-in-parallel",
   "helpers/passing-test.toml",
   "helpers/passing-test2.toml",
 ]

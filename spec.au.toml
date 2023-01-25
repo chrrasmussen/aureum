@@ -9,7 +9,7 @@ expected_stdout = """
 ✅ spec/aureum/cli/output-format.au.toml:tap-failing
 ✅ spec/aureum/cli/output-format.au.toml:tap-passing
 ✅ spec/aureum/cli/output-format.au.toml:unknown
-✅ spec/aureum/cli/run-tests-in-parallell.au.toml
+✅ spec/aureum/cli/run-tests-in-parallel.au.toml
 ✅ spec/aureum/cli/show-all-tests.au.toml:default
 ✅ spec/aureum/cli/show-all-tests.au.toml:show-all-tests
 ✅ spec/aureum/error/error.au.toml:invalid-test-config
