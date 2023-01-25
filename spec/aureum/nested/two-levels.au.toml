@@ -2,8 +2,8 @@ test_program = { env = "AUREUM_TEST_EXEC" }
 test_arguments = ["--show-all-tests", "two-levels.toml"]
 
 expected_stdout = """
-✅ ./two-levels.toml:test1
-✅ ./two-levels.toml:test2
+✅ two-levels.toml:test1
+✅ two-levels.toml:test2
 
 Completed running 2 tests.
 All tests passed.

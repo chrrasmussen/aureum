@@ -9,7 +9,7 @@ test_arguments = [
   "helpers/passing-test.toml",
 ]
 expected_stdout = """
-✅ ./helpers/passing-test.toml
+✅ helpers/passing-test.toml
 
 Completed running 1 tests.
 All tests passed.
@@ -26,7 +26,7 @@ test_arguments = [
   "helpers/failing-test.toml",
 ]
 expected_stdout = """
-❌ ./helpers/failing-test.toml
+❌ helpers/failing-test.toml
 
 Completed running 1 tests.
 1 failures.
@@ -40,7 +40,7 @@ test_arguments = ["--output-format", "tap", "helpers/passing-test.toml"]
 expected_stdout = """
 TAP version 14
 1..1
-ok     1 - ./helpers/passing-test.toml
+ok     1 - helpers/passing-test.toml
 """
 expected_stderr = ""
 expected_exit_code = 0
@@ -51,7 +51,7 @@ test_arguments = ["--output-format", "tap", "helpers/failing-test.toml"]
 expected_stdout = """
 TAP version 14
 1..1
-not ok 1 - ./helpers/failing-test.toml
+not ok 1 - helpers/failing-test.toml
   ---
   exit-code:
     expected: 42

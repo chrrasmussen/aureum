@@ -18,5 +18,5 @@ Completed running 0 tests.
 All tests passed.
 """
 expected_stderr = """
-./helpers/invalid-test-config.toml: Unable to parse test config
+helpers/invalid-test-config.toml: Unable to parse test config
 """
