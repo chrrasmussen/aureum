@@ -60,7 +60,6 @@ impl<T> ValueComparison<T> {
     }
 }
 
-#[derive(Debug)]
 pub enum RunError {
     FailedToDecodeUtf8,
     MissingExitCode,

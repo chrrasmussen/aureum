@@ -44,7 +44,6 @@ enum ConfigValue<T> {
 
 // IMPLEMENTATION
 
-#[derive(Debug)]
 pub enum TestConfigError {
     FailedToFetchEnvVar { var_name: String, error: VarError },
     FailedToParseString(String),
