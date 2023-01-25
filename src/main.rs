@@ -1,4 +1,5 @@
 mod cli;
+mod file_util;
 mod tap_format;
 mod test_case;
 mod test_config;

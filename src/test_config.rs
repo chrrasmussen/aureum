@@ -1,3 +1,4 @@
+use crate::file_util;
 use crate::test_case::TestCase;
 use crate::test_id::TestId;
 use serde::Deserialize;
@@ -58,14 +59,15 @@ impl TestConfig {
         P: Into<PathBuf>,
     {
         let source_file = path.into();
-        let current_dir = source_file.as_path().parent().unwrap_or(Path::new("."));
+        let current_dir = file_util::parent_dir(&source_file);
 
         let test_configs = split_test_configs(self);
 
         let mut test_cases = vec![];
         for (id_path, test_config) in test_configs {
             let test_id = TestId::new(id_path);
-            let test_case = test_config.to_test_case(source_file.clone(), test_id, current_dir)?;
+            let test_case =
+                test_config.to_test_case(source_file.clone(), test_id, current_dir.as_path())?;
             test_cases.push(test_case)
         }
 

@@ -1,6 +1,7 @@
+use crate::file_util;
 use crate::test_id::TestId;
 use std::io::{self, Read, Write};
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::process::{Command, Stdio};
 
 #[derive(Clone)]
@@ -67,7 +68,7 @@ pub enum RunError {
 }
 
 pub fn run(test_case: &TestCase) -> Result<TestResult, RunError> {
-    let current_dir = test_case.source_file.parent().unwrap_or(Path::new("."));
+    let current_dir = file_util::parent_dir(&test_case.source_file);
 
     let mut cmd = Command::new(&test_case.program);
     cmd.current_dir(current_dir);
