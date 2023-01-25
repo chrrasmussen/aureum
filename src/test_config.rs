@@ -3,7 +3,7 @@ use crate::test_case::TestCase;
 use crate::test_id::TestId;
 use serde::Deserialize;
 use std::collections::{BTreeMap, BTreeSet};
-use std::env::{var, VarError};
+use std::env;
 use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
@@ -11,24 +11,57 @@ use std::str::FromStr;
 
 // READ TEST CONFIG
 
-pub enum TestConfigError {
+pub enum TestConfigResult {
+    FailedToReadFile(io::Error),
     FailedToParseTestConfig(toml::de::Error),
-    FailedToGatherData(TestConfigDataError),
-    FailedToCreateTestCases(CreateTestCaseError),
-    IOError(io::Error),
+    PartialSuccess {
+        requirements: BTreeSet<TestConfigRequirement>,
+        error: CreateTestCaseError,
+    },
+    Success {
+        requirements: BTreeSet<TestConfigRequirement>,
+        test_cases: Vec<TestCase>,
+    },
 }
 
-pub fn test_cases_from_file(path: &PathBuf) -> Result<Vec<TestCase>, TestConfigError> {
-    let toml_content = fs::read_to_string(path).map_err(TestConfigError::IOError)?;
-    let test_config = toml::from_str::<TestConfig>(&toml_content)
-        .map_err(TestConfigError::FailedToParseTestConfig)?;
+pub fn test_cases_from_file(path: &Path) -> TestConfigResult {
+    let toml_content = match fs::read_to_string(path) {
+        Ok(x) => x,
+        Err(err) => return TestConfigResult::FailedToReadFile(err),
+    };
+
+    let test_config = match toml::from_str::<TestConfig>(&toml_content) {
+        Ok(x) => x,
+        Err(err) => return TestConfigResult::FailedToParseTestConfig(err),
+    };
+
     let requirements = test_config.get_requirements();
     let test_dir = file_util::parent_dir(path);
-    let data = gather_requirements(&requirements, &test_dir)
-        .map_err(TestConfigError::FailedToGatherData)?;
-    test_config
-        .to_test_cases(path, &data)
-        .map_err(TestConfigError::FailedToCreateTestCases)
+
+    let data = match gather_requirements(&requirements, &test_dir) {
+        Ok(x) => x,
+        Err(err) => {
+            return TestConfigResult::PartialSuccess {
+                requirements: requirements,
+                error: err,
+            }
+        }
+    };
+
+    let test_cases = match test_config.to_test_cases(path, &data) {
+        Ok(x) => x,
+        Err(err) => {
+            return TestConfigResult::PartialSuccess {
+                requirements: requirements,
+                error: err,
+            }
+        }
+    };
+
+    TestConfigResult::Success {
+        requirements,
+        test_cases,
+    }
 }
 
 // TOML STRUCTURE
@@ -127,34 +160,26 @@ impl TestConfigData {
     }
 }
 
-pub enum TestConfigDataError {
-    FailedToFetchEnvVar { var_name: String, error: VarError },
-    IOError(io::Error),
-}
-
-fn read_locale_file(path: &String, current_dir: &Path) -> Result<String, TestConfigDataError> {
+fn read_local_file(path: &String, current_dir: &Path) -> Result<String, CreateTestCaseError> {
     let path = current_dir.join(path);
-    fs::read_to_string(path).map_err(TestConfigDataError::IOError)
+    fs::read_to_string(path).map_err(CreateTestCaseError::FailedToReadLocalFile)
 }
 
-fn read_from_env(var_name: &String) -> Result<String, TestConfigDataError> {
-    var(var_name).map_err(|err| TestConfigDataError::FailedToFetchEnvVar {
-        var_name: var_name.to_owned(),
-        error: err,
-    })
+fn read_from_env(var_name: &String) -> Result<String, CreateTestCaseError> {
+    env::var(var_name).map_err(|_err| CreateTestCaseError::MissingEnvVar(var_name.to_owned()))
 }
 
 fn gather_requirements(
     requirements: &BTreeSet<TestConfigRequirement>,
     current_dir: &Path,
-) -> Result<TestConfigData, TestConfigDataError> {
+) -> Result<TestConfigData, CreateTestCaseError> {
     let mut data = TestConfigData::new();
 
     for requirement in requirements {
         match requirement {
             TestConfigRequirement::LocalFile(path) => {
                 data.files
-                    .insert(path.to_owned(), read_locale_file(path, current_dir)?);
+                    .insert(path.to_owned(), read_local_file(path, current_dir)?);
             }
             TestConfigRequirement::EnvVar(var_name) => {
                 data.env
@@ -171,6 +196,7 @@ fn gather_requirements(
 pub enum CreateTestCaseError {
     MissingLocalFile(String),
     MissingEnvVar(String),
+    FailedToReadLocalFile(io::Error),
     FailedToParseString,
     ProgramRequired,
     ExpectationRequired,

@@ -30,31 +30,49 @@ fn main() {
         exit(EXIT_CODE_ON_FAILURE);
     }
 
-    let mut test_cases = vec![];
+    let mut all_test_cases = vec![];
     let mut failing_configs = vec![];
 
     for test_file in test_files {
         match test_config::test_cases_from_file(&test_file) {
-            Ok(sub_tests) => test_cases.extend(sub_tests),
-            Err(err) => failing_configs.push((test_file.clone(), err)),
+            test_config::TestConfigResult::FailedToReadFile(_err) => {
+                failing_configs.push(test_file.clone());
+            }
+            test_config::TestConfigResult::FailedToParseTestConfig(_err) => {
+                failing_configs.push(test_file.clone());
+            }
+            test_config::TestConfigResult::PartialSuccess {
+                requirements: _,
+                error: _,
+            } => {
+                // TODO: Handle requirements
+                failing_configs.push(test_file.clone());
+            }
+            test_config::TestConfigResult::Success {
+                requirements: _,
+                test_cases,
+            } => {
+                // TODO: Handle requirements
+                all_test_cases.extend(test_cases);
+            }
         }
     }
 
-    for (test_config_path, _err) in &failing_configs {
+    for test_config_path in &failing_configs {
         eprintln!(
-            "{}: Unable to parse test config",
+            "{}: Unable to generate test cases for test config",
             test_config_path.display()
         );
     }
 
     let report_config = ReportConfig {
-        number_of_tests: test_cases.len(),
+        number_of_tests: all_test_cases.len(),
         format: get_report_format(&args),
     };
 
     test_runner::report_start(&report_config);
     let run_results =
-        test_runner::run_test_cases(&report_config, &test_cases, args.run_tests_in_parallel);
+        test_runner::run_test_cases(&report_config, &all_test_cases, args.run_tests_in_parallel);
     test_runner::report_summary(&report_config, &run_results);
 
     let all_tests_passed = run_results
