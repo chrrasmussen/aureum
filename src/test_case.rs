@@ -1,3 +1,4 @@
+use crate::test_id::TestId;
 use std::io::{self, Read, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
@@ -5,7 +6,7 @@ use std::process::{Command, Stdio};
 #[derive(Clone)]
 pub struct TestCase {
     pub source_file: PathBuf,
-    pub id_path: Vec<String>,
+    pub id: TestId,
     pub description: Option<String>,
     pub program: String,
     pub arguments: Vec<String>,
@@ -19,10 +20,10 @@ impl TestCase {
     pub fn id(&self) -> String {
         let file_path = self.source_file.display();
 
-        if self.id_path.is_empty() {
+        if self.id.is_root() {
             file_path.to_string()
         } else {
-            format!("{}:{}", file_path, self.id_path.join("."))
+            format!("{}:{}", file_path, self.id.to_string())
         }
     }
 }

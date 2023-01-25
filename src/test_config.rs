@@ -1,4 +1,5 @@
 use crate::test_case::TestCase;
+use crate::test_id::TestId;
 use serde::Deserialize;
 use std::collections::BTreeMap;
 use std::env::{var, VarError};
@@ -63,7 +64,8 @@ impl TestConfig {
 
         let mut test_cases = vec![];
         for (id_path, test_config) in test_configs {
-            let test_case = test_config.to_test_case(source_file.clone(), id_path, current_dir)?;
+            let test_id = TestId::new(id_path);
+            let test_case = test_config.to_test_case(source_file.clone(), test_id, current_dir)?;
             test_cases.push(test_case)
         }
 
@@ -73,7 +75,7 @@ impl TestConfig {
     fn to_test_case(
         self,
         source_file: PathBuf,
-        id_path: Vec<String>,
+        id: TestId,
         current_dir: &Path,
     ) -> Result<TestCase, TestConfigError> {
         let description = read_from_config_value(self.test_description, current_dir)?;
@@ -102,7 +104,7 @@ impl TestConfig {
 
         Ok(TestCase {
             source_file,
-            id_path,
+            id,
             description,
             program,
             arguments,

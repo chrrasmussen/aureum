@@ -2,6 +2,7 @@ mod cli;
 mod tap_format;
 mod test_case;
 mod test_config;
+mod test_id;
 mod test_runner;
 
 use cli::{Args, OutputFormat};
