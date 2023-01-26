@@ -43,7 +43,7 @@ fn main() {
             }
             test_config::TestConfigResult::PartialSuccess {
                 requirements: _,
-                error: _,
+                validation_errors: _,
             } => {
                 // TODO: Handle requirements
                 failing_configs.push(test_file.clone());

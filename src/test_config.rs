@@ -16,7 +16,7 @@ pub enum TestConfigResult {
     FailedToParseTestConfig(toml::de::Error),
     PartialSuccess {
         requirements: TestConfigData,
-        error: CreateTestCaseError,
+        validation_errors: BTreeSet<TestCaseValidationError>,
     },
     Success {
         requirements: TestConfigData,
@@ -44,7 +44,7 @@ pub fn test_cases_from_file(path: &Path) -> TestConfigResult {
         Err(err) => {
             return TestConfigResult::PartialSuccess {
                 requirements: data,
-                error: err,
+                validation_errors: err,
             }
         }
     };
@@ -184,7 +184,8 @@ fn read_from_env(var_name: &String) -> Result<String, env::VarError> {
 
 // CREATE TEST CASES
 
-pub enum CreateTestCaseError {
+#[derive(PartialEq, Eq, PartialOrd, Ord)]
+pub enum TestCaseValidationError {
     MissingLocalFile(String),
     MissingEnvVar(String),
     FailedToParseString,
@@ -197,7 +198,7 @@ impl TestConfig {
         self,
         path: P,
         data: &TestConfigData,
-    ) -> Result<Vec<TestCase>, CreateTestCaseError>
+    ) -> Result<Vec<TestCase>, BTreeSet<TestCaseValidationError>>
     where
         P: AsRef<Path>,
     {
@@ -220,56 +221,80 @@ impl TestConfig {
         source_file: PathBuf,
         id: TestId,
         data: &TestConfigData,
-    ) -> Result<TestCase, CreateTestCaseError> {
-        let description = read_from_config_value(self.test_description, data)?;
+    ) -> Result<TestCase, BTreeSet<TestCaseValidationError>> {
+        let mut validation_errors = BTreeSet::new();
 
-        let program: String;
-        if let Some(p) = read_from_config_value(self.test_program, data)? {
-            program = p
+        let description =
+            read_from_config_value(&mut validation_errors, self.test_description, data);
+
+        let mut program = String::from("");
+        if let Some(p) = read_from_config_value(&mut validation_errors, self.test_program, data) {
+            program = p;
         } else {
-            return Err(CreateTestCaseError::ProgramRequired);
+            validation_errors.insert(TestCaseValidationError::ProgramRequired);
         }
 
         let mut arguments = vec![];
         for arg in self.test_arguments.unwrap_or(vec![]) {
-            arguments.push(arg.read(data)?)
+            match arg.read(data) {
+                Ok(arg) => {
+                    arguments.push(arg);
+                }
+                Err(err) => {
+                    validation_errors.insert(err);
+                }
+            }
         }
 
-        let stdin = read_from_config_value(self.test_stdin, data)?;
+        let stdin = read_from_config_value(&mut validation_errors, self.test_stdin, data);
 
-        let expected_stdout = read_from_config_value(self.expected_stdout, data)?;
-        let expected_stderr = read_from_config_value(self.expected_stderr, data)?;
-        let expected_exit_code = read_from_config_value(self.expected_exit_code, data)?;
+        let expected_stdout =
+            read_from_config_value(&mut validation_errors, self.expected_stdout, data);
+        let expected_stderr =
+            read_from_config_value(&mut validation_errors, self.expected_stderr, data);
+        let expected_exit_code =
+            read_from_config_value(&mut validation_errors, self.expected_exit_code, data);
 
         if expected_stdout == None && expected_stderr == None && expected_exit_code == None {
-            return Err(CreateTestCaseError::ExpectationRequired);
+            validation_errors.insert(TestCaseValidationError::ExpectationRequired);
         }
 
-        Ok(TestCase {
-            source_file,
-            id,
-            description,
-            program,
-            arguments,
-            stdin,
-            expected_stdout,
-            expected_stderr,
-            expected_exit_code,
-        })
+        if validation_errors.is_empty() {
+            Ok(TestCase {
+                source_file,
+                id,
+                description,
+                program,
+                arguments,
+                stdin,
+                expected_stdout,
+                expected_stderr,
+                expected_exit_code,
+            })
+        } else {
+            Err(validation_errors)
+        }
     }
 }
 
 fn read_from_config_value<T>(
+    validation_errors: &mut BTreeSet<TestCaseValidationError>,
     config_value: Option<ConfigValue<T>>,
     data: &TestConfigData,
-) -> Result<Option<T>, CreateTestCaseError>
+) -> Option<T>
 where
     T: FromStr,
 {
     if let Some(config_value) = config_value {
-        Ok(Some(config_value.read(data)?))
+        match config_value.read(data) {
+            Ok(value) => Some(value),
+            Err(err) => {
+                validation_errors.insert(err);
+                None
+            }
+        }
     } else {
-        Ok(None)
+        None
     }
 }
 
@@ -316,7 +341,7 @@ impl<T> ConfigValue<T>
 where
     T: FromStr,
 {
-    fn read(self, data: &TestConfigData) -> Result<T, CreateTestCaseError> {
+    fn read(self, data: &TestConfigData) -> Result<T, TestCaseValidationError> {
         match self {
             Self::Literal(value) => Ok(value),
             Self::WrappedLiteral { value } => Ok(value),
@@ -324,20 +349,20 @@ where
                 if let Some(str) = data.get_file(&file_path) {
                     let value = str
                         .parse()
-                        .map_err(|_err| CreateTestCaseError::FailedToParseString)?;
+                        .map_err(|_err| TestCaseValidationError::FailedToParseString)?;
                     Ok(value)
                 } else {
-                    Err(CreateTestCaseError::MissingLocalFile(file_path))
+                    Err(TestCaseValidationError::MissingLocalFile(file_path))
                 }
             }
             Self::FetchFromEnv { env: var_name } => {
                 if let Some(str) = data.get_env(&var_name) {
                     let value = str
                         .parse()
-                        .map_err(|_err| CreateTestCaseError::FailedToParseString)?;
+                        .map_err(|_err| TestCaseValidationError::FailedToParseString)?;
                     Ok(value)
                 } else {
-                    Err(CreateTestCaseError::MissingEnvVar(var_name))
+                    Err(TestCaseValidationError::MissingEnvVar(var_name))
                 }
             }
         }
