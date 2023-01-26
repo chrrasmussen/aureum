@@ -15,11 +15,11 @@ pub enum TestConfigResult {
     FailedToReadFile(io::Error),
     FailedToParseTestConfig(toml::de::Error),
     PartialSuccess {
-        requirements: BTreeSet<TestConfigRequirement>,
+        requirements: TestConfigData,
         error: CreateTestCaseError,
     },
     Success {
-        requirements: BTreeSet<TestConfigRequirement>,
+        requirements: TestConfigData,
         test_cases: Vec<TestCase>,
     },
 }
@@ -37,29 +37,20 @@ pub fn test_cases_from_file(path: &Path) -> TestConfigResult {
 
     let requirements = test_config.get_requirements();
     let test_dir = file_util::parent_dir(path);
-
-    let data = match gather_requirements(&requirements, &test_dir) {
-        Ok(x) => x,
-        Err(err) => {
-            return TestConfigResult::PartialSuccess {
-                requirements: requirements,
-                error: err,
-            }
-        }
-    };
+    let data = gather_requirements(&requirements, &test_dir);
 
     let test_cases = match test_config.to_test_cases(path, &data) {
         Ok(x) => x,
         Err(err) => {
             return TestConfigResult::PartialSuccess {
-                requirements: requirements,
+                requirements: data,
                 error: err,
             }
         }
     };
 
     TestConfigResult::Success {
-        requirements,
+        requirements: data,
         test_cases,
     }
 }
@@ -90,13 +81,13 @@ enum ConfigValue<T> {
 // REQUIREMENTS
 
 #[derive(PartialEq, PartialOrd, Eq, Ord)]
-pub enum TestConfigRequirement {
+enum Requirement {
     LocalFile(String),
     EnvVar(String),
 }
 
 impl TestConfig {
-    fn get_requirements(&self) -> BTreeSet<TestConfigRequirement> {
+    fn get_requirements(&self) -> BTreeSet<Requirement> {
         let mut requirements = BTreeSet::new();
 
         add_requirement(&mut requirements, &self.test_description);
@@ -124,31 +115,26 @@ impl TestConfig {
     }
 }
 
-fn add_requirement<T>(
-    requirements: &mut BTreeSet<TestConfigRequirement>,
-    value: &Option<ConfigValue<T>>,
-) {
+fn add_requirement<T>(requirements: &mut BTreeSet<Requirement>, value: &Option<ConfigValue<T>>) {
     requirements.extend(value.as_ref().and_then(get_requirement));
 }
 
-fn get_requirement<T>(config_value: &ConfigValue<T>) -> Option<TestConfigRequirement> {
+fn get_requirement<T>(config_value: &ConfigValue<T>) -> Option<Requirement> {
     match config_value {
         ConfigValue::Literal(_) => None,
         ConfigValue::WrappedLiteral { value: _ } => None,
         ConfigValue::ReadFromFile { file: filename } => {
-            Some(TestConfigRequirement::LocalFile(filename.clone()))
+            Some(Requirement::LocalFile(filename.clone()))
         }
-        ConfigValue::FetchFromEnv { env: var_name } => {
-            Some(TestConfigRequirement::EnvVar(var_name.clone()))
-        }
+        ConfigValue::FetchFromEnv { env: var_name } => Some(Requirement::EnvVar(var_name.clone())),
     }
 }
 
 // READ CONTENT
 
-struct TestConfigData {
-    files: BTreeMap<String, String>,
-    env: BTreeMap<String, String>,
+pub struct TestConfigData {
+    files: BTreeMap<String, Option<String>>,
+    env: BTreeMap<String, Option<String>>,
 }
 
 impl TestConfigData {
@@ -158,37 +144,42 @@ impl TestConfigData {
             files: BTreeMap::new(),
         }
     }
+
+    fn get_file(&self, key: &String) -> Option<String> {
+        self.files.get(key).and_then(|x| x.to_owned())
+    }
+
+    fn get_env(&self, key: &String) -> Option<String> {
+        self.env.get(key).and_then(|x| x.to_owned())
+    }
 }
 
-fn read_local_file(path: &String, current_dir: &Path) -> Result<String, CreateTestCaseError> {
-    let path = current_dir.join(path);
-    fs::read_to_string(path).map_err(CreateTestCaseError::FailedToReadLocalFile)
-}
-
-fn read_from_env(var_name: &String) -> Result<String, CreateTestCaseError> {
-    env::var(var_name).map_err(|_err| CreateTestCaseError::MissingEnvVar(var_name.to_owned()))
-}
-
-fn gather_requirements(
-    requirements: &BTreeSet<TestConfigRequirement>,
-    current_dir: &Path,
-) -> Result<TestConfigData, CreateTestCaseError> {
+fn gather_requirements(requirements: &BTreeSet<Requirement>, current_dir: &Path) -> TestConfigData {
     let mut data = TestConfigData::new();
 
     for requirement in requirements {
         match requirement {
-            TestConfigRequirement::LocalFile(path) => {
+            Requirement::LocalFile(path) => {
                 data.files
-                    .insert(path.to_owned(), read_local_file(path, current_dir)?);
+                    .insert(path.to_owned(), read_local_file(path, current_dir).ok());
             }
-            TestConfigRequirement::EnvVar(var_name) => {
+            Requirement::EnvVar(var_name) => {
                 data.env
-                    .insert(var_name.to_owned(), read_from_env(var_name)?);
+                    .insert(var_name.to_owned(), read_from_env(var_name).ok());
             }
         }
     }
 
-    Ok(data)
+    data
+}
+
+fn read_local_file(path: &String, current_dir: &Path) -> io::Result<String> {
+    let path = current_dir.join(path);
+    fs::read_to_string(path)
+}
+
+fn read_from_env(var_name: &String) -> Result<String, env::VarError> {
+    env::var(var_name)
 }
 
 // CREATE TEST CASES
@@ -196,7 +187,6 @@ fn gather_requirements(
 pub enum CreateTestCaseError {
     MissingLocalFile(String),
     MissingEnvVar(String),
-    FailedToReadLocalFile(io::Error),
     FailedToParseString,
     ProgramRequired,
     ExpectationRequired,
@@ -331,7 +321,7 @@ where
             Self::Literal(value) => Ok(value),
             Self::WrappedLiteral { value } => Ok(value),
             Self::ReadFromFile { file: file_path } => {
-                if let Some(str) = data.files.get(&file_path) {
+                if let Some(str) = data.get_file(&file_path) {
                     let value = str
                         .parse()
                         .map_err(|_err| CreateTestCaseError::FailedToParseString)?;
@@ -341,7 +331,7 @@ where
                 }
             }
             Self::FetchFromEnv { env: var_name } => {
-                if let Some(str) = data.env.get(&var_name) {
+                if let Some(str) = data.get_env(&var_name) {
                     let value = str
                         .parse()
                         .map_err(|_err| CreateTestCaseError::FailedToParseString)?;
