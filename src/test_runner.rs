@@ -146,11 +146,8 @@ fn summary_print_summary(number_of_tests: usize, show_all_tests: bool, run_resul
         }
     }
 
-    let number_of_failed_tests = run_results
-        .iter()
-        .filter(|t| t.is_success() == false)
-        .count();
-    let number_of_passed_tests = number_of_tests - number_of_failed_tests;
+    let number_of_passed_tests = run_results.iter().filter(|t| t.is_success()).count();
+    let number_of_failed_tests = number_of_tests - number_of_passed_tests;
 
     println!();
     println!(
