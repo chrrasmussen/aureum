@@ -14,27 +14,19 @@ pub enum ReportFormat {
     Tap,
 }
 
-#[derive(PartialEq, Clone)]
-pub enum TestStatus {
-    Passed,
-    Failed,
-}
-
 #[derive(Clone)]
 pub struct RunResult {
     pub test_case: TestCase,
     pub test_status: TestStatus,
 }
 
-pub fn report_start(report_config: &ReportConfig) {
-    match report_config.format {
-        ReportFormat::Summary { show_all_tests: _ } => {}
-        ReportFormat::Tap => {
-            tap_format::print_version();
-            tap_format::print_plan(1, report_config.number_of_tests);
-        }
-    }
+#[derive(PartialEq, Clone)]
+pub enum TestStatus {
+    Passed,
+    Failed,
 }
+
+// RUN TEST CASES
 
 pub fn run_test_cases(
     report_config: &ReportConfig,
@@ -59,7 +51,9 @@ pub fn run_test_cases(
         }]
     };
 
-    if run_in_parallel {
+    report_start(report_config);
+
+    let run_results = if run_in_parallel {
         test_cases
             .par_iter()
             .enumerate()
@@ -71,6 +65,22 @@ pub fn run_test_cases(
             .enumerate()
             .map(run)
             .fold(vec![], |x, y| [x, y].concat())
+    };
+
+    report_summary(&report_config, &run_results);
+
+    run_results
+}
+
+// REPORTING
+
+fn report_start(report_config: &ReportConfig) {
+    match report_config.format {
+        ReportFormat::Summary { show_all_tests: _ } => {}
+        ReportFormat::Tap => {
+            tap_format::print_version();
+            tap_format::print_plan(1, report_config.number_of_tests);
+        }
     }
 }
 
@@ -89,7 +99,7 @@ fn report_test_case(
     }
 }
 
-pub fn report_summary(report_config: &ReportConfig, run_results: &[RunResult]) {
+fn report_summary(report_config: &ReportConfig, run_results: &[RunResult]) {
     match report_config.format {
         ReportFormat::Summary { show_all_tests } => {
             for run_result in run_results {

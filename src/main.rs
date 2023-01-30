@@ -75,10 +75,8 @@ fn main() {
         format: get_report_format(&args),
     };
 
-    test_runner::report_start(&report_config);
     let run_results =
         test_runner::run_test_cases(&report_config, &all_test_cases, args.run_tests_in_parallel);
-    test_runner::report_summary(&report_config, &run_results);
 
     let all_tests_passed = run_results
         .iter()
