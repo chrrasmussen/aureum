@@ -9,7 +9,9 @@ mod test_runner;
 
 use cli::{Args, OutputFormat, TestPath};
 use glob::glob;
+use serde_yaml::Value;
 use std::collections::BTreeMap;
+use std::fmt::{Display, Formatter};
 use std::path::PathBuf;
 use std::process::exit;
 use test_id_container::TestIdContainer;
@@ -31,22 +33,28 @@ fn main() {
     }
 
     let mut all_test_cases = vec![];
-    let mut failing_configs = vec![];
+    let mut failed_configs = vec![];
 
     for test_file in test_files {
         match test_config::test_cases_from_file(&test_file) {
             test_config::TestConfigResult::FailedToReadFile(_err) => {
-                failing_configs.push(test_file.clone());
+                failed_configs.push(report_simple_error(
+                    test_file.clone(),
+                    "Unable to read file",
+                ));
             }
             test_config::TestConfigResult::FailedToParseTestConfig(_err) => {
-                failing_configs.push(test_file.clone());
+                failed_configs.push(report_simple_error(
+                    test_file.clone(),
+                    "Unable to generate test cases for test config",
+                ));
             }
             test_config::TestConfigResult::PartialSuccess {
                 requirements: _,
                 validation_errors: _,
             } => {
                 // TODO: Handle requirements
-                failing_configs.push(test_file.clone());
+                failed_configs.push(report_simple_error(test_file.clone(), "TODO"));
             }
             test_config::TestConfigResult::Success {
                 requirements: _,
@@ -58,11 +66,8 @@ fn main() {
         }
     }
 
-    for test_config_path in &failing_configs {
-        eprintln!(
-            "{}: Unable to generate test cases for test config",
-            test_config_path.display()
-        );
+    for test_config_path in &failed_configs {
+        eprint!("{}", test_config_path);
     }
 
     let report_config = ReportConfig {
@@ -78,7 +83,7 @@ fn main() {
     let all_tests_passed = run_results
         .iter()
         .fold(true, |acc, t| acc && t.test_status == TestStatus::Passed);
-    if failing_configs.is_empty() == false || all_tests_passed == false {
+    if failed_configs.is_empty() == false || all_tests_passed == false {
         exit(EXIT_CODE_ON_FAILURE)
     }
 }
@@ -142,5 +147,27 @@ fn get_report_format(args: &Args) -> ReportFormat {
             show_all_tests: args.show_all_tests,
         },
         OutputFormat::Tap => ReportFormat::Tap,
+    }
+}
+
+struct ConfigError {
+    source_file: PathBuf,
+    error: Value,
+}
+
+impl Display for ConfigError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let source_file = self.source_file.display().to_string();
+        let content = BTreeMap::from([(source_file, &self.error)]);
+        let output =
+            serde_yaml::to_string(&content).unwrap_or(String::from("Failed to convert to YAML"));
+        write!(f, "{}", output)
+    }
+}
+
+fn report_simple_error(source_file: PathBuf, msg: &str) -> ConfigError {
+    ConfigError {
+        source_file,
+        error: Value::String(msg.to_owned()),
     }
 }
