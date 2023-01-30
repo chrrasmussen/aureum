@@ -26,7 +26,7 @@ expected_stdout = """
 Started running 0 tests:
 
 
-Finished running tests: 0 passed, 0 failures
+Finished running tests: 0 passed, 0 failed
 """
 expected_stderr = """
 helpers/invalid-test-config.toml: Unable to generate test cases for test config

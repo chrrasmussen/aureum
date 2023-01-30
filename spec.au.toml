@@ -31,7 +31,7 @@ Started running 25 tests:
 ✅ spec/basic/read-external-file.au.toml
 ✅ spec/basic/run-bash.au.toml
 
-Finished running tests: 25 passed, 0 failures
+Finished running tests: 25 passed, 0 failed
 """
 expected_stderr = ""
 expected_status_code = 0

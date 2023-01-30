@@ -14,7 +14,7 @@ Started running 1 tests:
 
 ✅ helpers/passing-test.toml
 
-Finished running tests: 1 passed, 0 failures
+Finished running tests: 1 passed, 0 failed
 """
 expected_stderr = ""
 expected_exit_code = 0
@@ -33,7 +33,7 @@ F
 
 ❌ helpers/failing-test.toml
 
-Finished running tests: 0 passed, 1 failures
+Finished running tests: 0 passed, 1 failed
 """
 expected_stderr = ""
 expected_exit_code = 1

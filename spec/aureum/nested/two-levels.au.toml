@@ -8,7 +8,7 @@ Started running 2 tests:
 ✅ two-levels.toml:test1
 ✅ two-levels.toml:test2
 
-Finished running tests: 2 passed, 0 failures
+Finished running tests: 2 passed, 0 failed
 """
 expected_stderr = ""
 expected_exit_code = 0

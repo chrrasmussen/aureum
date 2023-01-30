@@ -154,7 +154,7 @@ fn summary_print_summary(number_of_tests: usize, show_all_tests: bool, run_resul
 
     println!();
     println!(
-        "Finished running tests: {} passed, {} failures",
+        "Finished running tests: {} passed, {} failed",
         number_of_passed_tests, number_of_failed_tests,
     );
 }
