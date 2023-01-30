@@ -111,7 +111,7 @@ fn report_summary(report_config: &ReportConfig, run_results: &[RunResult]) {
 // SUMMARY HELPERS
 
 fn summary_print_start(number_of_tests: usize) {
-    println!("Started running {} tests:", number_of_tests)
+    println!("Running {} tests:", number_of_tests)
 }
 
 fn summary_print_test_case(result: &Result<TestResult, RunError>) {
@@ -149,10 +149,16 @@ fn summary_print_summary(number_of_tests: usize, show_all_tests: bool, run_resul
     let number_of_passed_tests = run_results.iter().filter(|t| t.is_success()).count();
     let number_of_failed_tests = number_of_tests - number_of_passed_tests;
 
+    let status = if number_of_failed_tests == 0 {
+        "OK"
+    } else {
+        "FAIL"
+    };
+
     println!();
     println!(
-        "Finished running tests: {} passed, {} failed",
-        number_of_passed_tests, number_of_failed_tests,
+        "Test result: {} ({} passed, {} failed)",
+        status, number_of_passed_tests, number_of_failed_tests,
     );
 }
 

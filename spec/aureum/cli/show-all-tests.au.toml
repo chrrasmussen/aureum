@@ -8,7 +8,7 @@ test_arguments = [
   "helpers/failing-test.toml",
 ]
 expected_stdout = """
-Started running 2 tests:
+Running 2 tests:
 F.
 
 ❌ helpers/failing-test.toml
@@ -23,7 +23,7 @@ stdout:
   got: Hello world
 ✅ helpers/passing-test.toml
 
-Finished running tests: 1 passed, 1 failed
+Test result: FAIL (1 passed, 1 failed)
 """
 expected_stderr = ""
 expected_exit_code = 1
@@ -32,7 +32,7 @@ expected_exit_code = 1
 [tests.default]
 test_arguments = ["helpers/passing-test.toml", "helpers/failing-test.toml"]
 expected_stdout = """
-Started running 2 tests:
+Running 2 tests:
 F.
 
 ❌ helpers/failing-test.toml
@@ -46,7 +46,7 @@ stdout:
   expected: STDOUT
   got: Hello world
 
-Finished running tests: 1 passed, 1 failed
+Test result: FAIL (1 passed, 1 failed)
 """
 expected_stderr = ""
 expected_exit_code = 1
