@@ -113,47 +113,6 @@ fn report_summary(report_config: &ReportConfig, run_results: &[RunResult]) {
     }
 }
 
-// TAP HELPERS
-
-fn tap_print_start(number_of_tests: usize) {
-    tap_format::print_version();
-    tap_format::print_plan(1, number_of_tests);
-}
-
-fn tap_print_test_case(
-    test_number: usize,
-    test_case: &TestCase,
-    result: Result<TestResult, RunError>,
-    indent_level: usize,
-) {
-    let message: String;
-    if let Some(description) = &test_case.description {
-        message = format!("{} # {}", test_case.id(), description);
-    } else {
-        message = format!("{}", test_case.id());
-    }
-
-    match result {
-        Ok(test_result) => {
-            if test_result.is_success() {
-                tap_format::print_ok(test_number, &message, indent_level)
-            } else {
-                tap_format::print_not_ok(
-                    test_number,
-                    &message,
-                    &format_test_result(test_result),
-                    indent_level,
-                )
-            }
-        }
-        Err(_) => {
-            tap_format::print_not_ok(test_number, &message, "Failed to run test", indent_level)
-        }
-    }
-}
-
-fn tap_print_summary() {}
-
 // SUMMARY HELPERS
 
 fn summary_print_start(number_of_tests: usize) {
@@ -222,6 +181,47 @@ fn summary_print_result(run_result: &RunResult) {
         println!("❌ {}", message)
     }
 }
+
+// TAP HELPERS
+
+fn tap_print_start(number_of_tests: usize) {
+    tap_format::print_version();
+    tap_format::print_plan(1, number_of_tests);
+}
+
+fn tap_print_test_case(
+    test_number: usize,
+    test_case: &TestCase,
+    result: Result<TestResult, RunError>,
+    indent_level: usize,
+) {
+    let message: String;
+    if let Some(description) = &test_case.description {
+        message = format!("{} # {}", test_case.id(), description);
+    } else {
+        message = format!("{}", test_case.id());
+    }
+
+    match result {
+        Ok(test_result) => {
+            if test_result.is_success() {
+                tap_format::print_ok(test_number, &message, indent_level)
+            } else {
+                tap_format::print_not_ok(
+                    test_number,
+                    &message,
+                    &format_test_result(test_result),
+                    indent_level,
+                )
+            }
+        }
+        Err(_) => {
+            tap_format::print_not_ok(test_number, &message, "Failed to run test", indent_level)
+        }
+    }
+}
+
+fn tap_print_summary() {}
 
 // ERROR FORMATTING
 
