@@ -169,7 +169,12 @@ fn summary_print_result(run_result: &RunResult) {
     if run_result.is_success() {
         println!("✅ {}", message)
     } else {
-        println!("❌ {}", message)
+        println!("❌ {}", message);
+        let error_msg = match &run_result.result {
+            Ok(result) => format_test_result(result),
+            Err(_) => String::from("Failed to run test"),
+        };
+        print!("{}", error_msg);
     }
 }
 

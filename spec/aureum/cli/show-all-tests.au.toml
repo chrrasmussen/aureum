@@ -12,6 +12,15 @@ Started running 2 tests:
 F.
 
 ❌ helpers/failing-test.toml
+exit-code:
+  expected: 42
+  got: 0
+stderr:
+  expected: STDERR
+  got: ''
+stdout:
+  expected: STDOUT
+  got: Hello world
 ✅ helpers/passing-test.toml
 
 Finished running tests: 1 passed, 1 failed
@@ -27,6 +36,15 @@ Started running 2 tests:
 F.
 
 ❌ helpers/failing-test.toml
+exit-code:
+  expected: 42
+  got: 0
+stderr:
+  expected: STDERR
+  got: ''
+stdout:
+  expected: STDOUT
+  got: Hello world
 
 Finished running tests: 1 passed, 1 failed
 """
