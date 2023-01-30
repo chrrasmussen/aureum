@@ -76,10 +76,11 @@ pub fn run_test_cases(
 
 fn report_start(report_config: &ReportConfig) {
     match report_config.format {
-        ReportFormat::Summary { show_all_tests: _ } => {}
+        ReportFormat::Summary { show_all_tests: _ } => {
+            summary_print_start();
+        }
         ReportFormat::Tap => {
-            tap_format::print_version();
-            tap_format::print_plan(1, report_config.number_of_tests);
+            tap_print_start(report_config.number_of_tests);
         }
     }
 }
@@ -91,10 +92,12 @@ fn report_test_case(
     result: Result<TestResult, RunError>,
 ) {
     match report_config.format {
-        ReportFormat::Summary { show_all_tests: _ } => {}
+        ReportFormat::Summary { show_all_tests: _ } => {
+            summary_print_test_case();
+        }
         ReportFormat::Tap => {
             let test_number_indent_level = report_config.number_of_tests.to_string().len();
-            print_tap_result(index + 1, &test_case, result, test_number_indent_level);
+            tap_print_test_case(index + 1, &test_case, result, test_number_indent_level);
         }
     }
 }
@@ -102,34 +105,22 @@ fn report_test_case(
 fn report_summary(report_config: &ReportConfig, run_results: &[RunResult]) {
     match report_config.format {
         ReportFormat::Summary { show_all_tests } => {
-            for run_result in run_results {
-                let test_failed = run_result.test_status == TestStatus::Failed;
-                if show_all_tests || test_failed {
-                    print_summary_result(run_result);
-                }
-            }
-
-            let number_of_failed_tests = run_results
-                .iter()
-                .filter(|t| t.test_status == TestStatus::Failed)
-                .count();
-
-            println!();
-            println!("Completed running {} tests.", report_config.number_of_tests);
-
-            if number_of_failed_tests == 0 {
-                println!("All tests passed.")
-            } else {
-                println!("{} failures.", number_of_failed_tests)
-            }
+            summary_print_summary(report_config.number_of_tests, show_all_tests, run_results);
         }
-        ReportFormat::Tap => {}
+        ReportFormat::Tap => {
+            tap_print_summary();
+        }
     }
 }
 
 // TAP HELPERS
 
-fn print_tap_result(
+fn tap_print_start(number_of_tests: usize) {
+    tap_format::print_version();
+    tap_format::print_plan(1, number_of_tests);
+}
+
+fn tap_print_test_case(
     test_number: usize,
     test_case: &TestCase,
     result: Result<TestResult, RunError>,
@@ -161,9 +152,38 @@ fn print_tap_result(
     }
 }
 
+fn tap_print_summary() {}
+
 // SUMMARY HELPERS
 
-fn print_summary_result(run_result: &RunResult) {
+fn summary_print_start() {}
+
+fn summary_print_test_case() {}
+
+fn summary_print_summary(number_of_tests: usize, show_all_tests: bool, run_results: &[RunResult]) {
+    for run_result in run_results {
+        let test_failed = run_result.test_status == TestStatus::Failed;
+        if show_all_tests || test_failed {
+            summary_print_result(run_result);
+        }
+    }
+
+    let number_of_failed_tests = run_results
+        .iter()
+        .filter(|t| t.test_status == TestStatus::Failed)
+        .count();
+
+    println!();
+    println!("Completed running {} tests.", number_of_tests);
+
+    if number_of_failed_tests == 0 {
+        println!("All tests passed.")
+    } else {
+        println!("{} failures.", number_of_failed_tests)
+    }
+}
+
+fn summary_print_result(run_result: &RunResult) {
     let test_id = run_result.test_case.id();
 
     let message: String;
