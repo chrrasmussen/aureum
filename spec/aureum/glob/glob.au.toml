@@ -7,21 +7,25 @@ expected_exit_code = 0
 [tests.single-file]
 test_arguments = ["--show-all-tests", "helpers/dir1/test1.toml"]
 expected_stdout = """
+Started running 1 tests:
+.
+
 ✅ helpers/dir1/test1.toml
 
-Completed running 1 tests.
-All tests passed.
+Finished running tests: 1 passed, 0 failures
 """
 
 
 [tests.single-dir]
 test_arguments = ["--show-all-tests", "helpers/dir1/*.toml"]
 expected_stdout = """
+Started running 2 tests:
+..
+
 ✅ helpers/dir1/test1.toml
 ✅ helpers/dir1/test2.toml
 
-Completed running 2 tests.
-All tests passed.
+Finished running tests: 2 passed, 0 failures
 """
 
 
@@ -33,13 +37,15 @@ test_arguments = [
   "helpers/dir1/*.toml", # This argument is redundant, but it tests that the paths are deduplicated.
 ]
 expected_stdout = """
+Started running 4 tests:
+....
+
 ✅ helpers/dir1/test1.toml
 ✅ helpers/dir1/test2.toml
 ✅ helpers/dir2/test1.toml
 ✅ helpers/dir2/test2.toml
 
-Completed running 4 tests.
-All tests passed.
+Finished running tests: 4 passed, 0 failures
 """
 
 
@@ -50,9 +56,11 @@ test_arguments = [
   "helpers/dir1/test2.toml",
 ]
 expected_stdout = """
+Started running 2 tests:
+..
+
 ✅ helpers/dir1/test1.toml
 ✅ helpers/dir1/test2.toml
 
-Completed running 2 tests.
-All tests passed.
+Finished running tests: 2 passed, 0 failures
 """

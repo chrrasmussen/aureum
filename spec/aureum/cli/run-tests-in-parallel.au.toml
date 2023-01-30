@@ -6,9 +6,10 @@ test_arguments = [
 ]
 
 expected_stdout = """
+Started running 2 tests:
+..
 
-Completed running 2 tests.
-All tests passed.
+Finished running tests: 2 passed, 0 failures
 """
 expected_stderr = ""
 expected_exit_code = 0

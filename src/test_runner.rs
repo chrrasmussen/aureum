@@ -77,7 +77,7 @@ pub fn run_test_cases(
 fn report_start(report_config: &ReportConfig) {
     match report_config.format {
         ReportFormat::Summary { show_all_tests: _ } => {
-            summary_print_start();
+            summary_print_start(report_config.number_of_tests);
         }
         ReportFormat::Tap => {
             tap_print_start(report_config.number_of_tests);
@@ -93,7 +93,7 @@ fn report_test_case(
 ) {
     match report_config.format {
         ReportFormat::Summary { show_all_tests: _ } => {
-            summary_print_test_case();
+            summary_print_test_case(result);
         }
         ReportFormat::Tap => {
             let test_number_indent_level = report_config.number_of_tests.to_string().len();
@@ -156,14 +156,38 @@ fn tap_print_summary() {}
 
 // SUMMARY HELPERS
 
-fn summary_print_start() {}
+fn summary_print_start(number_of_tests: usize) {
+    println!("Started running {} tests:", number_of_tests)
+}
 
-fn summary_print_test_case() {}
+fn summary_print_test_case(result: Result<TestResult, RunError>) {
+    match result {
+        Ok(test_result) => {
+            if test_result.is_success() {
+                print!(".")
+            } else {
+                print!("F")
+            }
+        }
+        Err(_) => {
+            print!("F")
+        }
+    }
+}
 
 fn summary_print_summary(number_of_tests: usize, show_all_tests: bool, run_results: &[RunResult]) {
+    println!(); // Add newline to dots
+
+    let mut is_any_test_cases_printed = false;
+
     for run_result in run_results {
         let test_failed = run_result.test_status == TestStatus::Failed;
         if show_all_tests || test_failed {
+            if is_any_test_cases_printed == false {
+                println!();
+                is_any_test_cases_printed = true;
+            }
+
             summary_print_result(run_result);
         }
     }
@@ -172,15 +196,13 @@ fn summary_print_summary(number_of_tests: usize, show_all_tests: bool, run_resul
         .iter()
         .filter(|t| t.test_status == TestStatus::Failed)
         .count();
+    let number_of_passed_tests = number_of_tests - number_of_failed_tests;
 
     println!();
-    println!("Completed running {} tests.", number_of_tests);
-
-    if number_of_failed_tests == 0 {
-        println!("All tests passed.")
-    } else {
-        println!("{} failures.", number_of_failed_tests)
-    }
+    println!(
+        "Finished running tests: {} passed, {} failures",
+        number_of_passed_tests, number_of_failed_tests,
+    );
 }
 
 fn summary_print_result(run_result: &RunResult) {

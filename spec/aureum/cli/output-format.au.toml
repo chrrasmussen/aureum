@@ -9,10 +9,12 @@ test_arguments = [
   "helpers/passing-test.toml",
 ]
 expected_stdout = """
+Started running 1 tests:
+.
+
 ✅ helpers/passing-test.toml
 
-Completed running 1 tests.
-All tests passed.
+Finished running tests: 1 passed, 0 failures
 """
 expected_stderr = ""
 expected_exit_code = 0
@@ -26,10 +28,12 @@ test_arguments = [
   "helpers/failing-test.toml",
 ]
 expected_stdout = """
+Started running 1 tests:
+F
+
 ❌ helpers/failing-test.toml
 
-Completed running 1 tests.
-1 failures.
+Finished running tests: 0 passed, 1 failures
 """
 expected_stderr = ""
 expected_exit_code = 1

@@ -23,9 +23,10 @@ expected_exit_code = 2
 [tests.invalid-test-config]
 test_arguments = ["helpers/invalid-test-config.toml"]
 expected_stdout = """
+Started running 0 tests:
 
-Completed running 0 tests.
-All tests passed.
+
+Finished running tests: 0 passed, 0 failures
 """
 expected_stderr = """
 helpers/invalid-test-config.toml: Unable to generate test cases for test config
