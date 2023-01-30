@@ -14,6 +14,7 @@ use std::collections::BTreeMap;
 use std::fmt::{Display, Formatter};
 use std::path::PathBuf;
 use std::process::exit;
+use test_config::TestConfigError;
 use test_id_container::TestIdContainer;
 use test_runner::{ReportConfig, ReportFormat};
 
@@ -37,31 +38,16 @@ fn main() {
 
     for test_file in test_files {
         match test_config::test_cases_from_file(&test_file) {
-            test_config::TestConfigResult::FailedToReadFile(_err) => {
-                failed_configs.push(report_simple_error(
-                    test_file.clone(),
-                    "Failed to read file",
-                ));
-            }
-            test_config::TestConfigResult::FailedToParseTestConfig(_err) => {
-                failed_configs.push(report_simple_error(
-                    test_file.clone(),
-                    "Failed to parse test config",
-                ));
-            }
-            test_config::TestConfigResult::PartialSuccess {
-                requirements: _,
-                validation_errors: _,
-            } => {
+            Ok(result) => {
                 // TODO: Handle requirements
-                failed_configs.push(report_simple_error(test_file.clone(), "TODO"));
+                all_test_cases.extend(result.test_cases);
             }
-            test_config::TestConfigResult::Success {
-                requirements: _,
-                test_cases,
-            } => {
-                // TODO: Handle requirements
-                all_test_cases.extend(test_cases);
+            Err(err) => {
+                let msg = match err {
+                    TestConfigError::FailedToReadFile(_) => "Failed to read file",
+                    TestConfigError::FailedToParseTestConfig(_) => "Failed to parse test config",
+                };
+                failed_configs.push(report_simple_error(test_file.clone(), msg));
             }
         }
     }

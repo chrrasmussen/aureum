@@ -11,48 +11,33 @@ use std::str::FromStr;
 
 // READ TEST CONFIG
 
-pub enum TestConfigResult {
-    FailedToReadFile(io::Error),
-    FailedToParseTestConfig(toml::de::Error),
-    PartialSuccess {
-        requirements: TestConfigData,
-        validation_errors: BTreeSet<TestCaseValidationError>,
-    },
-    Success {
-        requirements: TestConfigData,
-        test_cases: Vec<TestCase>,
-    },
+pub struct TestCases {
+    pub requirements: TestConfigData,
+    pub validation_errors: Vec<(TestId, BTreeSet<TestCaseValidationError>)>,
+    pub test_cases: Vec<TestCase>,
 }
 
-pub fn test_cases_from_file(path: &Path) -> TestConfigResult {
-    let toml_content = match fs::read_to_string(path) {
-        Ok(x) => x,
-        Err(err) => return TestConfigResult::FailedToReadFile(err),
-    };
+pub enum TestConfigError {
+    FailedToReadFile(io::Error),
+    FailedToParseTestConfig(toml::de::Error),
+}
 
-    let test_config = match toml::from_str::<TestConfig>(&toml_content) {
-        Ok(x) => x,
-        Err(err) => return TestConfigResult::FailedToParseTestConfig(err),
-    };
+pub fn test_cases_from_file(path: &Path) -> Result<TestCases, TestConfigError> {
+    let toml_content = fs::read_to_string(path).map_err(TestConfigError::FailedToReadFile)?;
+    let test_config = toml::from_str::<TestConfig>(&toml_content)
+        .map_err(TestConfigError::FailedToParseTestConfig)?;
 
     let requirements = test_config.get_requirements();
     let test_dir = file_util::parent_dir(path);
     let data = gather_requirements(&requirements, &test_dir);
 
-    let test_cases = match test_config.to_test_cases(path, &data) {
-        Ok(x) => x,
-        Err(err) => {
-            return TestConfigResult::PartialSuccess {
-                requirements: data,
-                validation_errors: err,
-            }
-        }
-    };
+    let (test_cases, validation_errors) = test_config.to_test_cases(path, &data);
 
-    TestConfigResult::Success {
+    Ok(TestCases {
         requirements: data,
+        validation_errors,
         test_cases,
-    }
+    })
 }
 
 // TOML STRUCTURE
@@ -198,7 +183,10 @@ impl TestConfig {
         self,
         path: P,
         data: &TestConfigData,
-    ) -> Result<Vec<TestCase>, BTreeSet<TestCaseValidationError>>
+    ) -> (
+        Vec<TestCase>,
+        Vec<(TestId, BTreeSet<TestCaseValidationError>)>,
+    )
     where
         P: AsRef<Path>,
     {
@@ -207,13 +195,18 @@ impl TestConfig {
         let test_configs = split_test_configs(self);
 
         let mut test_cases = vec![];
+        let mut validation_errors = vec![];
+
         for (id_path, test_config) in test_configs {
             let test_id = TestId::new(id_path);
-            let test_case = test_config.to_test_case(source_file.to_path_buf(), test_id, data)?;
-            test_cases.push(test_case)
+
+            match test_config.to_test_case(source_file.to_path_buf(), test_id.clone(), data) {
+                Ok(test_case) => test_cases.push(test_case),
+                Err(err) => validation_errors.push((test_id, err)),
+            }
         }
 
-        Ok(test_cases)
+        (test_cases, validation_errors)
     }
 
     fn to_test_case(
