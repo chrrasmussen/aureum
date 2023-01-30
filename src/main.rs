@@ -40,13 +40,13 @@ fn main() {
             test_config::TestConfigResult::FailedToReadFile(_err) => {
                 failed_configs.push(report_simple_error(
                     test_file.clone(),
-                    "Unable to read file",
+                    "Failed to read file",
                 ));
             }
             test_config::TestConfigResult::FailedToParseTestConfig(_err) => {
                 failed_configs.push(report_simple_error(
                     test_file.clone(),
-                    "Unable to generate test cases for test config",
+                    "Failed to parse test config",
                 ));
             }
             test_config::TestConfigResult::PartialSuccess {

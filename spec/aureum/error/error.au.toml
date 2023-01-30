@@ -29,5 +29,5 @@ Running 0 tests:
 Test result: OK (0 passed, 0 failed)
 """
 expected_stderr = """
-helpers/invalid-test-config.toml: Unable to generate test cases for test config
+helpers/invalid-test-config.toml: Failed to parse test config
 """
