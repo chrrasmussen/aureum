@@ -84,7 +84,7 @@ fn report_test_case(
         ReportFormat::Summary { show_all_tests: _ } => {}
         ReportFormat::Tap => {
             let test_number_indent_level = report_config.number_of_tests.to_string().len();
-            print_test_case_result(index + 1, &test_case, result, test_number_indent_level);
+            print_tap_result(index + 1, &test_case, result, test_number_indent_level);
         }
     }
 }
@@ -95,7 +95,7 @@ pub fn report_summary(report_config: &ReportConfig, run_results: &[RunResult]) {
             for run_result in run_results {
                 let test_failed = run_result.test_status == TestStatus::Failed;
                 if show_all_tests || test_failed {
-                    print_run_result(run_result);
+                    print_summary_result(run_result);
                 }
             }
 
@@ -117,7 +117,9 @@ pub fn report_summary(report_config: &ReportConfig, run_results: &[RunResult]) {
     }
 }
 
-fn print_test_case_result(
+// TAP HELPERS
+
+fn print_tap_result(
     test_number: usize,
     test_case: &TestCase,
     result: Result<TestResult, RunError>,
@@ -149,7 +151,9 @@ fn print_test_case_result(
     }
 }
 
-fn print_run_result(run_result: &RunResult) {
+// SUMMARY HELPERS
+
+fn print_summary_result(run_result: &RunResult) {
     let test_id = run_result.test_case.id();
 
     let message: String;
@@ -166,6 +170,8 @@ fn print_run_result(run_result: &RunResult) {
         println!("❌ {}", message)
     }
 }
+
+// ERROR FORMATTING
 
 fn format_test_result(test_result: TestResult) -> String {
     let mut diagnostics = BTreeMap::new();
