@@ -14,16 +14,18 @@ pub enum ReportFormat {
     Tap,
 }
 
-#[derive(Clone)]
 pub struct RunResult {
     pub test_case: TestCase,
-    pub test_status: TestStatus,
+    pub result: Result<TestResult, RunError>,
 }
 
-#[derive(PartialEq, Clone)]
-pub enum TestStatus {
-    Passed,
-    Failed,
+impl RunResult {
+    pub fn is_success(&self) -> bool {
+        match &self.result {
+            Ok(test_result) => test_result.is_success(),
+            Err(_) => false,
+        }
+    }
 }
 
 // RUN TEST CASES
@@ -36,18 +38,11 @@ pub fn run_test_cases(
     let run = |(i, test_case)| -> Vec<RunResult> {
         let result = test_case::run(test_case);
 
-        let is_success = result.as_ref().map_or(false, |t| t.is_success());
-        report_test_case(report_config, i, test_case, result);
-
-        let test_status = if is_success {
-            TestStatus::Passed
-        } else {
-            TestStatus::Failed
-        };
+        report_test_case(report_config, i, test_case, &result);
 
         vec![RunResult {
             test_case: test_case.clone(),
-            test_status,
+            result,
         }]
     };
 
@@ -58,13 +53,13 @@ pub fn run_test_cases(
             .par_iter()
             .enumerate()
             .map(run)
-            .reduce(|| vec![], |x, y| [x, y].concat())
+            .reduce(|| vec![], |x, y| itertools::concat([x, y]))
     } else {
         test_cases
             .iter()
             .enumerate()
             .map(run)
-            .fold(vec![], |x, y| [x, y].concat())
+            .fold(vec![], |x, y| itertools::concat([x, y]))
     };
 
     report_summary(&report_config, &run_results);
@@ -89,7 +84,7 @@ fn report_test_case(
     report_config: &ReportConfig,
     index: usize,
     test_case: &TestCase,
-    result: Result<TestResult, RunError>,
+    result: &Result<TestResult, RunError>,
 ) {
     match report_config.format {
         ReportFormat::Summary { show_all_tests: _ } => {
@@ -119,7 +114,7 @@ fn summary_print_start(number_of_tests: usize) {
     println!("Started running {} tests:", number_of_tests)
 }
 
-fn summary_print_test_case(result: Result<TestResult, RunError>) {
+fn summary_print_test_case(result: &Result<TestResult, RunError>) {
     match result {
         Ok(test_result) => {
             if test_result.is_success() {
@@ -140,7 +135,7 @@ fn summary_print_summary(number_of_tests: usize, show_all_tests: bool, run_resul
     let mut is_any_test_cases_printed = false;
 
     for run_result in run_results {
-        let test_failed = run_result.test_status == TestStatus::Failed;
+        let test_failed = run_result.is_success() == false;
         if show_all_tests || test_failed {
             if is_any_test_cases_printed == false {
                 println!();
@@ -153,7 +148,7 @@ fn summary_print_summary(number_of_tests: usize, show_all_tests: bool, run_resul
 
     let number_of_failed_tests = run_results
         .iter()
-        .filter(|t| t.test_status == TestStatus::Failed)
+        .filter(|t| t.is_success() == false)
         .count();
     let number_of_passed_tests = number_of_tests - number_of_failed_tests;
 
@@ -174,8 +169,7 @@ fn summary_print_result(run_result: &RunResult) {
         message = format!("{}", test_id);
     }
 
-    let is_success = run_result.test_status == TestStatus::Passed;
-    if is_success {
+    if run_result.is_success() {
         println!("✅ {}", message)
     } else {
         println!("❌ {}", message)
@@ -192,7 +186,7 @@ fn tap_print_start(number_of_tests: usize) {
 fn tap_print_test_case(
     test_number: usize,
     test_case: &TestCase,
-    result: Result<TestResult, RunError>,
+    result: &Result<TestResult, RunError>,
     indent_level: usize,
 ) {
     let message: String;
@@ -225,14 +219,14 @@ fn tap_print_summary() {}
 
 // ERROR FORMATTING
 
-fn format_test_result(test_result: TestResult) -> String {
+fn format_test_result(test_result: &TestResult) -> String {
     let mut diagnostics = BTreeMap::new();
 
-    if let ValueComparison::Diff { expected, got } = test_result.stdout {
+    if let ValueComparison::Diff { expected, got } = &test_result.stdout {
         diagnostics.insert("stdout", show_string_diff(expected, got));
     }
 
-    if let ValueComparison::Diff { expected, got } = test_result.stderr {
+    if let ValueComparison::Diff { expected, got } = &test_result.stderr {
         diagnostics.insert("stderr", show_string_diff(expected, got));
     }
 
@@ -243,8 +237,11 @@ fn format_test_result(test_result: TestResult) -> String {
     serde_yaml::to_string(&diagnostics).unwrap_or(String::from("Failed to convert to YAML"))
 }
 
-fn show_string_diff(expected: String, got: String) -> BTreeMap<&'static str, Value> {
-    show_diff(Value::String(expected), Value::String(got))
+fn show_string_diff(expected: &String, got: &String) -> BTreeMap<&'static str, Value> {
+    show_diff(
+        Value::String(expected.to_owned()),
+        Value::String(got.to_owned()),
+    )
 }
 
 fn show_i32_diff(expected: i32, got: i32) -> BTreeMap<&'static str, Value> {

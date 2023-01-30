@@ -15,7 +15,7 @@ use std::fmt::{Display, Formatter};
 use std::path::PathBuf;
 use std::process::exit;
 use test_id_container::TestIdContainer;
-use test_runner::{ReportConfig, ReportFormat, TestStatus};
+use test_runner::{ReportConfig, ReportFormat};
 
 const EXIT_CODE_ON_FAILURE: i32 = 1;
 
@@ -80,7 +80,7 @@ fn main() {
 
     let all_tests_passed = run_results
         .iter()
-        .fold(true, |acc, t| acc && t.test_status == TestStatus::Passed);
+        .fold(true, |acc, t| acc && t.is_success());
     if failed_configs.is_empty() == false || all_tests_passed == false {
         exit(EXIT_CODE_ON_FAILURE)
     }
