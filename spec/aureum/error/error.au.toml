@@ -10,6 +10,16 @@ No test configs found for the given paths
 """
 
 
+[tests.missing-test-config-with-test-id]
+test_arguments = ["AUREUM-THIS-FILE-DOES-NOT-EXIST:sub1"]
+expected_stderr = """
+error: Invalid value 'AUREUM-THIS-FILE-DOES-NOT-EXIST:sub1' for '<PATHS>...': Invalid path to test config
+
+For more information try '--help'
+"""
+expected_exit_code = 2
+
+
 [tests.invalid-test-config]
 test_arguments = ["helpers/invalid-test-config.toml"]
 expected_stdout = """

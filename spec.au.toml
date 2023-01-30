@@ -14,6 +14,7 @@ expected_stdout = """
 ✅ spec/aureum/cli/show-all-tests.au.toml:show-all-tests
 ✅ spec/aureum/error/error.au.toml:invalid-test-config
 ✅ spec/aureum/error/error.au.toml:missing-test-config
+✅ spec/aureum/error/error.au.toml:missing-test-config-with-test-id
 ✅ spec/aureum/glob/glob.au.toml:multiple-dirs
 ✅ spec/aureum/glob/glob.au.toml:multiple-files
 ✅ spec/aureum/glob/glob.au.toml:single-dir
@@ -27,7 +28,7 @@ expected_stdout = """
 ✅ spec/basic/read-external-file.au.toml
 ✅ spec/basic/run-bash.au.toml
 
-Completed running 24 tests.
+Completed running 25 tests.
 All tests passed.
 """
 expected_stderr = ""
