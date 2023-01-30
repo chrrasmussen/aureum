@@ -7,7 +7,7 @@ pub fn parse() -> Args {
     Args::parse()
 }
 
-/// Golden test runner
+/// Golden test runner for executables
 #[derive(Parser)]
 pub struct Args {
     /// Paths to test configs
