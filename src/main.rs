@@ -172,11 +172,10 @@ fn test_cases_errors(test_cases: &TestCases) -> Option<Value> {
         contents.insert("requirements", serde_yaml::to_value(requirements).ok()?);
     }
 
-    let validation_errors = validation_errors_map(&test_cases.validation_errors);
-    if validation_errors.len() > 0 {
+    if let Some(validation_errors) = validation_errors_map(&test_cases.validation_errors) {
         contents.insert(
             "validation-errors",
-            serde_yaml::to_value(validation_errors).ok()?,
+            validation_errors,
         );
     }
 
@@ -218,7 +217,15 @@ fn requirements_map(requirements: &TestConfigData) -> BTreeMap<&str, BTreeMap<St
 
 fn validation_errors_map(
     validation_errors: &Vec<(TestId, BTreeSet<TestCaseValidationError>)>,
-) -> BTreeMap<String, Vec<&str>> {
+) -> Option<Value> {
+    if validation_errors.len() == 1 {
+        let (maybe_root, errs) = &validation_errors[0];
+        if maybe_root.is_root() {
+            let contents = errs.iter().map(show_validation_error).collect::<Vec<_>>();
+            return Some(serde_yaml::to_value(contents).unwrap_or(Value::Null));
+        }
+    }
+
     let mut contents = BTreeMap::new();
 
     for (test_id, errs) in validation_errors {
@@ -228,7 +235,11 @@ fn validation_errors_map(
         );
     }
 
-    contents
+    if contents.len() > 0 {
+        Some(serde_yaml::to_value(contents).unwrap_or(Value::Null))
+    } else {
+        None
+    }
 }
 
 fn show_validation_error(validation_error: &TestCaseValidationError) -> &str {

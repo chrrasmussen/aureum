@@ -44,9 +44,8 @@ Test result: OK (0 passed, 0 failed)
 expected_stderr = """
 helpers/empty-test-config.toml:
   validation-errors:
-    '':
-    - The field 'program' is required
-    - At least one expectation is required
+  - The field 'program' is required
+  - At least one expectation is required
 """
 
 
@@ -61,8 +60,7 @@ Test result: OK (0 passed, 0 failed)
 expected_stderr = """
 helpers/no-test-program.toml:
   validation-errors:
-    '':
-    - The field 'program' is required
+  - The field 'program' is required
 """
 
 
@@ -77,8 +75,7 @@ Test result: OK (0 passed, 0 failed)
 expected_stderr = """
 helpers/no-expectations.toml:
   validation-errors:
-    '':
-    - At least one expectation is required
+  - At least one expectation is required
 """
 
 
@@ -96,8 +93,7 @@ helpers/missing-env-var.toml:
     env:
       AUREUM_TEST_THIS_ENV_VAR_DOES_NOT_EXIST: ❌
   validation-errors:
-    '':
-    - Missing environment variable
+  - Missing environment variable
 """
 
 
@@ -115,6 +111,5 @@ helpers/missing-external-file.toml:
     files:
       AUREUM_TEST_THIS_FILE_DOES_NOT_EXIST: ❌
   validation-errors:
-    '':
-    - Missing external file
+  - Missing external file
 """
