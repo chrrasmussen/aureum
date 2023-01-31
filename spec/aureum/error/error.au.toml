@@ -6,8 +6,9 @@ expected_exit_code = 1
 [tests.missing-test-config]
 program_arguments = ["AUREUM-THIS-FILE-DOES-NOT-EXIST"]
 expected_stderr = """
-No config files found for the given paths
+error: No config files found for the given paths
 """
+expected_exit_code = 2
 
 
 [tests.missing-test-config-with-test-id]

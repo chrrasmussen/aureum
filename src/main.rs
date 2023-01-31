@@ -19,7 +19,8 @@ use test_id::TestId;
 use test_id_container::TestIdContainer;
 use test_runner::{ReportConfig, ReportFormat};
 
-const EXIT_CODE_ON_FAILURE: i32 = 1;
+const TEST_FAILURE_EXIT_CODE: i32 = 1;
+const INVALID_USER_INPUT_EXIT_CODE: i32 = 2;
 
 fn main() {
     let args = cli::parse();
@@ -30,8 +31,8 @@ fn main() {
         .collect::<Vec<_>>();
 
     if test_files.is_empty() {
-        eprintln!("No config files found for the given paths");
-        exit(EXIT_CODE_ON_FAILURE);
+        eprintln!("error: No config files found for the given paths");
+        exit(INVALID_USER_INPUT_EXIT_CODE);
     }
 
     let mut all_test_cases = vec![];
@@ -73,7 +74,7 @@ fn main() {
         .iter()
         .fold(true, |acc, t| acc && t.is_success());
     if failed_configs.is_empty() == false || all_tests_passed == false {
-        exit(EXIT_CODE_ON_FAILURE)
+        exit(TEST_FAILURE_EXIT_CODE)
     }
 }
 
