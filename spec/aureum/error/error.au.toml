@@ -32,6 +32,7 @@ Test result: OK (0 passed, 0 failed)
 expected_stderr = """
 helpers/invalid-test-config.toml: Failed to parse config file
 
+Some config files contain errors (See above)
 """
 
 
@@ -49,6 +50,7 @@ helpers/empty-test-config.toml:
   - The field 'program' is required
   - At least one expectation is required
 
+Some config files contain errors (See above)
 """
 
 
@@ -65,6 +67,7 @@ helpers/no-test-program.toml:
   validation-errors:
   - The field 'program' is required
 
+Some config files contain errors (See above)
 """
 
 
@@ -81,6 +84,7 @@ helpers/no-expectations.toml:
   validation-errors:
   - At least one expectation is required
 
+Some config files contain errors (See above)
 """
 
 
@@ -100,6 +104,7 @@ helpers/missing-env-var.toml:
   validation-errors:
   - Missing environment variable 'AUREUM_TEST_THIS_ENV_VAR_DOES_NOT_EXIST'
 
+Some config files contain errors (See above)
 """
 
 
@@ -119,4 +124,5 @@ helpers/missing-external-file.toml:
   validation-errors:
   - Missing external file 'AUREUM_TEST_THIS_FILE_DOES_NOT_EXIST'
 
+Some config files contain errors (See above)
 """
