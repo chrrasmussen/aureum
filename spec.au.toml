@@ -2,8 +2,8 @@ program = { env = "AUREUM_TEST_EXEC" }
 program_arguments = ["--show-all-tests", "spec"]
 
 expected_stdout = """
-Running 25 tests:
-.........................
+Running 28 tests:
+............................
 
 ✅ spec/aureum/cli/help.au.toml
 ✅ spec/aureum/cli/no-args.au.toml
@@ -15,9 +15,12 @@ Running 25 tests:
 ✅ spec/aureum/cli/run-tests-in-parallel.au.toml
 ✅ spec/aureum/cli/show-all-tests.au.toml:default
 ✅ spec/aureum/cli/show-all-tests.au.toml:show-all-tests
+✅ spec/aureum/error/error.au.toml:empty-test-config
 ✅ spec/aureum/error/error.au.toml:invalid-test-config
 ✅ spec/aureum/error/error.au.toml:missing-test-config
 ✅ spec/aureum/error/error.au.toml:missing-test-config-with-test-id
+✅ spec/aureum/error/error.au.toml:no-expectations
+✅ spec/aureum/error/error.au.toml:no-program-specified
 ✅ spec/aureum/glob/glob.au.toml:multiple-dirs
 ✅ spec/aureum/glob/glob.au.toml:multiple-files
 ✅ spec/aureum/glob/glob.au.toml:single-dir
@@ -31,7 +34,7 @@ Running 25 tests:
 ✅ spec/basic/read-external-file.au.toml
 ✅ spec/basic/run-bash.au.toml
 
-Test result: OK (25 passed, 0 failed)
+Test result: OK (28 passed, 0 failed)
 """
 expected_stderr = ""
 expected_status_code = 0

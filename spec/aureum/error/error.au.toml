@@ -31,3 +31,52 @@ Test result: OK (0 passed, 0 failed)
 expected_stderr = """
 helpers/invalid-test-config.toml: Failed to parse test config
 """
+
+
+[tests.empty-test-config]
+program_arguments = ["helpers/empty-test-config.toml"]
+expected_stdout = """
+Running 0 tests:
+
+
+Test result: OK (0 passed, 0 failed)
+"""
+expected_stderr = """
+helpers/empty-test-config.toml:
+  validation-errors:
+    '':
+    - The field 'program' is required
+    - At least one expectation is required
+"""
+
+
+[tests.no-program-specified]
+program_arguments = ["helpers/no-test-program.toml"]
+expected_stdout = """
+Running 0 tests:
+
+
+Test result: OK (0 passed, 0 failed)
+"""
+expected_stderr = """
+helpers/no-test-program.toml:
+  validation-errors:
+    '':
+    - The field 'program' is required
+"""
+
+
+[tests.no-expectations]
+program_arguments = ["helpers/no-expectations.toml"]
+expected_stdout = """
+Running 0 tests:
+
+
+Test result: OK (0 passed, 0 failed)
+"""
+expected_stderr = """
+helpers/no-expectations.toml:
+  validation-errors:
+    '':
+    - At least one expectation is required
+"""
