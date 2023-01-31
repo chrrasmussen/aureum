@@ -56,8 +56,9 @@ fn main() {
         }
     }
 
-    for test_config_path in &failed_configs {
-        eprint!("{}", test_config_path);
+    for failed_config in &failed_configs {
+        eprint!("{}", failed_config); // Already contains newline
+        eprintln!();
     }
 
     let report_config = ReportConfig {

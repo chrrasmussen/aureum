@@ -14,5 +14,6 @@ helpers/missing-program.toml:
     - The field 'program' is required
     test2:
     - The field 'program' is required
+
 """
 expected_exit_code = 1
