@@ -49,7 +49,7 @@ impl FromStr for TestPath {
                     test_id: TestId::from(suffix),
                 })
             } else {
-                Err("Invalid path to test config")
+                Err("Invalid path to config file")
             }
         } else {
             Ok(Self::Glob(s.to_owned()))

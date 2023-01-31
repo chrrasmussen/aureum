@@ -30,7 +30,7 @@ fn main() {
         .collect::<Vec<_>>();
 
     if test_files.is_empty() {
-        eprintln!("No test configs found for the given paths");
+        eprintln!("No config files found for the given paths");
         exit(EXIT_CODE_ON_FAILURE);
     }
 
@@ -49,7 +49,7 @@ fn main() {
             Err(err) => {
                 let msg = match err {
                     TestConfigError::FailedToReadFile(_) => "Failed to read file",
-                    TestConfigError::FailedToParseTestConfig(_) => "Failed to parse test config",
+                    TestConfigError::FailedToParseTestConfig(_) => "Failed to parse config file",
                 };
                 failed_configs.push(report_error_message(test_file, msg));
             }

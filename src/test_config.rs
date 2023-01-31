@@ -9,7 +9,7 @@ use std::io;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
 
-// READ TEST CONFIG
+// READ CONFIG FILE
 
 pub struct TestCases {
     pub requirements: TestConfigData,
@@ -241,7 +241,7 @@ impl TestConfig {
     ) -> Result<TestCase, BTreeSet<TestCaseValidationError>> {
         let mut validation_errors = BTreeSet::new();
 
-        // Validate fields in test config
+        // Validate fields in config file
 
         if self.program.is_none() {
             validation_errors.insert(TestCaseValidationError::ProgramRequired);

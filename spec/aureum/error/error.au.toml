@@ -6,14 +6,14 @@ expected_exit_code = 1
 [tests.missing-test-config]
 program_arguments = ["AUREUM-THIS-FILE-DOES-NOT-EXIST"]
 expected_stderr = """
-No test configs found for the given paths
+No config files found for the given paths
 """
 
 
 [tests.missing-test-config-with-test-id]
 program_arguments = ["AUREUM-THIS-FILE-DOES-NOT-EXIST:sub1"]
 expected_stderr = """
-error: Invalid value 'AUREUM-THIS-FILE-DOES-NOT-EXIST:sub1' for '<PATHS>...': Invalid path to test config
+error: Invalid value 'AUREUM-THIS-FILE-DOES-NOT-EXIST:sub1' for '<PATHS>...': Invalid path to config file
 
 For more information try '--help'
 """
@@ -29,7 +29,7 @@ Running 0 tests:
 Test result: OK (0 passed, 0 failed)
 """
 expected_stderr = """
-helpers/invalid-test-config.toml: Failed to parse test config
+helpers/invalid-test-config.toml: Failed to parse config file
 
 """
 
