@@ -7,7 +7,7 @@ Golden test runner for executables
 Usage: aureum [OPTIONS] <PATHS>...
 
 Arguments:
-  <PATHS>...  Paths to test configs
+  <PATHS>...  Paths to config files
 
 Options:
       --output-format <OUTPUT_FORMAT>  Options: summary, tap [default: summary]

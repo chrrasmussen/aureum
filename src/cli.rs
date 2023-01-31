@@ -10,7 +10,7 @@ pub fn parse() -> Args {
 /// Golden test runner for executables
 #[derive(Parser)]
 pub struct Args {
-    /// Paths to test configs
+    /// Paths to config files
     #[arg(required = true)]
     pub paths: Vec<TestPath>,
 
