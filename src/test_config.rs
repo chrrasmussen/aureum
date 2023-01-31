@@ -67,7 +67,7 @@ enum ConfigValue<T> {
 
 #[derive(PartialEq, PartialOrd, Eq, Ord)]
 enum Requirement {
-    LocalFile(String),
+    ExternalFile(String),
     EnvVar(String),
 }
 
@@ -109,7 +109,7 @@ fn get_requirement<T>(config_value: &ConfigValue<T>) -> Option<Requirement> {
         ConfigValue::Literal(_) => None,
         ConfigValue::WrappedLiteral { value: _ } => None,
         ConfigValue::ReadFromFile { file: filename } => {
-            Some(Requirement::LocalFile(filename.clone()))
+            Some(Requirement::ExternalFile(filename.clone()))
         }
         ConfigValue::FetchFromEnv { env: var_name } => Some(Requirement::EnvVar(var_name.clone())),
     }
@@ -168,9 +168,9 @@ fn gather_requirements(requirements: &BTreeSet<Requirement>, current_dir: &Path)
 
     for requirement in requirements {
         match requirement {
-            Requirement::LocalFile(path) => {
+            Requirement::ExternalFile(path) => {
                 data.files
-                    .insert(path.to_owned(), read_local_file(path, current_dir).ok());
+                    .insert(path.to_owned(), read_external_file(path, current_dir).ok());
             }
             Requirement::EnvVar(var_name) => {
                 data.env
@@ -182,7 +182,7 @@ fn gather_requirements(requirements: &BTreeSet<Requirement>, current_dir: &Path)
     data
 }
 
-fn read_local_file(path: &String, current_dir: &Path) -> io::Result<String> {
+fn read_external_file(path: &String, current_dir: &Path) -> io::Result<String> {
     let path = current_dir.join(path);
     fs::read_to_string(path)
 }
@@ -195,7 +195,7 @@ fn read_from_env(var_name: &String) -> Result<String, env::VarError> {
 
 #[derive(PartialEq, Eq, PartialOrd, Ord)]
 pub enum TestCaseValidationError {
-    MissingLocalFile(String),
+    MissingExternalFile(String),
     MissingEnvVar(String),
     FailedToParseString,
     ProgramRequired,
@@ -375,7 +375,7 @@ where
                         .map_err(|_err| TestCaseValidationError::FailedToParseString)?;
                     Ok(value)
                 } else {
-                    Err(TestCaseValidationError::MissingLocalFile(file_path))
+                    Err(TestCaseValidationError::MissingExternalFile(file_path))
                 }
             }
             Self::FetchFromEnv { env: var_name } => {

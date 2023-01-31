@@ -190,17 +190,6 @@ fn test_cases_errors(test_cases: &TestCases) -> Option<Value> {
 fn requirements_map(requirements: &TestConfigData) -> BTreeMap<&str, BTreeMap<String, String>> {
     let mut contents = BTreeMap::new();
 
-    let any_env_missing = requirements.any_missing_env_requirements();
-    let env = requirements.env_requirements();
-    if any_env_missing && env.len() > 0 {
-        contents.insert(
-            "env",
-            env.into_iter()
-                .map(|(x, y)| (x, show_presence(y)))
-                .collect(),
-        );
-    }
-
     let any_files_missing = requirements.any_missing_file_requirements();
     let files = requirements.file_requirements();
     if any_files_missing && files.len() > 0 {
@@ -208,6 +197,17 @@ fn requirements_map(requirements: &TestConfigData) -> BTreeMap<&str, BTreeMap<St
             "files",
             files
                 .into_iter()
+                .map(|(x, y)| (x, show_presence(y)))
+                .collect(),
+        );
+    }
+
+    let any_env_missing = requirements.any_missing_env_requirements();
+    let env = requirements.env_requirements();
+    if any_env_missing && env.len() > 0 {
+        contents.insert(
+            "env",
+            env.into_iter()
                 .map(|(x, y)| (x, show_presence(y)))
                 .collect(),
         );
@@ -233,7 +233,7 @@ fn validation_errors_map(
 
 fn show_validation_error(validation_error: &TestCaseValidationError) -> &str {
     match validation_error {
-        TestCaseValidationError::MissingLocalFile(_) => "Missing external file",
+        TestCaseValidationError::MissingExternalFile(_) => "Missing external file",
         TestCaseValidationError::MissingEnvVar(_) => "Missing environment variable",
         TestCaseValidationError::FailedToParseString => "Failed to parse string",
         TestCaseValidationError::ProgramRequired => "The field 'program' is required",
