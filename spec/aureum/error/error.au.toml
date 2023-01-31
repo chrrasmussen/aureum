@@ -93,7 +93,7 @@ helpers/missing-env-var.toml:
     env:
       AUREUM_TEST_THIS_ENV_VAR_DOES_NOT_EXIST: ❌
   validation-errors:
-  - Missing environment variable
+  - Missing environment variable 'AUREUM_TEST_THIS_ENV_VAR_DOES_NOT_EXIST'
 """
 
 
@@ -111,5 +111,5 @@ helpers/missing-external-file.toml:
     files:
       AUREUM_TEST_THIS_FILE_DOES_NOT_EXIST: ❌
   validation-errors:
-  - Missing external file
+  - Missing external file 'AUREUM_TEST_THIS_FILE_DOES_NOT_EXIST'
 """

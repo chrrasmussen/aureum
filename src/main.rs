@@ -242,13 +242,13 @@ fn validation_errors_map(
     }
 }
 
-fn show_validation_error(validation_error: &TestCaseValidationError) -> &str {
+fn show_validation_error(validation_error: &TestCaseValidationError) -> String {
     match validation_error {
-        TestCaseValidationError::MissingExternalFile(_) => "Missing external file",
-        TestCaseValidationError::MissingEnvVar(_) => "Missing environment variable",
-        TestCaseValidationError::FailedToParseString => "Failed to parse string",
-        TestCaseValidationError::ProgramRequired => "The field 'program' is required",
-        TestCaseValidationError::ExpectationRequired => "At least one expectation is required",
+        TestCaseValidationError::MissingExternalFile(file_path) => format!("Missing external file '{}'", file_path),
+        TestCaseValidationError::MissingEnvVar(var_name) => format!("Missing environment variable '{}'", var_name),
+        TestCaseValidationError::FailedToParseString => String::from("Failed to parse string"),
+        TestCaseValidationError::ProgramRequired => String::from("The field 'program' is required"),
+        TestCaseValidationError::ExpectationRequired => String::from("At least one expectation is required"),
     }
 }
 
