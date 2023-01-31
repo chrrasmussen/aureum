@@ -241,13 +241,26 @@ impl TestConfig {
     ) -> Result<TestCase, BTreeSet<TestCaseValidationError>> {
         let mut validation_errors = BTreeSet::new();
 
+        // Validate fields in test config
+
+        if self.program.is_none() {
+            validation_errors.insert(TestCaseValidationError::ProgramRequired);
+        }
+
+        if self.expected_stdout.is_none()
+            && self.expected_stderr.is_none()
+            && self.expected_exit_code.is_none()
+        {
+            validation_errors.insert(TestCaseValidationError::ExpectationRequired);
+        }
+
+        // Read fields
+
         let description = read_from_config_value(&mut validation_errors, self.description, data);
 
         let mut program = String::from("");
         if let Some(p) = read_from_config_value(&mut validation_errors, self.program, data) {
             program = p;
-        } else {
-            validation_errors.insert(TestCaseValidationError::ProgramRequired);
         }
 
         let mut arguments = vec![];
@@ -270,10 +283,6 @@ impl TestConfig {
             read_from_config_value(&mut validation_errors, self.expected_stderr, data);
         let expected_exit_code =
             read_from_config_value(&mut validation_errors, self.expected_exit_code, data);
-
-        if expected_stdout == None && expected_stderr == None && expected_exit_code == None {
-            validation_errors.insert(TestCaseValidationError::ExpectationRequired);
-        }
 
         if validation_errors.is_empty() {
             Ok(TestCase {

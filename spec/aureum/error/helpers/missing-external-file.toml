@@ -1,0 +1,3 @@
+program = "/bin/echo"
+
+expected_stdout = { file = "AUREUM_TEST_THIS_FILE_DOES_NOT_EXIST" }

@@ -233,7 +233,7 @@ fn validation_errors_map(
 
 fn show_validation_error(validation_error: &TestCaseValidationError) -> &str {
     match validation_error {
-        TestCaseValidationError::MissingLocalFile(_) => "Missing local file",
+        TestCaseValidationError::MissingLocalFile(_) => "Missing external file",
         TestCaseValidationError::MissingEnvVar(_) => "Missing environment variable",
         TestCaseValidationError::FailedToParseString => "Failed to parse string",
         TestCaseValidationError::ProgramRequired => "The field 'program' is required",

@@ -80,3 +80,41 @@ helpers/no-expectations.toml:
     '':
     - At least one expectation is required
 """
+
+
+[tests.missing-env-var]
+program_arguments = ["helpers/missing-env-var.toml"]
+expected_stdout = """
+Running 0 tests:
+
+
+Test result: OK (0 passed, 0 failed)
+"""
+expected_stderr = """
+helpers/missing-env-var.toml:
+  requirements:
+    env:
+      AUREUM_TEST_THIS_ENV_VAR_DOES_NOT_EXIST: ❌
+  validation-errors:
+    '':
+    - Missing environment variable
+"""
+
+
+[tests.missing-external-file]
+program_arguments = ["helpers/missing-external-file.toml"]
+expected_stdout = """
+Running 0 tests:
+
+
+Test result: OK (0 passed, 0 failed)
+"""
+expected_stderr = """
+helpers/missing-external-file.toml:
+  requirements:
+    files:
+      AUREUM_TEST_THIS_FILE_DOES_NOT_EXIST: ❌
+  validation-errors:
+    '':
+    - Missing external file
+"""
