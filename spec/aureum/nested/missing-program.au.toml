@@ -1,0 +1,18 @@
+program = { env = "AUREUM_TEST_EXEC" }
+program_arguments = ["--show-all-tests", "helpers/missing-program.toml"]
+
+expected_stdout = """
+Running 0 tests:
+
+
+Test result: OK (0 passed, 0 failed)
+"""
+expected_stderr = """
+helpers/missing-program.toml:
+  validation-errors:
+    test1:
+    - The field 'program' is required
+    test2:
+    - The field 'program' is required
+"""
+expected_exit_code = 1
