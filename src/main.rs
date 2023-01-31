@@ -10,11 +10,12 @@ mod test_runner;
 use cli::{Args, OutputFormat, TestPath};
 use glob::glob;
 use serde_yaml::Value;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::fmt::{Display, Formatter};
 use std::path::PathBuf;
 use std::process::exit;
-use test_config::TestConfigError;
+use test_config::{TestCaseValidationError, TestCases, TestConfigData, TestConfigError};
+use test_id::TestId;
 use test_id_container::TestIdContainer;
 use test_runner::{ReportConfig, ReportFormat};
 
@@ -39,7 +40,10 @@ fn main() {
     for test_file in test_files {
         match test_config::test_cases_from_file(&test_file) {
             Ok(result) => {
-                // TODO: Handle requirements
+                if let Some(data) = test_cases_errors(&result) {
+                    failed_configs.push(report_error(test_file, data));
+                }
+
                 all_test_cases.extend(result.test_cases);
             }
             Err(err) => {
@@ -47,7 +51,7 @@ fn main() {
                     TestConfigError::FailedToReadFile(_) => "Failed to read file",
                     TestConfigError::FailedToParseTestConfig(_) => "Failed to parse test config",
                 };
-                failed_configs.push(report_simple_error(test_file.clone(), msg));
+                failed_configs.push(report_error_message(test_file, msg));
             }
         }
     }
@@ -149,9 +153,94 @@ impl Display for ConfigError {
     }
 }
 
-fn report_simple_error(source_file: PathBuf, msg: &str) -> ConfigError {
+fn report_error(source_file: PathBuf, error: Value) -> ConfigError {
+    ConfigError { source_file, error }
+}
+
+fn report_error_message(source_file: PathBuf, msg: &str) -> ConfigError {
     ConfigError {
         source_file,
-        error: Value::String(msg.to_owned()),
+        error: Value::String(String::from(msg)),
     }
+}
+
+fn test_cases_errors(test_cases: &TestCases) -> Option<Value> {
+    let mut contents = BTreeMap::new();
+
+    let requirements = requirements_map(&test_cases.requirements);
+    if requirements.len() > 0 {
+        contents.insert("requirements", serde_yaml::to_value(requirements).ok()?);
+    }
+
+    let validation_errors = validation_errors_map(&test_cases.validation_errors);
+    if validation_errors.len() > 0 {
+        contents.insert(
+            "validation-errors",
+            serde_yaml::to_value(validation_errors).ok()?,
+        );
+    }
+
+    if contents.len() > 0 {
+        serde_yaml::to_value(contents).ok()
+    } else {
+        None
+    }
+}
+
+fn requirements_map(requirements: &TestConfigData) -> BTreeMap<&str, BTreeMap<String, String>> {
+    let mut contents = BTreeMap::new();
+
+    let any_env_missing = requirements.any_missing_env_requirements();
+    let env = requirements.env_requirements();
+    if any_env_missing && env.len() > 0 {
+        contents.insert(
+            "env",
+            env.into_iter()
+                .map(|(x, y)| (x, show_presence(y)))
+                .collect(),
+        );
+    }
+
+    let any_files_missing = requirements.any_missing_file_requirements();
+    let files = requirements.file_requirements();
+    if any_files_missing && files.len() > 0 {
+        contents.insert(
+            "files",
+            files
+                .into_iter()
+                .map(|(x, y)| (x, show_presence(y)))
+                .collect(),
+        );
+    }
+
+    contents
+}
+
+fn validation_errors_map(
+    validation_errors: &Vec<(TestId, BTreeSet<TestCaseValidationError>)>,
+) -> BTreeMap<String, Vec<&str>> {
+    let mut contents = BTreeMap::new();
+
+    for (test_id, errs) in validation_errors {
+        contents.insert(
+            test_id.to_string(),
+            errs.iter().map(show_validation_error).collect::<Vec<_>>(),
+        );
+    }
+
+    contents
+}
+
+fn show_validation_error(validation_error: &TestCaseValidationError) -> &str {
+    match validation_error {
+        TestCaseValidationError::MissingLocalFile(_) => "Missing local file",
+        TestCaseValidationError::MissingEnvVar(_) => "Missing environment variable",
+        TestCaseValidationError::FailedToParseString => "Failed to parse string",
+        TestCaseValidationError::ProgramRequired => "The field 'program' is required",
+        TestCaseValidationError::ExpectationRequired => "At least one expectation is required",
+    }
+}
+
+fn show_presence(value: bool) -> String {
+    String::from(if value { "✔️" } else { "❌" })
 }

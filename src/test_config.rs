@@ -130,6 +130,30 @@ impl TestConfigData {
         }
     }
 
+    pub fn any_missing_file_requirements(&self) -> bool {
+        self.files.iter().any(|(_key, value)| value.is_none())
+    }
+
+    pub fn file_requirements(&self) -> Vec<(String, bool)> {
+        Vec::from_iter(
+            self.files
+                .iter()
+                .map(|(key, value)| (key.to_owned(), value.is_some())),
+        )
+    }
+
+    pub fn any_missing_env_requirements(&self) -> bool {
+        self.env.iter().any(|(_key, value)| value.is_none())
+    }
+
+    pub fn env_requirements(&self) -> Vec<(String, bool)> {
+        Vec::from_iter(
+            self.env
+                .iter()
+                .map(|(key, value)| (key.to_owned(), value.is_some())),
+        )
+    }
+
     fn get_file(&self, key: &String) -> Option<String> {
         self.files.get(key).and_then(|x| x.to_owned())
     }
