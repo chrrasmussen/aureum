@@ -1,5 +1,5 @@
-test_program = { env = "AUREUM_TEST_EXEC" }
-test_arguments = ["--show-all-tests", "two-levels.toml"]
+program = { env = "AUREUM_TEST_EXEC" }
+program_arguments = ["--show-all-tests", "two-levels.toml"]
 
 expected_stdout = """
 Running 2 tests:

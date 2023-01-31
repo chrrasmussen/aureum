@@ -1,5 +1,5 @@
-test_program = { env = "AUREUM_TEST_EXEC" }
-test_arguments = ["--help"]
+program = { env = "AUREUM_TEST_EXEC" }
+program_arguments = ["--help"]
 
 expected_stdout = """
 Golden test runner for executables

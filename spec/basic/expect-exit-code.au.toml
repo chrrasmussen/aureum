@@ -1,5 +1,5 @@
-test_program = "/bin/bash"
-test_stdin = """
+program = "/bin/bash"
+stdin = """
 #!/usr/bin/env bash
 set -e
 

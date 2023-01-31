@@ -1,8 +1,8 @@
-test_program = { env = "AUREUM_TEST_EXEC" }
+program = { env = "AUREUM_TEST_EXEC" }
 
 
 [tests.show-all-tests]
-test_arguments = [
+program_arguments = [
   "--show-all-tests",
   "helpers/passing-test.toml",
   "helpers/failing-test.toml",
@@ -30,7 +30,7 @@ expected_exit_code = 1
 
 
 [tests.default]
-test_arguments = ["helpers/passing-test.toml", "helpers/failing-test.toml"]
+program_arguments = ["helpers/passing-test.toml", "helpers/failing-test.toml"]
 expected_stdout = """
 Running 2 tests:
 F.

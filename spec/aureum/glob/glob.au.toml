@@ -1,11 +1,11 @@
-test_program = { env = "AUREUM_TEST_EXEC" }
+program = { env = "AUREUM_TEST_EXEC" }
 
 expected_stderr = ""
 expected_exit_code = 0
 
 
 [tests.single-file]
-test_arguments = ["--show-all-tests", "helpers/dir1/test1.toml"]
+program_arguments = ["--show-all-tests", "helpers/dir1/test1.toml"]
 expected_stdout = """
 Running 1 tests:
 .
@@ -17,7 +17,7 @@ Test result: OK (1 passed, 0 failed)
 
 
 [tests.single-dir]
-test_arguments = ["--show-all-tests", "helpers/dir1/*.toml"]
+program_arguments = ["--show-all-tests", "helpers/dir1/*.toml"]
 expected_stdout = """
 Running 2 tests:
 ..
@@ -30,7 +30,7 @@ Test result: OK (2 passed, 0 failed)
 
 
 [tests.multiple-dirs]
-test_arguments = [
+program_arguments = [
   "--show-all-tests",
   "helpers/dir1/*.toml",
   "helpers/dir2/*.toml",
@@ -50,7 +50,7 @@ Test result: OK (4 passed, 0 failed)
 
 
 [tests.multiple-files]
-test_arguments = [
+program_arguments = [
   "--show-all-tests",
   "helpers/dir1/test1.toml",
   "helpers/dir1/test2.toml",

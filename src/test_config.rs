@@ -44,10 +44,10 @@ pub fn test_cases_from_file(path: &Path) -> Result<TestCases, TestConfigError> {
 
 #[derive(Deserialize, Clone)]
 struct TestConfig {
-    test_description: Option<ConfigValue<String>>,
-    test_program: Option<ConfigValue<String>>,
-    test_arguments: Option<Vec<ConfigValue<String>>>,
-    test_stdin: Option<ConfigValue<String>>,
+    description: Option<ConfigValue<String>>,
+    program: Option<ConfigValue<String>>,
+    program_arguments: Option<Vec<ConfigValue<String>>>,
+    stdin: Option<ConfigValue<String>>,
     expected_stdout: Option<ConfigValue<String>>,
     expected_stderr: Option<ConfigValue<String>>,
     expected_exit_code: Option<ConfigValue<i32>>,
@@ -75,14 +75,14 @@ impl TestConfig {
     fn get_requirements(&self) -> BTreeSet<Requirement> {
         let mut requirements = BTreeSet::new();
 
-        add_requirement(&mut requirements, &self.test_description);
-        add_requirement(&mut requirements, &self.test_program);
-        add_requirement(&mut requirements, &self.test_stdin);
+        add_requirement(&mut requirements, &self.description);
+        add_requirement(&mut requirements, &self.program);
+        add_requirement(&mut requirements, &self.stdin);
         add_requirement(&mut requirements, &self.expected_stdout);
         add_requirement(&mut requirements, &self.expected_stderr);
         add_requirement(&mut requirements, &self.expected_exit_code);
 
-        if let Some(arguments) = &self.test_arguments {
+        if let Some(arguments) = &self.program_arguments {
             for argument in arguments {
                 let requirement = get_requirement(argument);
                 requirements.extend(requirement)
@@ -217,18 +217,17 @@ impl TestConfig {
     ) -> Result<TestCase, BTreeSet<TestCaseValidationError>> {
         let mut validation_errors = BTreeSet::new();
 
-        let description =
-            read_from_config_value(&mut validation_errors, self.test_description, data);
+        let description = read_from_config_value(&mut validation_errors, self.description, data);
 
         let mut program = String::from("");
-        if let Some(p) = read_from_config_value(&mut validation_errors, self.test_program, data) {
+        if let Some(p) = read_from_config_value(&mut validation_errors, self.program, data) {
             program = p;
         } else {
             validation_errors.insert(TestCaseValidationError::ProgramRequired);
         }
 
         let mut arguments = vec![];
-        for arg in self.test_arguments.unwrap_or(vec![]) {
+        for arg in self.program_arguments.unwrap_or(vec![]) {
             match arg.read(data) {
                 Ok(arg) => {
                     arguments.push(arg);
@@ -239,7 +238,7 @@ impl TestConfig {
             }
         }
 
-        let stdin = read_from_config_value(&mut validation_errors, self.test_stdin, data);
+        let stdin = read_from_config_value(&mut validation_errors, self.stdin, data);
 
         let expected_stdout =
             read_from_config_value(&mut validation_errors, self.expected_stdout, data);
@@ -309,14 +308,12 @@ fn split_test_configs(base_config: TestConfig) -> Vec<(Vec<String>, TestConfig)>
 
 fn merge_test_configs(base_config: TestConfig, prioritized_config: TestConfig) -> TestConfig {
     TestConfig {
-        test_description: prioritized_config
-            .test_description
-            .or(base_config.test_description),
-        test_program: prioritized_config.test_program.or(base_config.test_program),
-        test_arguments: prioritized_config
-            .test_arguments
-            .or(base_config.test_arguments),
-        test_stdin: prioritized_config.test_stdin.or(base_config.test_stdin),
+        description: prioritized_config.description.or(base_config.description),
+        program: prioritized_config.program.or(base_config.program),
+        program_arguments: prioritized_config
+            .program_arguments
+            .or(base_config.program_arguments),
+        stdin: prioritized_config.stdin.or(base_config.stdin),
         expected_stdout: prioritized_config
             .expected_stdout
             .or(base_config.expected_stdout),

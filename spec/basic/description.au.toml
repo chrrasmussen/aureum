@@ -1,5 +1,5 @@
-test_description = "My description"
-test_program = "/bin/echo"
-test_arguments = ["-n", "Hello world"]
+description = "My description"
+program = "/bin/echo"
+program_arguments = ["-n", "Hello world"]
 
 expected_stdout = "Hello world"

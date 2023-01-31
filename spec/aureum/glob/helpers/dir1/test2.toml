@@ -1,4 +1,4 @@
-test_program = "/bin/echo"
-test_arguments = ["-n", "Test 2"]
+program = "/bin/echo"
+program_arguments = ["-n", "Test 2"]
 
 expected_stdout = "Test 2"

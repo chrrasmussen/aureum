@@ -1,17 +1,17 @@
-test_program = { env = "AUREUM_TEST_EXEC" }
+program = { env = "AUREUM_TEST_EXEC" }
 expected_stdout = ""
 expected_exit_code = 1
 
 
 [tests.missing-test-config]
-test_arguments = ["AUREUM-THIS-FILE-DOES-NOT-EXIST"]
+program_arguments = ["AUREUM-THIS-FILE-DOES-NOT-EXIST"]
 expected_stderr = """
 No test configs found for the given paths
 """
 
 
 [tests.missing-test-config-with-test-id]
-test_arguments = ["AUREUM-THIS-FILE-DOES-NOT-EXIST:sub1"]
+program_arguments = ["AUREUM-THIS-FILE-DOES-NOT-EXIST:sub1"]
 expected_stderr = """
 error: Invalid value 'AUREUM-THIS-FILE-DOES-NOT-EXIST:sub1' for '<PATHS>...': Invalid path to test config
 
@@ -21,7 +21,7 @@ expected_exit_code = 2
 
 
 [tests.invalid-test-config]
-test_arguments = ["helpers/invalid-test-config.toml"]
+program_arguments = ["helpers/invalid-test-config.toml"]
 expected_stdout = """
 Running 0 tests:
 

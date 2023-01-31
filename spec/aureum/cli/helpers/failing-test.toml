@@ -1,5 +1,5 @@
-test_program = "/bin/echo"
-test_arguments = ["-n", "Hello world"]
+program = "/bin/echo"
+program_arguments = ["-n", "Hello world"]
 
 expected_stdout = "STDOUT"
 expected_stderr = "STDERR"
