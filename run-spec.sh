@@ -5,6 +5,4 @@ set -e
 export AUREUM_TEST_EXEC="$PWD/target/debug/aureum"
 export AUREUM_TEST_HELLO_WORLD="Hello world" # Required by `basic/read-env-var.au.toml`
 
-ARGS=${*:-spec.au.toml}
-
-cargo run -- $ARGS
+cargo run -- "${@:-spec.au.toml}"
