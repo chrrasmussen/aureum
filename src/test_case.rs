@@ -1,12 +1,12 @@
 use crate::file_util;
 use crate::test_id::TestId;
+use relative_path::RelativePathBuf;
 use std::io::{self, Read, Write};
-use std::path::PathBuf;
 use std::process::{Command, Stdio};
 
 #[derive(Clone)]
 pub struct TestCase {
-    pub source_file: PathBuf,
+    pub source_file: RelativePathBuf,
     pub id: TestId,
     pub description: Option<String>,
     pub program: String,
@@ -19,7 +19,7 @@ pub struct TestCase {
 
 impl TestCase {
     pub fn id(&self) -> String {
-        let file_path = self.source_file.display();
+        let file_path = self.source_file.to_string();
 
         if self.id.is_root() {
             file_path.to_string()
@@ -67,7 +67,7 @@ pub enum RunError {
 }
 
 pub fn run(test_case: &TestCase) -> Result<TestResult, RunError> {
-    let current_dir = file_util::parent_dir(&test_case.source_file);
+    let current_dir = file_util::parent_dir(&test_case.source_file).to_logical_path(".");
 
     let mut cmd = Command::new(&test_case.program);
     cmd.current_dir(current_dir);

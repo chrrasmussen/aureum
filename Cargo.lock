@@ -10,6 +10,7 @@ dependencies = [
  "glob",
  "itertools",
  "rayon",
+ "relative-path",
  "serde",
  "serde_yaml",
  "toml",
@@ -326,6 +327,12 @@ dependencies = [
  "crossbeam-utils",
  "num_cpus",
 ]
+
+[[package]]
+name = "relative-path"
+version = "1.7.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d3bf6b372449361333ac1f498b7edae4dd5e70dccd7c0c2a7c7bce8f05ede648"
 
 [[package]]
 name = "rustix"

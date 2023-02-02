@@ -9,6 +9,7 @@ mod test_runner;
 
 use cli::{Args, OutputFormat, TestPath};
 use glob::glob;
+use relative_path::RelativePathBuf;
 use serde_yaml::Value;
 use std::collections::{BTreeMap, BTreeSet};
 use std::fmt::{Display, Formatter};
@@ -25,12 +26,12 @@ const INVALID_USER_INPUT_EXIT_CODE: i32 = 2;
 fn main() {
     let args = cli::parse();
 
-    let test_files = expand_test_paths(&args.paths)
+    let source_files = expand_test_paths(&args.paths)
         .keys()
         .cloned()
         .collect::<Vec<_>>();
 
-    if test_files.is_empty() {
+    if source_files.is_empty() {
         eprintln!("error: No config files found for the given paths");
         exit(INVALID_USER_INPUT_EXIT_CODE);
     }
@@ -38,11 +39,13 @@ fn main() {
     let mut all_test_cases = vec![];
     let mut failed_configs = vec![];
 
-    for test_file in test_files {
-        match test_config::test_cases_from_file(&test_file) {
+    for source_file in source_files {
+        let path = RelativePathBuf::from_path(source_file).unwrap(); // TODO: Avoid `unwrap()`
+
+        match test_config::test_cases_from_file(&path) {
             Ok(result) => {
                 if let Some(data) = test_cases_errors(&result) {
-                    failed_configs.push(report_error(test_file, data));
+                    failed_configs.push(report_error(path, data));
                 }
 
                 all_test_cases.extend(result.test_cases);
@@ -52,7 +55,7 @@ fn main() {
                     TestConfigError::FailedToReadFile(_) => "Failed to read file",
                     TestConfigError::FailedToParseTestConfig(_) => "Failed to parse config file",
                 };
-                failed_configs.push(report_error_message(test_file, msg));
+                failed_configs.push(report_error_message(path, msg));
             }
         }
     }
@@ -147,13 +150,13 @@ fn get_report_format(args: &Args) -> ReportFormat {
 }
 
 struct ConfigError {
-    source_file: PathBuf,
+    source_file: RelativePathBuf,
     error: Value,
 }
 
 impl Display for ConfigError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let source_file = self.source_file.display().to_string();
+        let source_file = self.source_file.to_string();
         let content = BTreeMap::from([(source_file, &self.error)]);
         let output =
             serde_yaml::to_string(&content).unwrap_or(String::from("Failed to convert to YAML\n"));
@@ -161,11 +164,11 @@ impl Display for ConfigError {
     }
 }
 
-fn report_error(source_file: PathBuf, error: Value) -> ConfigError {
+fn report_error(source_file: RelativePathBuf, error: Value) -> ConfigError {
     ConfigError { source_file, error }
 }
 
-fn report_error_message(source_file: PathBuf, msg: &str) -> ConfigError {
+fn report_error_message(source_file: RelativePathBuf, msg: &str) -> ConfigError {
     ConfigError {
         source_file,
         error: Value::String(String::from(msg)),

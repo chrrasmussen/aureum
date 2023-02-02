@@ -1,12 +1,13 @@
 use crate::file_util;
 use crate::test_case::TestCase;
 use crate::test_id::TestId;
+use relative_path::{RelativePath, RelativePathBuf};
 use serde::Deserialize;
 use std::collections::{BTreeMap, BTreeSet};
 use std::env;
 use std::fs;
 use std::io;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::str::FromStr;
 
 // READ CONFIG FILE
@@ -22,16 +23,19 @@ pub enum TestConfigError {
     FailedToParseTestConfig(toml::de::Error),
 }
 
-pub fn test_cases_from_file(path: &Path) -> Result<TestCases, TestConfigError> {
-    let toml_content = fs::read_to_string(path).map_err(TestConfigError::FailedToReadFile)?;
+pub fn test_cases_from_file(source_file: &RelativePath) -> Result<TestCases, TestConfigError> {
+    let source_path = source_file.to_logical_path(".");
+
+    let toml_content =
+        fs::read_to_string(source_path).map_err(TestConfigError::FailedToReadFile)?;
     let test_config = toml::from_str::<TestConfig>(&toml_content)
         .map_err(TestConfigError::FailedToParseTestConfig)?;
 
     let requirements = test_config.get_requirements();
-    let test_dir = file_util::parent_dir(path);
-    let data = gather_requirements(&requirements, &test_dir);
+    let source_dir = file_util::parent_dir(source_file).to_logical_path(".");
+    let data = gather_requirements(&requirements, &source_dir);
 
-    let (test_cases, validation_errors) = test_config.to_test_cases(path, &data);
+    let (test_cases, validation_errors) = test_config.to_test_cases(source_file, &data);
 
     Ok(TestCases {
         requirements: data,
@@ -212,7 +216,7 @@ impl TestConfig {
         Vec<(TestId, BTreeSet<TestCaseValidationError>)>,
     )
     where
-        P: AsRef<Path>,
+        P: AsRef<RelativePath>,
     {
         let source_file = path.as_ref();
 
@@ -224,7 +228,7 @@ impl TestConfig {
         for (id_path, test_config) in test_configs {
             let test_id = TestId::new(id_path);
 
-            match test_config.to_test_case(source_file.to_path_buf(), test_id.clone(), data) {
+            match test_config.to_test_case(source_file.to_owned(), test_id.clone(), data) {
                 Ok(test_case) => test_cases.push(test_case),
                 Err(err) => validation_errors.push((test_id, err)),
             }
@@ -235,7 +239,7 @@ impl TestConfig {
 
     fn to_test_case(
         self,
-        source_file: PathBuf,
+        source_file: RelativePathBuf,
         id: TestId,
         data: &TestConfigData,
     ) -> Result<TestCase, BTreeSet<TestCaseValidationError>> {

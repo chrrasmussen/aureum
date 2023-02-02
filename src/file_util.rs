@@ -1,13 +1,11 @@
-use std::path::{Path, PathBuf};
+use relative_path::{RelativePath, RelativePathBuf};
 
-pub fn parent_dir<P>(path: P) -> PathBuf
+pub fn parent_dir<P>(path: P) -> RelativePathBuf
 where
-    P: AsRef<Path>,
+    P: AsRef<RelativePath>,
 {
-    let parent_dir = path.as_ref().parent().unwrap_or(Path::new("."));
-    if parent_dir == Path::new("") {
-        PathBuf::from(".")
-    } else {
-        parent_dir.to_path_buf()
-    }
+    path.as_ref()
+        .parent()
+        .unwrap_or(RelativePath::new("."))
+        .to_relative_path_buf()
 }
