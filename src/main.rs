@@ -156,7 +156,7 @@ impl Display for ConfigError {
         let source_file = self.source_file.display().to_string();
         let content = BTreeMap::from([(source_file, &self.error)]);
         let output =
-            serde_yaml::to_string(&content).unwrap_or(String::from("Failed to convert to YAML"));
+            serde_yaml::to_string(&content).unwrap_or(String::from("Failed to convert to YAML\n"));
         write!(f, "{}", output)
     }
 }

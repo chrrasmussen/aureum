@@ -178,7 +178,7 @@ fn summary_print_result(run_result: &RunResult) {
         println!("❌ {}", message);
         let error_msg = match &run_result.result {
             Ok(result) => format_test_result(result),
-            Err(_) => String::from("Failed to run test"),
+            Err(_) => String::from("Failed to run test\n"),
         };
         print!("{}", error_msg);
     }
@@ -242,7 +242,7 @@ fn format_test_result(test_result: &TestResult) -> String {
         diagnostics.insert("exit-code", show_i32_diff(expected, got));
     }
 
-    serde_yaml::to_string(&diagnostics).unwrap_or(String::from("Failed to convert to YAML"))
+    serde_yaml::to_string(&diagnostics).unwrap_or(String::from("Failed to convert to YAML\n"))
 }
 
 fn show_string_diff(expected: &String, got: &String) -> BTreeMap<&'static str, Value> {
