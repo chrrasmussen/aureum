@@ -12,7 +12,7 @@ Key functionality:
 - Supports two output formats: `summary` and [`tap`](http://testanything.org)
 - Tries to provide helpful error messages
 - `aureum` is tested by `aureum` (See [`spec/`](spec/))
-- Runs on Linux and macOS.
+- Runs on Linux, macOS and Windows
 
 This tool is best suited to test executables that are stateless, i.e. running an executable with a given input always produces the same output.
 
