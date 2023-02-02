@@ -1,5 +1,5 @@
 description = "My description"
-program = "/bin/echo"
+program = "echo"
 program_arguments = ["-n", "Hello world"]
 
 expected_stdout = "Hello world"

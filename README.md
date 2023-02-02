@@ -58,7 +58,7 @@ When running `aureum`, you may specify one or more files/directories/[glob patte
 Create a file named `hello.au.toml` with the following contents:
 
 ```toml
-program = "/bin/echo"
+program = "echo"
 program_arguments = ["-n", "Hello world"]
 
 expected_stdout = "Hello world"
@@ -106,7 +106,7 @@ Note that fields specified at the level above the sub-test will get inherited by
 Filename: ``multiple-tests.au.toml``
 
 ```toml
-program = "/bin/echo"
+program = "echo"
 
 [tests.test1]
 program_arguments = ["-n", "Test 1"]
