@@ -9,11 +9,13 @@ mod test_runner;
 
 use cli::{Args, OutputFormat, TestPath};
 use glob::glob;
+use pathdiff;
 use relative_path::RelativePathBuf;
 use serde_yaml::Value;
 use std::collections::{BTreeMap, BTreeSet};
+use std::env;
 use std::fmt::{Display, Formatter};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::exit;
 use test_config::{TestCaseValidationError, TestCases, TestConfigData, TestConfigError};
 use test_id::TestId;
@@ -26,7 +28,9 @@ const INVALID_USER_INPUT_EXIT_CODE: i32 = 2;
 fn main() {
     let args = cli::parse();
 
-    let source_files = expand_test_paths(&args.paths)
+    let current_dir = env::current_dir().expect("Current directory must be available");
+
+    let source_files = expand_test_paths(&args.paths, &current_dir)
         .keys()
         .cloned()
         .collect::<Vec<_>>();
@@ -40,12 +44,10 @@ fn main() {
     let mut failed_configs = vec![];
 
     for source_file in source_files {
-        let path = RelativePathBuf::from_path(source_file).unwrap(); // TODO: Avoid `unwrap()`
-
-        match test_config::test_cases_from_file(&path) {
+        match test_config::test_cases_from_file(&source_file) {
             Ok(result) => {
                 if let Some(data) = test_cases_errors(&result) {
-                    failed_configs.push(report_error(path, data));
+                    failed_configs.push(report_error(source_file, data));
                 }
 
                 all_test_cases.extend(result.test_cases);
@@ -55,7 +57,7 @@ fn main() {
                     TestConfigError::FailedToReadFile(_) => "Failed to read file",
                     TestConfigError::FailedToParseTestConfig(_) => "Failed to parse config file",
                 };
-                failed_configs.push(report_error_message(path, msg));
+                failed_configs.push(report_error_message(source_file, msg));
             }
         }
     }
@@ -87,8 +89,11 @@ fn main() {
     }
 }
 
-pub fn expand_test_paths(test_paths: &[TestPath]) -> BTreeMap<PathBuf, TestIdContainer> {
-    let mut test_files = BTreeMap::new();
+pub fn expand_test_paths(
+    test_paths: &[TestPath],
+    current_dir: &Path,
+) -> BTreeMap<RelativePathBuf, TestIdContainer> {
+    let mut files = BTreeMap::new();
 
     for test_path in test_paths {
         match test_path {
@@ -97,22 +102,33 @@ pub fn expand_test_paths(test_paths: &[TestPath]) -> BTreeMap<PathBuf, TestIdCon
                 // TODO: Handle error case
                 if let Ok(found_test_files) = locate_test_files(path.as_str()) {
                     for found_test_file in found_test_files {
-                        test_files.insert(found_test_file, TestIdContainer::full());
+                        if let Some(path) = get_relative_path(&found_test_file, current_dir) {
+                            files.insert(path, TestIdContainer::full());
+                        } else {
+                            // TODO: Handle if path is not relative
+                        }
                     }
                 }
             }
-            TestPath::SpecificFile { file_path, test_id } => {
-                test_files
-                    .entry(file_path.clone())
-                    .and_modify(|test_ids: &mut TestIdContainer| {
-                        test_ids.add(test_id.clone());
-                    })
-                    .or_insert(TestIdContainer::empty());
+            TestPath::SpecificFile {
+                source_file,
+                test_id,
+            } => {
+                if let Some(path) = get_relative_path(source_file, current_dir) {
+                    files
+                        .entry(path)
+                        .and_modify(|test_ids: &mut TestIdContainer| {
+                            test_ids.add(test_id.clone());
+                        })
+                        .or_insert(TestIdContainer::empty());
+                } else {
+                    // TODO: Handle if path is not relative
+                }
             }
         }
     }
 
-    test_files
+    files
 }
 
 enum LocateFileError {
@@ -146,6 +162,15 @@ fn get_report_format(args: &Args) -> ReportFormat {
             show_all_tests: args.show_all_tests,
         },
         OutputFormat::Tap => ReportFormat::Tap,
+    }
+}
+
+fn get_relative_path(path: &Path, base: &Path) -> Option<RelativePathBuf> {
+    if path.is_relative() {
+        RelativePathBuf::from_path(path).ok()
+    } else {
+        let path_diff = pathdiff::diff_paths(path, base)?;
+        RelativePathBuf::from_path(path_diff).ok()
     }
 }
 

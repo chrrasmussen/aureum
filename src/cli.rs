@@ -31,7 +31,10 @@ pub struct Args {
 pub enum TestPath {
     Pipe,
     Glob(String),
-    SpecificFile { file_path: PathBuf, test_id: TestId },
+    SpecificFile {
+        source_file: PathBuf,
+        test_id: TestId,
+    },
 }
 
 impl FromStr for TestPath {
@@ -45,7 +48,7 @@ impl FromStr for TestPath {
 
             if path.is_file() {
                 Ok(Self::SpecificFile {
-                    file_path: path,
+                    source_file: path,
                     test_id: TestId::from(suffix),
                 })
             } else {
