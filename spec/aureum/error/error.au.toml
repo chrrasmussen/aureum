@@ -74,15 +74,18 @@ Some config files contain errors (See above)
 [tests.unknown-test-program]
 program_arguments = ["helpers/unknown-test-program.toml"]
 expected_stdout = """
-Running 1 tests:
-F
+Running 0 tests:
 
-❌ helpers/unknown-test-program.toml
-Failed to run test
 
-Test result: FAIL (0 passed, 1 failed)
+Test result: OK (0 passed, 0 failed)
 """
-expected_stderr = ""
+expected_stderr = """
+helpers/unknown-test-program.toml:
+  validation-errors:
+  - The program 'AUREUM-THIS-PROGRAM-DOES-NOT-EXIST' was not found
+
+Some config files contain errors (See above)
+"""
 
 
 [tests.no-expectations]

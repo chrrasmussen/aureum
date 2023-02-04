@@ -203,6 +203,7 @@ pub enum TestCaseValidationError {
     MissingEnvVar(String),
     FailedToParseString,
     ProgramRequired,
+    ProgramNotFound(String),
     ExpectationRequired,
 }
 
@@ -287,6 +288,11 @@ impl TestConfig {
             read_from_config_value(&mut validation_errors, self.expected_stderr, data);
         let expected_exit_code =
             read_from_config_value(&mut validation_errors, self.expected_exit_code, data);
+
+        // Validate fields
+        if &program.is_empty() == &false && which::which(&program).is_err() {
+            validation_errors.insert(TestCaseValidationError::ProgramNotFound(program.clone()));
+        }
 
         if validation_errors.is_empty() {
             Ok(TestCase {

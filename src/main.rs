@@ -285,6 +285,9 @@ fn show_validation_error(validation_error: &TestCaseValidationError) -> String {
         }
         TestCaseValidationError::FailedToParseString => String::from("Failed to parse string"),
         TestCaseValidationError::ProgramRequired => String::from("The field 'program' is required"),
+        TestCaseValidationError::ProgramNotFound(program) => {
+            format!("The program '{}' was not found", program)
+        }
         TestCaseValidationError::ExpectationRequired => {
             String::from("At least one expectation is required")
         }
