@@ -69,7 +69,7 @@ enum ConfigValue<T> {
 
 // REQUIREMENTS
 
-#[derive(PartialEq, PartialOrd, Eq, Ord)]
+#[derive(PartialEq, Eq, PartialOrd, Ord)]
 enum Requirement {
     ExternalFile(String),
     EnvVar(String),
