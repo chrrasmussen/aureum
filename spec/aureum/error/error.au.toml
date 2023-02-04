@@ -71,6 +71,20 @@ Some config files contain errors (See above)
 """
 
 
+[tests.unknown-test-program]
+program_arguments = ["helpers/unknown-test-program.toml"]
+expected_stdout = """
+Running 1 tests:
+F
+
+❌ helpers/unknown-test-program.toml
+Failed to run test
+
+Test result: FAIL (0 passed, 1 failed)
+"""
+expected_stderr = ""
+
+
 [tests.no-expectations]
 program_arguments = ["helpers/no-expectations.toml"]
 expected_stdout = """
