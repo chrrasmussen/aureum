@@ -1,13 +1,8 @@
-mod cli;
-mod file_util;
-mod tap_format;
-mod test_case;
-mod test_config;
-mod test_id;
-mod test_id_container;
-mod test_runner;
-
-use cli::{Args, OutputFormat, TestPath};
+use aureum::cli::{Args, OutputFormat, TestPath};
+use aureum::test_config::{TestCaseValidationError, TestCases, TestConfigData, TestConfigError};
+use aureum::test_id::TestId;
+use aureum::test_id_container::TestIdContainer;
+use aureum::test_runner::{ReportConfig, ReportFormat};
 use glob::glob;
 use pathdiff;
 use relative_path::RelativePathBuf;
@@ -17,16 +12,12 @@ use std::env;
 use std::fmt::{Display, Formatter};
 use std::path::{Path, PathBuf};
 use std::process::exit;
-use test_config::{TestCaseValidationError, TestCases, TestConfigData, TestConfigError};
-use test_id::TestId;
-use test_id_container::TestIdContainer;
-use test_runner::{ReportConfig, ReportFormat};
 
 const TEST_FAILURE_EXIT_CODE: i32 = 1;
 const INVALID_USER_INPUT_EXIT_CODE: i32 = 2;
 
 fn main() {
-    let args = cli::parse();
+    let args = aureum::cli::parse();
 
     let current_dir = env::current_dir().expect("Current directory must be available");
 
@@ -44,7 +35,7 @@ fn main() {
     let mut failed_configs = vec![];
 
     for source_file in source_files {
-        match test_config::test_cases_from_file(&source_file) {
+        match aureum::test_config::test_cases_from_file(&source_file) {
             Ok(result) => {
                 if let Some(data) = test_cases_errors(&result) {
                     failed_configs.push(report_error(source_file, data));
@@ -72,8 +63,11 @@ fn main() {
         format: get_report_format(&args),
     };
 
-    let run_results =
-        test_runner::run_test_cases(&report_config, &all_test_cases, args.run_tests_in_parallel);
+    let run_results = aureum::test_runner::run_test_cases(
+        &report_config,
+        &all_test_cases,
+        args.run_tests_in_parallel,
+    );
 
     let any_failed_configs = failed_configs.is_empty() == false;
     if any_failed_configs {
