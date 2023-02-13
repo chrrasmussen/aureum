@@ -79,15 +79,15 @@ Test result: OK (1 passed, 0 failed)
 The following fields are supported in an Aureum config file:
 
 ```toml
-description = <string>
-program = <string> # Required
-program_arguments = <list of strings>
-stdin = <string>
+description = ""        # String
+program = ""            # String (Required field)
+program_arguments = []  # List of strings
+stdin = ""              # String
 
 # At least one of the following fields are required
-expected_stdout = <string>
-expected_stderr = <string>
-expected_exit_code = <integer>
+expected_stdout = ""    # String
+expected_stderr = ""    # String
+expected_exit_code = 0  # Integer
 ```
 
 In addition to the literal values mentioned above, the following special forms are available:
