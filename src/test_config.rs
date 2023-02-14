@@ -293,10 +293,14 @@ impl TestConfig {
         // Validate fields
         let mut program = PathBuf::new();
         if &program_name.is_empty() == &false {
-            if let Ok(p) = file_util::find_executable_path(&program_name, current_dir.to_logical_path(".")) {
+            if let Ok(p) =
+                file_util::find_executable_path(&program_name, current_dir.to_logical_path("."))
+            {
                 program = p;
             } else {
-                validation_errors.insert(TestCaseValidationError::ProgramNotFound(program_name.clone()));
+                validation_errors.insert(TestCaseValidationError::ProgramNotFound(
+                    program_name.clone(),
+                ));
             }
         }
 
