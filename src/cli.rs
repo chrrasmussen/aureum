@@ -9,6 +9,7 @@ pub fn parse() -> Args {
 
 /// Golden test runner for executables
 #[derive(Parser)]
+#[clap(bin_name = "aureum")]
 pub struct Args {
     /// Paths to config files
     #[arg(required = true)]
