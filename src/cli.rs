@@ -1,6 +1,7 @@
+use crate::file_util;
 use crate::test_id::TestId;
 use clap::Parser;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::str::FromStr;
 
 pub fn parse() -> Args {
@@ -44,13 +45,11 @@ impl FromStr for TestPath {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if s == "-" {
             Ok(Self::Pipe)
-        } else if let Some((prefix, suffix)) = s.split_once(":") {
-            let path = PathBuf::from(prefix);
-
+        } else if let (path, Some(suffix)) = file_util::split_file_name(Path::new(s)) {
             if path.is_file() {
                 Ok(Self::SpecificFile {
                     source_file: path,
-                    test_id: TestId::from(suffix),
+                    test_id: TestId::from(suffix.as_str()),
                 })
             } else {
                 Err("Invalid path to config file")
