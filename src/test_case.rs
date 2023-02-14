@@ -2,6 +2,7 @@ use crate::file_util;
 use crate::test_id::TestId;
 use relative_path::RelativePathBuf;
 use std::io::{self, Read, Write};
+use std::path::PathBuf;
 use std::process::{Command, Stdio};
 
 #[derive(Clone)]
@@ -9,7 +10,7 @@ pub struct TestCase {
     pub source_file: RelativePathBuf,
     pub id: TestId,
     pub description: Option<String>,
-    pub program: String,
+    pub program: PathBuf,
     pub arguments: Vec<String>,
     pub stdin: Option<String>,
     pub expected_stdout: Option<String>,

@@ -7,7 +7,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::env;
 use std::fs;
 use std::io;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::str::FromStr;
 
 // READ CONFIG FILE
@@ -244,6 +244,7 @@ impl TestConfig {
         id: TestId,
         data: &TestConfigData,
     ) -> Result<TestCase, BTreeSet<TestCaseValidationError>> {
+        let current_dir = file_util::parent_dir(&source_file);
         let mut validation_errors = BTreeSet::new();
 
         // Validate fields in config file
@@ -263,9 +264,9 @@ impl TestConfig {
 
         let description = read_from_config_value(&mut validation_errors, self.description, data);
 
-        let mut program = String::from("");
+        let mut program_name = String::from("");
         if let Some(p) = read_from_config_value(&mut validation_errors, self.program, data) {
-            program = p;
+            program_name = p;
         }
 
         let mut arguments = vec![];
@@ -290,8 +291,13 @@ impl TestConfig {
             read_from_config_value(&mut validation_errors, self.expected_exit_code, data);
 
         // Validate fields
-        if &program.is_empty() == &false && which::which(&program).is_err() {
-            validation_errors.insert(TestCaseValidationError::ProgramNotFound(program.clone()));
+        let mut program = PathBuf::new();
+        if &program_name.is_empty() == &false {
+            if let Ok(p) = file_util::find_executable_path(&program_name, current_dir.to_logical_path(".")) {
+                program = p;
+            } else {
+                validation_errors.insert(TestCaseValidationError::ProgramNotFound(program_name.clone()));
+            }
         }
 
         if validation_errors.is_empty() {
