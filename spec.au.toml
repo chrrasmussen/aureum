@@ -2,8 +2,8 @@ program = { env = "AUREUM_TEST_EXEC" }
 program_arguments = ["--show-all-tests", "spec"]
 
 expected_stdout = """
-Running 32 tests:
-................................
+Running 33 tests:
+.................................
 
 ✅ spec/aureum/cli/help.au.toml
 ✅ spec/aureum/cli/no-args.au.toml
@@ -24,6 +24,7 @@ Running 32 tests:
 ✅ spec/aureum/error/error.au.toml:no-expectations
 ✅ spec/aureum/error/error.au.toml:no-program-specified
 ✅ spec/aureum/error/error.au.toml:unknown-test-program
+✅ spec/aureum/glob/absolute-path.au.toml
 ✅ spec/aureum/glob/glob.au.toml:multiple-dirs
 ✅ spec/aureum/glob/glob.au.toml:multiple-files
 ✅ spec/aureum/glob/glob.au.toml:single-dir
@@ -38,7 +39,7 @@ Running 32 tests:
 ✅ spec/basic/read-external-file.au.toml
 ✅ spec/basic/run-bash.au.toml
 
-Test result: OK (32 passed, 0 failed)
+Test result: OK (33 passed, 0 failed)
 """
 expected_stderr = ""
 expected_status_code = 0
