@@ -16,7 +16,6 @@ dependencies = [
  "serde",
  "serde_yaml",
  "toml",
- "unindent",
  "which",
 ]
 
@@ -449,12 +448,6 @@ name = "unicode-ident"
 version = "1.0.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "84a22b9f218b40614adcb3f4ff08b703773ad44fa9423e4e0d346d5db86e4ebc"
-
-[[package]]
-name = "unindent"
-version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5aa30f5ea51ff7edfc797c6d3f9ec8cbd8cfedef5371766b7181d33977f4814f"
 
 [[package]]
 name = "unsafe-libyaml"

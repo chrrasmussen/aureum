@@ -3,12 +3,11 @@ pub use crate::ascii_tree::Tree::{self, Leaf, Node};
 use crate::test_result::{TestResult, ValueComparison};
 use crate::utils::string;
 use std::fmt::Error;
-use unindent;
 
 pub fn draw_tree(tree: &Tree) -> Result<String, Error> {
     let mut output = String::new();
     ascii_tree::write_tree(&mut output, tree)?;
-    Ok(unindent::unindent(output.trim_start()))
+    Ok(output)
 }
 
 pub fn text_block(content: &str) -> String {

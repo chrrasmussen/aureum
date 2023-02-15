@@ -22,9 +22,9 @@ pub fn write_tree(f: &mut dyn Write, tree: &Tree) -> fmt::Result {
 fn write_tree_element(f: &mut dyn Write, tree: &Tree, level: &Vec<usize>) -> fmt::Result {
     use Tree::*;
     const EMPTY: &str = "   ";
-    const EDGE: &str = " └─";
-    const PIPE: &str = " │ ";
-    const BRANCH: &str = " ├─";
+    const EDGE: &str = "└─ ";
+    const PIPE: &str = "│  ";
+    const BRANCH: &str = "├─ ";
 
     let maxpos = level.len();
     let mut second_line = String::new();
@@ -46,10 +46,11 @@ fn write_tree_element(f: &mut dyn Write, tree: &Tree, level: &Vec<usize>) -> fmt
             second_line.push_str(PIPE);
         }
     }
+
     match tree {
         Node(title, children) => {
             let mut d = children.len();
-            write!(f, " {}\n", title)?;
+            write!(f, "{}\n", title)?;
             for s in children {
                 let mut lnext = level.clone();
                 lnext.push(d);
@@ -60,11 +61,12 @@ fn write_tree_element(f: &mut dyn Write, tree: &Tree, level: &Vec<usize>) -> fmt
         Leaf(lines) => {
             for (i, s) in lines.iter().enumerate() {
                 match i {
-                    0 => writeln!(f, " {}", s)?,
-                    _ => writeln!(f, "{} {}", second_line, s)?,
+                    0 => writeln!(f, "{}", s)?,
+                    _ => writeln!(f, "{}{}", second_line, s)?,
                 }
             }
         }
     }
+
     Ok(())
 }
