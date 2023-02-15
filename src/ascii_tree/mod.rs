@@ -2,64 +2,7 @@
 // Original author: d.maetzke@bpressure.net
 // License: MIT
 
-// Cargo.toml:
-// ```
-// [package]
-// name = "ascii_tree"
-// version = "0.1.1"
-// authors = ["d.maetzke@bpressure.net"]
-// include = [".gitignore", "Cargo.toml", "src/*.rs", "README.md"]
-// description = "generates ascii trees"
-// keywords = ["ascii", "tree"]
-// license = "MIT"
-// repository = "https://github.com/bpressure/ascii_tree"
-//
-// [dependencies]
-// ```
-
-//! Crate to write an ascii tree.
-//! 
-//! ```rust
-//! let l1 = Leaf(vec![String::from("line1"), String::from("line2"), String::from("line3"), String::from("line4")]);
-//! let l2 = Leaf(vec![String::from("only one line")]);
-//! let n1 = Node(String::from("node 1"), vec![l1.clone(), l2.clone()]);
-//! let n2 = Node(String::from("node 2"), vec![l2.clone(), l1.clone(), l2.clone()]);
-//! let n3 = Node(String::from("node 3"), vec![n1.clone(), l1.clone(), l2.clone()]);
-//! let n4 = Node(String::from("node 4"), vec![n1, n2, n3]);
-//! 
-//! let mut output = String::new();
-//! let _ = write_tree(&mut output, &n4);
-//! ```
-//! 
-//! The result would be:
-//! <pre>
-//! node 4
-//! ├─ node 1
-//! │  ├─ line1
-//! │  │  line2
-//! │  │  line3
-//! │  │  line4
-//! │  └─ only one line
-//! ├─ node 2
-//! │  ├─ only one line
-//! │  ├─ line1
-//! │  │  line2
-//! │  │  line3
-//! │  │  line4
-//! │  └─ only one line
-//! └─ node 3
-//!    ├─ node 1
-//!    │  ├─ line1
-//!    │  │  line2
-//!    │  │  line3
-//!    │  │  line4
-//!    │  └─ only one line
-//!    ├─ line1
-//!    │  line2
-//!    │  line3
-//!    │  line4
-//!    └─ only one line
-//! </pre>
+//! Write an ascii tree
 
 use std::fmt;
 use std::fmt::Write;
@@ -67,18 +10,14 @@ use std::fmt::Write;
 #[derive(Clone)]
 pub enum Tree {
     Node(String, Vec<Tree>),
-    Leaf(Vec<String>)
+    Leaf(Vec<String>),
 }
 
 #[inline]
 /// writes a tree in an ascii tree to the writer
-///
-/// ```
-/// let mut output = String::new();
-/// write_tree(&mut output, &tree);
-///
-/// ```
-pub fn write_tree(f: &mut dyn Write, tree: &Tree) -> fmt::Result { write_tree_element(f, tree, &vec![]) }
+pub fn write_tree(f: &mut dyn Write, tree: &Tree) -> fmt::Result {
+    write_tree_element(f, tree, &vec![])
+}
 
 fn write_tree_element(f: &mut dyn Write, tree: &Tree, level: &Vec<usize>) -> fmt::Result {
     use Tree::*;
@@ -92,10 +31,18 @@ fn write_tree_element(f: &mut dyn Write, tree: &Tree, level: &Vec<usize>) -> fmt
     for (pos, l) in level.iter().enumerate() {
         let last_row = pos == maxpos - 1;
         if *l == 1 {
-            if !last_row { write!(f, "{}", EMPTY)? } else { write!(f, "{}", EDGE)? }
+            if !last_row {
+                write!(f, "{}", EMPTY)?
+            } else {
+                write!(f, "{}", EDGE)?
+            }
             second_line.push_str(EMPTY);
         } else {
-            if !last_row { write!(f, "{}", PIPE)? } else { write!(f, "{}", BRANCH)? }
+            if !last_row {
+                write!(f, "{}", PIPE)?
+            } else {
+                write!(f, "{}", BRANCH)?
+            }
             second_line.push_str(PIPE);
         }
     }
@@ -114,7 +61,7 @@ fn write_tree_element(f: &mut dyn Write, tree: &Tree, level: &Vec<usize>) -> fmt
             for (i, s) in lines.iter().enumerate() {
                 match i {
                     0 => writeln!(f, " {}", s)?,
-                    _ => writeln!(f, "{} {}", second_line, s)?
+                    _ => writeln!(f, "{} {}", second_line, s)?,
                 }
             }
         }
