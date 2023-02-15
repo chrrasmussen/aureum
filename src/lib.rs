@@ -1,5 +1,4 @@
 pub mod cli;
-pub mod file_util;
 pub mod formats;
 pub mod test_case;
 pub mod test_id;

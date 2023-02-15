@@ -1,5 +1,5 @@
-use crate::file_util;
 use crate::test_id::TestId;
+use crate::utils::file;
 use relative_path::RelativePathBuf;
 use std::io::{self, Read, Write};
 use std::path::PathBuf;
@@ -68,7 +68,7 @@ pub enum RunError {
 }
 
 pub fn run(test_case: &TestCase) -> Result<TestResult, RunError> {
-    let current_dir = file_util::parent_dir(&test_case.source_file).to_logical_path(".");
+    let current_dir = file::parent_dir(&test_case.source_file).to_logical_path(".");
 
     let mut cmd = Command::new(&test_case.program);
     cmd.current_dir(current_dir);

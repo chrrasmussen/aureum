@@ -1,5 +1,5 @@
-use crate::file_util;
 use crate::test_id::TestId;
+use crate::utils::file;
 use clap::Parser;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
@@ -45,7 +45,7 @@ impl FromStr for TestPath {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if s == "-" {
             Ok(Self::Pipe)
-        } else if let (path, Some(suffix)) = file_util::split_file_name(Path::new(s)) {
+        } else if let (path, Some(suffix)) = file::split_file_name(Path::new(s)) {
             if path.is_file() {
                 Ok(Self::SpecificFile {
                     source_file: path,

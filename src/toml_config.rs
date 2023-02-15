@@ -1,6 +1,6 @@
-use crate::file_util;
 use crate::test_case::TestCase;
 use crate::test_id::TestId;
+use crate::utils::file;
 use relative_path::{RelativePath, RelativePathBuf};
 use serde::Deserialize;
 use std::collections::{BTreeMap, BTreeSet};
@@ -32,7 +32,7 @@ pub fn test_cases_from_file(source_file: &RelativePath) -> Result<TestCases, Tom
         .map_err(TomlConfigError::FailedToParseTomlConfig)?;
 
     let requirements = toml_config.get_requirements();
-    let source_dir = file_util::parent_dir(source_file).to_logical_path(".");
+    let source_dir = file::parent_dir(source_file).to_logical_path(".");
     let data = gather_requirements(&requirements, &source_dir);
 
     let (test_cases, validation_errors) = toml_config.to_test_cases(source_file, &data);
@@ -244,7 +244,7 @@ impl TomlConfig {
         id: TestId,
         data: &TomlConfigData,
     ) -> Result<TestCase, BTreeSet<TestCaseValidationError>> {
-        let current_dir = file_util::parent_dir(&source_file);
+        let current_dir = file::parent_dir(&source_file);
         let mut validation_errors = BTreeSet::new();
 
         // Validate fields in config file
@@ -294,7 +294,7 @@ impl TomlConfig {
         let mut program = PathBuf::new();
         if &program_name.is_empty() == &false {
             if let Ok(p) =
-                file_util::find_executable_path(&program_name, current_dir.to_logical_path("."))
+                file::find_executable_path(&program_name, current_dir.to_logical_path("."))
             {
                 program = p;
             } else {

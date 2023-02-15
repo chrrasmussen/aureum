@@ -1,4 +1,4 @@
-use aureum::file_util;
+use aureum::utils::file;
 use std::env;
 use std::path::{Path, PathBuf};
 
@@ -42,9 +42,9 @@ fn test_program_exists_at_absolute_path() {
 
 fn assert_executable_exists(binary_name: &str) {
     let current_dir = env::current_dir().unwrap(); // Returns path to project root
-    let helper_dir = current_dir.join("tests/file_util");
+    let helper_dir = current_dir.join("tests/file_utils");
 
-    let executable_path = file_util::find_executable_path(binary_name, helper_dir).unwrap();
+    let executable_path = file::find_executable_path(binary_name, helper_dir).unwrap();
 
     assert!(executable_path.is_absolute());
 }
@@ -83,7 +83,7 @@ fn test_split_file_name_with_colon_and_absolute_path() {
 }
 
 fn assert_split_file_name(input_path: &str, expected_path: &str, expected_suffix: Option<&str>) {
-    let (output_path, suffix) = file_util::split_file_name(Path::new(input_path));
+    let (output_path, suffix) = file::split_file_name(Path::new(input_path));
     assert_eq!(output_path, PathBuf::from(expected_path));
     assert_eq!(suffix, expected_suffix.map(|x| x.to_owned()));
 }
