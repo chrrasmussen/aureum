@@ -1,5 +1,6 @@
 use crate::formats::tap;
-use crate::test_case::{self, RunError, TestCase, TestResult, ValueComparison};
+use crate::test_case::{self, RunError, TestCase};
+use crate::test_result::{TestResult, ValueComparison};
 use rayon::prelude::*;
 use serde_yaml::{self, Number, Value};
 use std::collections::BTreeMap;
