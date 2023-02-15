@@ -210,15 +210,12 @@ fn tap_print_test_case(
             if test_result.is_success() {
                 tap::print_ok(test_number, &message, indent_level)
             } else {
-                tap::print_not_ok(
-                    test_number,
-                    &message,
-                    &format_test_result(test_result),
-                    indent_level,
-                )
+                tap::print_not_ok(test_number, &message, test_result, indent_level)
             }
         }
-        Err(_) => tap::print_not_ok(test_number, &message, "Failed to run test", indent_level),
+        Err(_) => {
+            tap::print_not_ok_diagnostics(test_number, &message, "Failed to run test", indent_level)
+        }
     }
 }
 
