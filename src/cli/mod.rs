@@ -1,3 +1,5 @@
+pub mod error;
+
 use aureum::test_id::TestId;
 use aureum::utils::file;
 use clap::Parser;
