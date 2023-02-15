@@ -1,8 +1,10 @@
-use aureum::cli::{Args, OutputFormat, TestPath};
+mod cli;
+
 use aureum::test_id::TestId;
 use aureum::test_id_container::TestIdContainer;
 use aureum::test_runner::{ReportConfig, ReportFormat};
 use aureum::toml_config::{TestCaseValidationError, TestCases, TomlConfigData, TomlConfigError};
+use cli::{Args, OutputFormat, TestPath};
 use glob::glob;
 use pathdiff;
 use relative_path::RelativePathBuf;
@@ -17,7 +19,7 @@ const TEST_FAILURE_EXIT_CODE: i32 = 1;
 const INVALID_USER_INPUT_EXIT_CODE: i32 = 2;
 
 fn main() {
-    let args = aureum::cli::parse();
+    let args = cli::parse();
 
     let current_dir = env::current_dir().expect("Current directory must be available");
 

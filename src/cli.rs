@@ -1,5 +1,5 @@
-use crate::test_id::TestId;
-use crate::utils::file;
+use aureum::test_id::TestId;
+use aureum::utils::file;
 use clap::Parser;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
