@@ -1,6 +1,6 @@
 pub mod cli;
 pub mod file_util;
-pub mod tap_format;
+pub mod formats;
 pub mod test_case;
 pub mod test_id;
 pub mod test_id_container;

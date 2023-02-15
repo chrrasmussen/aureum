@@ -1,4 +1,4 @@
-use crate::tap_format;
+use crate::formats::tap;
 use crate::test_case::{self, RunError, TestCase, TestResult, ValueComparison};
 use rayon::prelude::*;
 use serde_yaml::{self, Number, Value};
@@ -187,8 +187,8 @@ fn summary_print_result(run_result: &RunResult) {
 // TAP HELPERS
 
 fn tap_print_start(number_of_tests: usize) {
-    tap_format::print_version();
-    tap_format::print_plan(1, number_of_tests);
+    tap::print_version();
+    tap::print_plan(1, number_of_tests);
 }
 
 fn tap_print_test_case(
@@ -207,9 +207,9 @@ fn tap_print_test_case(
     match result {
         Ok(test_result) => {
             if test_result.is_success() {
-                tap_format::print_ok(test_number, &message, indent_level)
+                tap::print_ok(test_number, &message, indent_level)
             } else {
-                tap_format::print_not_ok(
+                tap::print_not_ok(
                     test_number,
                     &message,
                     &format_test_result(test_result),
@@ -217,9 +217,7 @@ fn tap_print_test_case(
                 )
             }
         }
-        Err(_) => {
-            tap_format::print_not_ok(test_number, &message, "Failed to run test", indent_level)
-        }
+        Err(_) => tap::print_not_ok(test_number, &message, "Failed to run test", indent_level),
     }
 }
 
