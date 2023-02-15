@@ -292,7 +292,7 @@ impl TomlConfig {
 
         // Validate fields
         let mut program = PathBuf::new();
-        if &program_name.is_empty() == &false {
+        if program_name.is_empty() == false {
             if let Ok(p) =
                 file::find_executable_path(&program_name, current_dir.to_logical_path("."))
             {
