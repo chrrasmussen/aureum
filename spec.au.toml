@@ -15,12 +15,12 @@ Running 33 tests:
 ✅ spec/aureum/cli/run-tests-in-parallel.au.toml
 ✅ spec/aureum/cli/show-all-tests.au.toml:default
 ✅ spec/aureum/cli/show-all-tests.au.toml:show-all-tests
-✅ spec/aureum/error/error.au.toml:empty-test-config
-✅ spec/aureum/error/error.au.toml:invalid-test-config
+✅ spec/aureum/error/error.au.toml:empty-config
+✅ spec/aureum/error/error.au.toml:invalid-config
+✅ spec/aureum/error/error.au.toml:missing-config
+✅ spec/aureum/error/error.au.toml:missing-config-with-test-id
 ✅ spec/aureum/error/error.au.toml:missing-env-var
 ✅ spec/aureum/error/error.au.toml:missing-external-file
-✅ spec/aureum/error/error.au.toml:missing-test-config
-✅ spec/aureum/error/error.au.toml:missing-test-config-with-test-id
 ✅ spec/aureum/error/error.au.toml:no-expectations
 ✅ spec/aureum/error/error.au.toml:no-program-specified
 ✅ spec/aureum/error/error.au.toml:unknown-test-program

@@ -13,29 +13,29 @@ use std::str::FromStr;
 // READ CONFIG FILE
 
 pub struct TestCases {
-    pub requirements: TestConfigData,
+    pub requirements: TomlConfigData,
     pub validation_errors: Vec<(TestId, BTreeSet<TestCaseValidationError>)>,
     pub test_cases: Vec<TestCase>,
 }
 
-pub enum TestConfigError {
+pub enum TomlConfigError {
     FailedToReadFile(io::Error),
-    FailedToParseTestConfig(toml::de::Error),
+    FailedToParseTomlConfig(toml::de::Error),
 }
 
-pub fn test_cases_from_file(source_file: &RelativePath) -> Result<TestCases, TestConfigError> {
+pub fn test_cases_from_file(source_file: &RelativePath) -> Result<TestCases, TomlConfigError> {
     let source_path = source_file.to_logical_path(".");
 
     let toml_content =
-        fs::read_to_string(source_path).map_err(TestConfigError::FailedToReadFile)?;
-    let test_config = toml::from_str::<TestConfig>(&toml_content)
-        .map_err(TestConfigError::FailedToParseTestConfig)?;
+        fs::read_to_string(source_path).map_err(TomlConfigError::FailedToReadFile)?;
+    let toml_config = toml::from_str::<TomlConfig>(&toml_content)
+        .map_err(TomlConfigError::FailedToParseTomlConfig)?;
 
-    let requirements = test_config.get_requirements();
+    let requirements = toml_config.get_requirements();
     let source_dir = file_util::parent_dir(source_file).to_logical_path(".");
     let data = gather_requirements(&requirements, &source_dir);
 
-    let (test_cases, validation_errors) = test_config.to_test_cases(source_file, &data);
+    let (test_cases, validation_errors) = toml_config.to_test_cases(source_file, &data);
 
     Ok(TestCases {
         requirements: data,
@@ -47,7 +47,7 @@ pub fn test_cases_from_file(source_file: &RelativePath) -> Result<TestCases, Tes
 // TOML STRUCTURE
 
 #[derive(Deserialize, Clone)]
-struct TestConfig {
+struct TomlConfig {
     description: Option<ConfigValue<String>>,
     program: Option<ConfigValue<String>>,
     program_arguments: Option<Vec<ConfigValue<String>>>,
@@ -55,7 +55,7 @@ struct TestConfig {
     expected_stdout: Option<ConfigValue<String>>,
     expected_stderr: Option<ConfigValue<String>>,
     expected_exit_code: Option<ConfigValue<i32>>,
-    tests: Option<BTreeMap<String, TestConfig>>,
+    tests: Option<BTreeMap<String, TomlConfig>>,
 }
 
 #[derive(Deserialize, Clone)]
@@ -75,7 +75,7 @@ enum Requirement {
     EnvVar(String),
 }
 
-impl TestConfig {
+impl TomlConfig {
     fn get_requirements(&self) -> BTreeSet<Requirement> {
         let mut requirements = BTreeSet::new();
 
@@ -94,8 +94,8 @@ impl TestConfig {
         }
 
         if let Some(tests) = &self.tests {
-            for (_, sub_test_config) in tests {
-                let mut sub_requirements = sub_test_config.get_requirements();
+            for (_, sub_toml_config) in tests {
+                let mut sub_requirements = sub_toml_config.get_requirements();
                 requirements.append(&mut sub_requirements)
             }
         }
@@ -121,14 +121,14 @@ fn get_requirement<T>(config_value: &ConfigValue<T>) -> Option<Requirement> {
 
 // READ CONTENT
 
-pub struct TestConfigData {
+pub struct TomlConfigData {
     files: BTreeMap<String, Option<String>>,
     env: BTreeMap<String, Option<String>>,
 }
 
-impl TestConfigData {
-    fn new() -> TestConfigData {
-        TestConfigData {
+impl TomlConfigData {
+    fn new() -> TomlConfigData {
+        TomlConfigData {
             env: BTreeMap::new(),
             files: BTreeMap::new(),
         }
@@ -167,8 +167,8 @@ impl TestConfigData {
     }
 }
 
-fn gather_requirements(requirements: &BTreeSet<Requirement>, current_dir: &Path) -> TestConfigData {
-    let mut data = TestConfigData::new();
+fn gather_requirements(requirements: &BTreeSet<Requirement>, current_dir: &Path) -> TomlConfigData {
+    let mut data = TomlConfigData::new();
 
     for requirement in requirements {
         match requirement {
@@ -207,11 +207,11 @@ pub enum TestCaseValidationError {
     ExpectationRequired,
 }
 
-impl TestConfig {
+impl TomlConfig {
     fn to_test_cases<P>(
         self,
         path: P,
-        data: &TestConfigData,
+        data: &TomlConfigData,
     ) -> (
         Vec<TestCase>,
         Vec<(TestId, BTreeSet<TestCaseValidationError>)>,
@@ -221,15 +221,15 @@ impl TestConfig {
     {
         let source_file = path.as_ref();
 
-        let test_configs = split_test_configs(self);
+        let toml_configs = split_toml_configs(self);
 
         let mut test_cases = vec![];
         let mut validation_errors = vec![];
 
-        for (id_path, test_config) in test_configs {
+        for (id_path, toml_config) in toml_configs {
             let test_id = TestId::new(id_path);
 
-            match test_config.to_test_case(source_file.to_owned(), test_id.clone(), data) {
+            match toml_config.to_test_case(source_file.to_owned(), test_id.clone(), data) {
                 Ok(test_case) => test_cases.push(test_case),
                 Err(err) => validation_errors.push((test_id, err)),
             }
@@ -242,7 +242,7 @@ impl TestConfig {
         self,
         source_file: RelativePathBuf,
         id: TestId,
-        data: &TestConfigData,
+        data: &TomlConfigData,
     ) -> Result<TestCase, BTreeSet<TestCaseValidationError>> {
         let current_dir = file_util::parent_dir(&source_file);
         let mut validation_errors = BTreeSet::new();
@@ -325,7 +325,7 @@ impl TestConfig {
 fn read_from_config_value<T>(
     validation_errors: &mut BTreeSet<TestCaseValidationError>,
     config_value: Option<ConfigValue<T>>,
-    data: &TestConfigData,
+    data: &TomlConfigData,
 ) -> Option<T>
 where
     T: FromStr,
@@ -344,23 +344,23 @@ where
 }
 
 // Currently only merges a single level
-fn split_test_configs(base_config: TestConfig) -> Vec<(Vec<String>, TestConfig)> {
+fn split_toml_configs(base_config: TomlConfig) -> Vec<(Vec<String>, TomlConfig)> {
     if let Some(tests) = base_config.tests.clone() {
-        let mut test_configs = vec![];
+        let mut toml_configs = vec![];
 
         for (name, sub_config) in tests.into_iter() {
-            let merged_test_config = merge_test_configs(base_config.clone(), sub_config);
-            test_configs.push((vec![name], merged_test_config))
+            let merged_toml_config = merge_toml_configs(base_config.clone(), sub_config);
+            toml_configs.push((vec![name], merged_toml_config))
         }
 
-        test_configs
+        toml_configs
     } else {
         vec![(vec![], base_config)]
     }
 }
 
-fn merge_test_configs(base_config: TestConfig, prioritized_config: TestConfig) -> TestConfig {
-    TestConfig {
+fn merge_toml_configs(base_config: TomlConfig, prioritized_config: TomlConfig) -> TomlConfig {
+    TomlConfig {
         description: prioritized_config.description.or(base_config.description),
         program: prioritized_config.program.or(base_config.program),
         program_arguments: prioritized_config
@@ -384,7 +384,7 @@ impl<T> ConfigValue<T>
 where
     T: FromStr,
 {
-    fn read(self, data: &TestConfigData) -> Result<T, TestCaseValidationError> {
+    fn read(self, data: &TomlConfigData) -> Result<T, TestCaseValidationError> {
         match self {
             Self::Literal(value) => Ok(value),
             Self::WrappedLiteral { value } => Ok(value),

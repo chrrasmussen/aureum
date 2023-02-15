@@ -1,8 +1,8 @@
 use aureum::cli::{Args, OutputFormat, TestPath};
-use aureum::test_config::{TestCaseValidationError, TestCases, TestConfigData, TestConfigError};
 use aureum::test_id::TestId;
 use aureum::test_id_container::TestIdContainer;
 use aureum::test_runner::{ReportConfig, ReportFormat};
+use aureum::toml_config::{TestCaseValidationError, TestCases, TomlConfigData, TomlConfigError};
 use glob::glob;
 use pathdiff;
 use relative_path::RelativePathBuf;
@@ -35,7 +35,7 @@ fn main() {
     let mut failed_configs = vec![];
 
     for source_file in source_files {
-        match aureum::test_config::test_cases_from_file(&source_file) {
+        match aureum::toml_config::test_cases_from_file(&source_file) {
             Ok(result) => {
                 if let Some(data) = test_cases_errors(&result) {
                     failed_configs.push(report_error(source_file, data));
@@ -45,8 +45,8 @@ fn main() {
             }
             Err(err) => {
                 let msg = match err {
-                    TestConfigError::FailedToReadFile(_) => "Failed to read file",
-                    TestConfigError::FailedToParseTestConfig(_) => "Failed to parse config file",
+                    TomlConfigError::FailedToReadFile(_) => "Failed to read file",
+                    TomlConfigError::FailedToParseTomlConfig(_) => "Failed to parse config file",
                 };
                 failed_configs.push(report_error_message(source_file, msg));
             }
@@ -213,7 +213,7 @@ fn test_cases_errors(test_cases: &TestCases) -> Option<Value> {
     }
 }
 
-fn requirements_map(requirements: &TestConfigData) -> BTreeMap<&str, BTreeMap<String, String>> {
+fn requirements_map(requirements: &TomlConfigData) -> BTreeMap<&str, BTreeMap<String, String>> {
     let mut contents = BTreeMap::new();
 
     let any_files_missing = requirements.any_missing_file_requirements();

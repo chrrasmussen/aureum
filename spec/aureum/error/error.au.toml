@@ -3,7 +3,7 @@ expected_stdout = ""
 expected_exit_code = 1
 
 
-[tests.missing-test-config]
+[tests.missing-config]
 program_arguments = ["AUREUM-THIS-FILE-DOES-NOT-EXIST"]
 expected_stderr = """
 error: No config files found for the given paths
@@ -11,7 +11,7 @@ error: No config files found for the given paths
 expected_exit_code = 2
 
 
-[tests.missing-test-config-with-test-id]
+[tests.missing-config-with-test-id]
 program_arguments = ["AUREUM-THIS-FILE-DOES-NOT-EXIST:sub1"]
 expected_stderr = """
 error: Invalid value 'AUREUM-THIS-FILE-DOES-NOT-EXIST:sub1' for '<PATHS>...': Invalid path to config file
@@ -21,8 +21,8 @@ For more information try '--help'
 expected_exit_code = 2
 
 
-[tests.invalid-test-config]
-program_arguments = ["helpers/invalid-test-config.toml"]
+[tests.invalid-config]
+program_arguments = ["helpers/invalid-config.toml"]
 expected_stdout = """
 Running 0 tests:
 
@@ -30,14 +30,14 @@ Running 0 tests:
 Test result: OK (0 passed, 0 failed)
 """
 expected_stderr = """
-helpers/invalid-test-config.toml: Failed to parse config file
+helpers/invalid-config.toml: Failed to parse config file
 
 Some config files contain errors (See above)
 """
 
 
-[tests.empty-test-config]
-program_arguments = ["helpers/empty-test-config.toml"]
+[tests.empty-config]
+program_arguments = ["helpers/empty-config.toml"]
 expected_stdout = """
 Running 0 tests:
 
@@ -45,7 +45,7 @@ Running 0 tests:
 Test result: OK (0 passed, 0 failed)
 """
 expected_stderr = """
-helpers/empty-test-config.toml:
+helpers/empty-config.toml:
   validation-errors:
   - The field 'program' is required
   - At least one expectation is required
