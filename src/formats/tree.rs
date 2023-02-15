@@ -1,6 +1,7 @@
+use crate::ascii_tree;
+pub use crate::ascii_tree::Tree::{self, Leaf, Node};
 use crate::test_result::{TestResult, ValueComparison};
 use crate::utils::string;
-pub use ascii_tree::Tree::{self, Leaf, Node};
 use std::fmt::Error;
 use unindent;
 

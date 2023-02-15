@@ -3,16 +3,9 @@
 version = 3
 
 [[package]]
-name = "ascii_tree"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ca6c635b3aa665c649ad1415f1573c85957dfa47690ec27aebe7ec17efe3c643"
-
-[[package]]
 name = "aureum"
 version = "0.1.0"
 dependencies = [
- "ascii_tree",
  "clap",
  "glob",
  "indoc",
