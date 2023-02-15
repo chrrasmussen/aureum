@@ -32,15 +32,29 @@ Running 1 tests:
 F
 
 ❌ helpers/failing-test.toml
-exit-code:
-  expected: 42
-  got: 0
-stderr:
-  expected: STDERR
-  got: ''
-stdout:
-  expected: STDOUT
-  got: Hello world
+├─ Standard output
+│  ├─ Expected
+│  │  ╭
+│  │  │ STDOUT
+│  │  ╰ (No newline at end)
+│  └─ Got
+│     ╭
+│     │ Hello world
+│     ╰ (No newline at end)
+├─ Standard error
+│  ├─ Expected
+│  │  ╭
+│  │  │ STDERR
+│  │  ╰ (No newline at end)
+│  └─ Got
+│     ╭
+│     │ 
+│     ╰ (No newline at end)
+└─ Exit code
+   ├─ Expected
+   │  └─ 42
+   └─ Got
+      └─ 0
 
 Test result: FAIL (0 passed, 1 failed)
 """

@@ -1,11 +1,13 @@
+use crate::test_result::{TestResult, ValueComparison};
 use crate::utils::string;
 pub use ascii_tree::Tree::{self, Leaf, Node};
 use std::fmt::Error;
+use unindent;
 
 pub fn draw_tree(tree: &Tree) -> Result<String, Error> {
     let mut output = String::new();
     ascii_tree::write_tree(&mut output, tree)?;
-    Ok(output)
+    Ok(unindent::unindent(output.trim_start()))
 }
 
 pub fn text_block(content: &str) -> String {
@@ -17,6 +19,65 @@ pub fn text_block(content: &str) -> String {
         format!("╭\n{}\n╰ (No newline at end)", prefixed_content)
     }
 }
+
+// ERROR FORMATTING
+
+pub fn tree_from_test_result(test_result: &TestResult) -> Vec<Tree> {
+    let mut categories = vec![];
+
+    if let ValueComparison::Diff { expected, got } = &test_result.stdout {
+        categories.push(Node(
+            String::from("Standard output"),
+            show_string_diff(expected, got),
+        ));
+    }
+
+    if let ValueComparison::Diff { expected, got } = &test_result.stderr {
+        categories.push(Node(
+            String::from("Standard error"),
+            show_string_diff(expected, got),
+        ));
+    }
+
+    if let ValueComparison::Diff { expected, got } = test_result.exit_code {
+        categories.push(Node(
+            String::from("Exit code"),
+            show_i32_diff(expected, got),
+        ));
+    }
+
+    categories
+}
+
+fn show_string_diff(expected: &str, got: &str) -> Vec<Tree> {
+    let expected_lines = string_to_lines(&format!("Expected\n{}", text_block(expected)));
+    let got_lines = string_to_lines(&format!("Got\n{}", text_block(got)));
+
+    vec![Leaf(expected_lines), Leaf(got_lines)]
+}
+
+fn string_to_lines(str: &str) -> Vec<String> {
+    let mut lines = vec![];
+
+    for line in str.lines() {
+        lines.push(line.to_owned());
+    }
+
+    lines
+}
+
+fn show_i32_diff(expected: i32, got: i32) -> Vec<Tree> {
+    show_single_line_diff(expected.to_string(), got.to_string())
+}
+
+fn show_single_line_diff(expected: String, got: String) -> Vec<Tree> {
+    vec![
+        Node(String::from("Expected"), vec![Leaf(vec![expected])]),
+        Node(String::from("Got"), vec![Leaf(vec![got])]),
+    ]
+}
+
+// TESTS
 
 #[cfg(test)]
 mod tests {

@@ -1,9 +1,8 @@
-use crate::formats::tap;
+use crate::formats::tree::Node;
+use crate::formats::{tap, tree};
 use crate::test_case::{self, RunError, TestCase};
-use crate::test_result::{TestResult, ValueComparison};
+use crate::test_result::TestResult;
 use rayon::prelude::*;
-use serde_yaml::{self, Number, Value};
-use std::collections::BTreeMap;
 
 pub struct ReportConfig {
     pub number_of_tests: usize,
@@ -176,12 +175,18 @@ fn summary_print_result(run_result: &RunResult) {
     if run_result.is_success() {
         println!("✅ {}", message)
     } else {
-        println!("❌ {}", message);
-        let error_msg = match &run_result.result {
-            Ok(result) => format_test_result(result),
-            Err(_) => String::from("Failed to run test\n"),
+        match &run_result.result {
+            Ok(result) => {
+                let header = format!("❌ {}", message);
+                let tree = Node(header, tree::tree_from_test_result(result));
+                let content = tree::draw_tree(&tree).unwrap_or(String::from("TODO"));
+                print!("{}", content);
+            }
+            Err(_) => {
+                println!("❌ {}", message);
+                println!("Failed to run test");
+            }
         };
-        print!("{}", error_msg);
     }
 }
 
@@ -220,41 +225,3 @@ fn tap_print_test_case(
 }
 
 fn tap_print_summary() {}
-
-// ERROR FORMATTING
-
-fn format_test_result(test_result: &TestResult) -> String {
-    let mut diagnostics = BTreeMap::new();
-
-    if let ValueComparison::Diff { expected, got } = &test_result.stdout {
-        diagnostics.insert("stdout", show_string_diff(expected, got));
-    }
-
-    if let ValueComparison::Diff { expected, got } = &test_result.stderr {
-        diagnostics.insert("stderr", show_string_diff(expected, got));
-    }
-
-    if let ValueComparison::Diff { expected, got } = test_result.exit_code {
-        diagnostics.insert("exit-code", show_i32_diff(expected, got));
-    }
-
-    serde_yaml::to_string(&diagnostics).unwrap_or(String::from("Failed to convert to YAML\n"))
-}
-
-fn show_string_diff(expected: &String, got: &String) -> BTreeMap<&'static str, Value> {
-    show_diff(
-        Value::String(expected.to_owned()),
-        Value::String(got.to_owned()),
-    )
-}
-
-fn show_i32_diff(expected: i32, got: i32) -> BTreeMap<&'static str, Value> {
-    show_diff(
-        Value::Number(Number::from(expected)),
-        Value::Number(Number::from(got)),
-    )
-}
-
-fn show_diff(expected: Value, got: Value) -> BTreeMap<&'static str, Value> {
-    BTreeMap::from([("expected", expected), ("got", got)])
-}
