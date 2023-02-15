@@ -179,7 +179,8 @@ fn summary_print_result(run_result: &RunResult) {
             Ok(result) => {
                 let header = format!("❌ {}", message);
                 let tree = Node(header, tree::tree_from_test_result(result));
-                let content = tree::draw_tree(&tree).unwrap_or(String::from("TODO"));
+                let content =
+                    tree::draw_tree(&tree).unwrap_or(String::from("Failed to draw tree\n"));
                 print!("{}", content);
             }
             Err(_) => {

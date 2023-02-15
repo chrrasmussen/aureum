@@ -1,5 +1,7 @@
 mod cli;
 
+use aureum::formats::tree;
+use aureum::formats::tree::Tree::{self, Leaf, Node};
 use aureum::test_id::TestId;
 use aureum::test_id_container::TestIdContainer;
 use aureum::test_runner::{ReportConfig, ReportFormat};
@@ -8,7 +10,6 @@ use cli::{Args, OutputFormat, TestPath};
 use glob::glob;
 use pathdiff;
 use relative_path::RelativePathBuf;
-use serde_yaml::Value;
 use std::collections::{BTreeMap, BTreeSet};
 use std::env;
 use std::fmt::{Display, Formatter};
@@ -39,8 +40,9 @@ fn main() {
     for source_file in source_files {
         match aureum::toml_config::test_cases_from_file(&source_file) {
             Ok(result) => {
-                if let Some(data) = test_cases_errors(&result) {
-                    failed_configs.push(report_error(source_file, data));
+                let errors = test_cases_errors(&result);
+                if errors.len() > 0 {
+                    failed_configs.push(report_error(source_file, errors));
                 }
 
                 all_test_cases.extend(result.test_cases);
@@ -172,103 +174,102 @@ fn get_relative_path(path: &Path, base: &Path) -> Option<RelativePathBuf> {
 
 struct ConfigError {
     source_file: RelativePathBuf,
-    error: Value,
+    errors: Vec<Tree>,
 }
 
 impl Display for ConfigError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let source_file = self.source_file.to_string();
-        let content = BTreeMap::from([(source_file, &self.error)]);
-        let output =
-            serde_yaml::to_string(&content).unwrap_or(String::from("Failed to convert to YAML\n"));
+        let content = Node(source_file, self.errors.clone());
+        let output = tree::draw_tree(&content).unwrap_or(String::from("Failed to draw tree\n"));
         write!(f, "{}", output)
     }
 }
 
-fn report_error(source_file: RelativePathBuf, error: Value) -> ConfigError {
-    ConfigError { source_file, error }
+fn report_error(source_file: RelativePathBuf, errors: Vec<Tree>) -> ConfigError {
+    ConfigError {
+        source_file,
+        errors,
+    }
 }
 
 fn report_error_message(source_file: RelativePathBuf, msg: &str) -> ConfigError {
     ConfigError {
         source_file,
-        error: Value::String(String::from(msg)),
+        errors: vec![Leaf(vec![String::from(msg)])],
     }
 }
 
-fn test_cases_errors(test_cases: &TestCases) -> Option<Value> {
-    let mut contents = BTreeMap::new();
+fn test_cases_errors(test_cases: &TestCases) -> Vec<Tree> {
+    let mut categories = vec![];
 
     let requirements = requirements_map(&test_cases.requirements);
     if requirements.len() > 0 {
-        contents.insert("requirements", serde_yaml::to_value(requirements).ok()?);
+        categories.push(Node(String::from("Requirements"), requirements));
     }
 
-    if let Some(validation_errors) = validation_errors_map(&test_cases.validation_errors) {
-        contents.insert("validation-errors", validation_errors);
+    let validation_errors = validation_errors_map(&test_cases.validation_errors);
+    if validation_errors.len() > 0 {
+        categories.push(Node(String::from("Validation errors"), validation_errors));
     }
 
-    if contents.len() > 0 {
-        serde_yaml::to_value(contents).ok()
-    } else {
-        None
-    }
+    categories
 }
 
-fn requirements_map(requirements: &TomlConfigData) -> BTreeMap<&str, BTreeMap<String, String>> {
-    let mut contents = BTreeMap::new();
+fn requirements_map(requirements: &TomlConfigData) -> Vec<Tree> {
+    let mut categories = vec![];
 
     let any_files_missing = requirements.any_missing_file_requirements();
     let files = requirements.file_requirements();
     if any_files_missing && files.len() > 0 {
-        contents.insert(
-            "files",
+        categories.push(Node(
+            String::from("Files"),
             files
                 .into_iter()
-                .map(|(x, y)| (x, show_presence(y)))
+                .map(|(x, y)| Leaf(vec![format!("{} {}", show_presence(y), x)]))
                 .collect(),
-        );
+        ));
     }
 
     let any_env_missing = requirements.any_missing_env_requirements();
     let env = requirements.env_requirements();
     if any_env_missing && env.len() > 0 {
-        contents.insert(
-            "env",
+        categories.push(Node(
+            String::from("Environment"),
             env.into_iter()
-                .map(|(x, y)| (x, show_presence(y)))
+                .map(|(x, y)| Leaf(vec![format!("{} {}", show_presence(y), x)]))
                 .collect(),
-        );
+        ));
     }
 
-    contents
+    categories
 }
 
 fn validation_errors_map(
     validation_errors: &Vec<(TestId, BTreeSet<TestCaseValidationError>)>,
-) -> Option<Value> {
+) -> Vec<Tree> {
     if validation_errors.len() == 1 {
         let (maybe_root, errs) = &validation_errors[0];
         if maybe_root.is_root() {
-            let contents = errs.iter().map(show_validation_error).collect::<Vec<_>>();
-            return Some(serde_yaml::to_value(contents).unwrap_or(Value::Null));
+            return errs
+                .iter()
+                .map(|err| Leaf(vec![show_validation_error(err)]))
+                .collect::<Vec<_>>();
         }
     }
 
-    let mut contents = BTreeMap::new();
+    let mut test_cases = vec![];
 
     for (test_id, errs) in validation_errors {
-        contents.insert(
+        test_cases.push(Node(
             test_id.to_string(),
-            errs.iter().map(show_validation_error).collect::<Vec<_>>(),
-        );
+            errs.iter()
+                .map(|err| Leaf(vec![show_validation_error(err)]))
+                .collect(),
+        ));
     }
 
-    if contents.len() > 0 {
-        Some(serde_yaml::to_value(contents).unwrap_or(Value::Null))
-    } else {
-        None
-    }
+    test_cases
 }
 
 fn show_validation_error(validation_error: &TestCaseValidationError) -> String {

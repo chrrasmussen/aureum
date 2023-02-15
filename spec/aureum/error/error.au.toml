@@ -30,7 +30,8 @@ Running 0 tests:
 Test result: OK (0 passed, 0 failed)
 """
 expected_stderr = """
-helpers/invalid-config.toml: Failed to parse config file
+helpers/invalid-config.toml
+└─ Failed to parse config file
 
 Some config files contain errors (See above)
 """
@@ -45,10 +46,10 @@ Running 0 tests:
 Test result: OK (0 passed, 0 failed)
 """
 expected_stderr = """
-helpers/empty-config.toml:
-  validation-errors:
-  - The field 'program' is required
-  - At least one expectation is required
+helpers/empty-config.toml
+└─ Validation errors
+   ├─ The field 'program' is required
+   └─ At least one expectation is required
 
 Some config files contain errors (See above)
 """
@@ -63,9 +64,9 @@ Running 0 tests:
 Test result: OK (0 passed, 0 failed)
 """
 expected_stderr = """
-helpers/no-test-program.toml:
-  validation-errors:
-  - The field 'program' is required
+helpers/no-test-program.toml
+└─ Validation errors
+   └─ The field 'program' is required
 
 Some config files contain errors (See above)
 """
@@ -80,9 +81,9 @@ Running 0 tests:
 Test result: OK (0 passed, 0 failed)
 """
 expected_stderr = """
-helpers/unknown-test-program.toml:
-  validation-errors:
-  - The program 'AUREUM-THIS-PROGRAM-DOES-NOT-EXIST' was not found
+helpers/unknown-test-program.toml
+└─ Validation errors
+   └─ The program 'AUREUM-THIS-PROGRAM-DOES-NOT-EXIST' was not found
 
 Some config files contain errors (See above)
 """
@@ -97,9 +98,9 @@ Running 0 tests:
 Test result: OK (0 passed, 0 failed)
 """
 expected_stderr = """
-helpers/no-expectations.toml:
-  validation-errors:
-  - At least one expectation is required
+helpers/no-expectations.toml
+└─ Validation errors
+   └─ At least one expectation is required
 
 Some config files contain errors (See above)
 """
@@ -114,12 +115,12 @@ Running 0 tests:
 Test result: OK (0 passed, 0 failed)
 """
 expected_stderr = """
-helpers/missing-env-var.toml:
-  requirements:
-    env:
-      AUREUM_TEST_THIS_ENV_VAR_DOES_NOT_EXIST: ❌
-  validation-errors:
-  - Missing environment variable 'AUREUM_TEST_THIS_ENV_VAR_DOES_NOT_EXIST'
+helpers/missing-env-var.toml
+├─ Requirements
+│  └─ Environment
+│     └─ ❌ AUREUM_TEST_THIS_ENV_VAR_DOES_NOT_EXIST
+└─ Validation errors
+   └─ Missing environment variable 'AUREUM_TEST_THIS_ENV_VAR_DOES_NOT_EXIST'
 
 Some config files contain errors (See above)
 """
@@ -134,12 +135,12 @@ Running 0 tests:
 Test result: OK (0 passed, 0 failed)
 """
 expected_stderr = """
-helpers/missing-external-file.toml:
-  requirements:
-    files:
-      AUREUM_TEST_THIS_FILE_DOES_NOT_EXIST: ❌
-  validation-errors:
-  - Missing external file 'AUREUM_TEST_THIS_FILE_DOES_NOT_EXIST'
+helpers/missing-external-file.toml
+├─ Requirements
+│  └─ Files
+│     └─ ❌ AUREUM_TEST_THIS_FILE_DOES_NOT_EXIST
+└─ Validation errors
+   └─ Missing external file 'AUREUM_TEST_THIS_FILE_DOES_NOT_EXIST'
 
 Some config files contain errors (See above)
 """
