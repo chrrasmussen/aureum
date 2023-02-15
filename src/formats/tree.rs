@@ -1,4 +1,12 @@
 use crate::utils::string;
+pub use ascii_tree::Tree::{self, Leaf, Node};
+use std::fmt::Error;
+
+pub fn draw_tree(tree: &Tree) -> Result<String, Error> {
+    let mut output = String::new();
+    ascii_tree::write_tree(&mut output, tree)?;
+    Ok(output)
+}
 
 pub fn text_block(content: &str) -> String {
     let prefixed_content = string::indent_with("│ ", content);
