@@ -1,9 +1,11 @@
 pub mod error;
+pub mod file;
 
 use aureum::test_id::TestId;
-use aureum::utils::file;
+use aureum::utils::file as file_utils;
 use clap::Parser;
-use std::path::{Path, PathBuf};
+use file::TestPath;
+use std::path::Path;
 use std::str::FromStr;
 
 pub fn parse() -> Args {
@@ -31,23 +33,13 @@ pub struct Args {
     pub run_tests_in_parallel: bool,
 }
 
-#[derive(PartialEq, Eq, PartialOrd, Ord, Clone)]
-pub enum TestPath {
-    Pipe,
-    Glob(String),
-    SpecificFile {
-        source_file: PathBuf,
-        test_id: TestId,
-    },
-}
-
 impl FromStr for TestPath {
     type Err = &'static str;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if s == "-" {
             Ok(Self::Pipe)
-        } else if let (path, Some(suffix)) = file::split_file_name(Path::new(s)) {
+        } else if let (path, Some(suffix)) = file_utils::split_file_name(Path::new(s)) {
             if path.is_file() {
                 Ok(Self::SpecificFile {
                     source_file: path,
