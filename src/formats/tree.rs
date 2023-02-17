@@ -57,13 +57,7 @@ fn show_string_diff(expected: &str, got: &str) -> Vec<Tree> {
 }
 
 fn string_to_lines(str: &str) -> Vec<String> {
-    let mut lines = vec![];
-
-    for line in str.lines() {
-        lines.push(line.to_owned());
-    }
-
-    lines
+    str.lines().map(|x| x.to_owned()).collect()
 }
 
 fn show_i32_diff(expected: i32, got: i32) -> Vec<Tree> {
