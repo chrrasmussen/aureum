@@ -7,7 +7,7 @@ where
 {
     path.as_ref()
         .parent()
-        .unwrap_or(RelativePath::new("."))
+        .unwrap_or_else(|| RelativePath::new("."))
         .to_relative_path_buf()
 }
 
@@ -28,7 +28,7 @@ where
     }
 
     // Search PATH
-    which::which(&binary_name)
+    which::which(binary_name)
 }
 
 /// Split file name on colon
@@ -39,7 +39,7 @@ pub fn split_file_name(p: &Path) -> (PathBuf, Option<String>) {
     if let Some(file_name) = p.file_name() {
         let mut new_path = PathBuf::from(p);
 
-        if let Some((prefix, suffix)) = file_name.to_string_lossy().split_once(":") {
+        if let Some((prefix, suffix)) = file_name.to_string_lossy().split_once(':') {
             new_path.set_file_name(prefix);
 
             return (new_path, Some(suffix.to_owned()));

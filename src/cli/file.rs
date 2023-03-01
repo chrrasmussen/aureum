@@ -46,7 +46,7 @@ pub fn expand_test_paths(
                         .and_modify(|test_ids: &mut TestIdContainer| {
                             test_ids.add(test_id.clone());
                         })
-                        .or_insert(TestIdContainer::empty());
+                        .or_insert_with(TestIdContainer::empty);
                 } else {
                     // TODO: Handle if path is not relative
                 }

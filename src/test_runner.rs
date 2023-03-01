@@ -53,7 +53,7 @@ pub fn run_test_cases(
             .par_iter()
             .enumerate()
             .map(run)
-            .reduce(|| vec![], |x, y| itertools::concat([x, y]))
+            .reduce(Vec::new, |x, y| itertools::concat([x, y]))
     } else {
         test_cases
             .iter()
@@ -62,7 +62,7 @@ pub fn run_test_cases(
             .fold(vec![], |x, y| itertools::concat([x, y]))
     };
 
-    report_summary(&report_config, &run_results);
+    report_summary(report_config, &run_results);
 
     run_results
 }
@@ -92,7 +92,7 @@ fn report_test_case(
         }
         ReportFormat::Tap => {
             let test_number_indent_level = report_config.number_of_tests.to_string().len();
-            tap_print_test_case(index + 1, &test_case, result, test_number_indent_level);
+            tap_print_test_case(index + 1, test_case, result, test_number_indent_level);
         }
     }
 }
@@ -135,9 +135,9 @@ fn summary_print_summary(number_of_tests: usize, show_all_tests: bool, run_resul
     let mut is_any_test_cases_printed = false;
 
     for run_result in run_results {
-        let test_failed = run_result.is_success() == false;
+        let test_failed = !run_result.is_success();
         if show_all_tests || test_failed {
-            if is_any_test_cases_printed == false {
+            if !is_any_test_cases_printed {
                 println!();
                 is_any_test_cases_printed = true;
             }
@@ -169,7 +169,7 @@ fn summary_print_result(run_result: &RunResult) {
     if let Some(description) = &run_result.test_case.description {
         message = format!("{} - {}", test_id, description);
     } else {
-        message = format!("{}", test_id);
+        message = test_id;
     }
 
     if run_result.is_success() {
@@ -179,8 +179,8 @@ fn summary_print_result(run_result: &RunResult) {
             Ok(result) => {
                 let header = format!("❌ {}", message);
                 let tree = Node(header, tree::tree_from_test_result(result));
-                let content =
-                    tree::draw_tree(&tree).unwrap_or(String::from("Failed to draw tree\n"));
+                let content = tree::draw_tree(&tree)
+                    .unwrap_or_else(|_| String::from("Failed to draw tree\n"));
                 print!("{}", content);
             }
             Err(_) => {
@@ -208,7 +208,7 @@ fn tap_print_test_case(
     if let Some(description) = &test_case.description {
         message = format!("{} # {}", test_case.id(), description);
     } else {
-        message = format!("{}", test_case.id());
+        message = test_case.id();
     }
 
     match result {

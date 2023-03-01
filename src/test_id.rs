@@ -13,11 +13,11 @@ impl TestId {
     }
 
     pub fn from(str: &str) -> TestId {
-        if str == "" {
+        if str.is_empty() {
             TestId { id_path: vec![] }
         } else {
             TestId {
-                id_path: str.split(".").map(String::from).collect(),
+                id_path: str.split('.').map(String::from).collect(),
             }
         }
     }

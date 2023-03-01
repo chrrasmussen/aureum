@@ -33,7 +33,7 @@ fn main() {
         match aureum::toml_config::test_cases_from_file(&source_file) {
             Ok(result) => {
                 let errors = error::test_cases_errors(&result);
-                if errors.len() > 0 {
+                if !errors.is_empty() {
                     failed_configs.push(error::report_error(source_file, errors));
                 }
 
@@ -65,16 +65,14 @@ fn main() {
         args.run_tests_in_parallel,
     );
 
-    let any_failed_configs = failed_configs.is_empty() == false;
+    let any_failed_configs = !failed_configs.is_empty();
     if any_failed_configs {
         eprintln!("Some config files contain errors (See above)");
     }
 
-    let all_tests_passed = run_results
-        .iter()
-        .fold(true, |acc, t| acc && t.is_success());
+    let all_tests_passed = run_results.iter().all(|t| t.is_success());
 
-    if any_failed_configs || all_tests_passed == false {
+    if any_failed_configs || !all_tests_passed {
         exit(TEST_FAILURE_EXIT_CODE)
     }
 }

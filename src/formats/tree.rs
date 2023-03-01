@@ -13,7 +13,7 @@ pub fn draw_tree(tree: &Tree) -> Result<String, Error> {
 pub fn text_block(content: &str) -> String {
     let prefixed_content = string::indent_with("│ ", content);
 
-    if content.ends_with("\n") {
+    if content.ends_with('\n') {
         format!("╭\n{}╰", prefixed_content)
     } else {
         format!("╭\n{}\n╰ (No newline at end)", prefixed_content)

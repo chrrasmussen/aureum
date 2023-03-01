@@ -15,7 +15,8 @@ impl Display for ConfigError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let source_file = self.source_file.to_string();
         let content = Node(source_file, self.errors.clone());
-        let output = tree::draw_tree(&content).unwrap_or(String::from("Failed to draw tree\n"));
+        let output =
+            tree::draw_tree(&content).unwrap_or_else(|_| String::from("Failed to draw tree\n"));
         write!(f, "{}", output)
     }
 }
@@ -38,12 +39,12 @@ pub fn test_cases_errors(test_cases: &TestCases) -> Vec<Tree> {
     let mut categories = vec![];
 
     let requirements = requirements_map(&test_cases.requirements);
-    if requirements.len() > 0 {
+    if !requirements.is_empty() {
         categories.push(Node(String::from("Requirements"), requirements));
     }
 
     let validation_errors = validation_errors_map(&test_cases.validation_errors);
-    if validation_errors.len() > 0 {
+    if !validation_errors.is_empty() {
         categories.push(Node(String::from("Validation errors"), validation_errors));
     }
 
@@ -55,7 +56,7 @@ fn requirements_map(requirements: &TomlConfigData) -> Vec<Tree> {
 
     let any_files_missing = requirements.any_missing_file_requirements();
     let files = requirements.file_requirements();
-    if any_files_missing && files.len() > 0 {
+    if any_files_missing && !files.is_empty() {
         categories.push(Node(
             String::from("Files"),
             files
@@ -67,7 +68,7 @@ fn requirements_map(requirements: &TomlConfigData) -> Vec<Tree> {
 
     let any_env_missing = requirements.any_missing_env_requirements();
     let env = requirements.env_requirements();
-    if any_env_missing && env.len() > 0 {
+    if any_env_missing && !env.is_empty() {
         categories.push(Node(
             String::from("Environment"),
             env.into_iter()

@@ -35,7 +35,7 @@ pub fn test_cases_from_file(source_file: &RelativePath) -> Result<TestCases, Tom
     let source_dir = file::parent_dir(source_file).to_logical_path(".");
     let data = gather_requirements(&requirements, &source_dir);
 
-    let (test_cases, validation_errors) = toml_config.to_test_cases(source_file, &data);
+    let (test_cases, validation_errors) = build_test_cases(toml_config, source_file, &data);
 
     Ok(TestCases {
         requirements: data,
@@ -94,7 +94,7 @@ impl TomlConfig {
         }
 
         if let Some(tests) = &self.tests {
-            for (_, sub_toml_config) in tests {
+            for sub_toml_config in tests.values() {
                 let mut sub_requirements = sub_toml_config.get_requirements();
                 requirements.append(&mut sub_requirements)
             }
@@ -207,118 +207,114 @@ pub enum TestCaseValidationError {
     ExpectationRequired,
 }
 
-impl TomlConfig {
-    fn to_test_cases<P>(
-        self,
-        path: P,
-        data: &TomlConfigData,
-    ) -> (
-        Vec<TestCase>,
-        Vec<(TestId, BTreeSet<TestCaseValidationError>)>,
-    )
-    where
-        P: AsRef<RelativePath>,
-    {
-        let source_file = path.as_ref();
+fn build_test_cases<P>(
+    toml_config: TomlConfig,
+    path: P,
+    data: &TomlConfigData,
+) -> (
+    Vec<TestCase>,
+    Vec<(TestId, BTreeSet<TestCaseValidationError>)>,
+)
+where
+    P: AsRef<RelativePath>,
+{
+    let source_file = path.as_ref();
 
-        let toml_configs = split_toml_configs(self);
+    let toml_configs = split_toml_configs(toml_config);
 
-        let mut test_cases = vec![];
-        let mut validation_errors = vec![];
+    let mut test_cases = vec![];
+    let mut validation_errors = vec![];
 
-        for (id_path, toml_config) in toml_configs {
-            let test_id = TestId::new(id_path);
+    for (id_path, toml_config) in toml_configs {
+        let test_id = TestId::new(id_path);
 
-            match toml_config.to_test_case(source_file.to_owned(), test_id.clone(), data) {
-                Ok(test_case) => test_cases.push(test_case),
-                Err(err) => validation_errors.push((test_id, err)),
-            }
+        match build_test_case(toml_config, source_file.to_owned(), test_id.clone(), data) {
+            Ok(test_case) => test_cases.push(test_case),
+            Err(err) => validation_errors.push((test_id, err)),
         }
-
-        (test_cases, validation_errors)
     }
 
-    fn to_test_case(
-        self,
-        source_file: RelativePathBuf,
-        id: TestId,
-        data: &TomlConfigData,
-    ) -> Result<TestCase, BTreeSet<TestCaseValidationError>> {
-        let current_dir = file::parent_dir(&source_file);
-        let mut validation_errors = BTreeSet::new();
+    (test_cases, validation_errors)
+}
 
-        // Validate fields in config file
+fn build_test_case(
+    toml_config: TomlConfig,
+    source_file: RelativePathBuf,
+    id: TestId,
+    data: &TomlConfigData,
+) -> Result<TestCase, BTreeSet<TestCaseValidationError>> {
+    let current_dir = file::parent_dir(&source_file);
+    let mut validation_errors = BTreeSet::new();
 
-        if self.program.is_none() {
-            validation_errors.insert(TestCaseValidationError::ProgramRequired);
-        }
+    // Validate fields in config file
 
-        if self.expected_stdout.is_none()
-            && self.expected_stderr.is_none()
-            && self.expected_exit_code.is_none()
-        {
-            validation_errors.insert(TestCaseValidationError::ExpectationRequired);
-        }
+    if toml_config.program.is_none() {
+        validation_errors.insert(TestCaseValidationError::ProgramRequired);
+    }
 
-        // Read fields
+    if toml_config.expected_stdout.is_none()
+        && toml_config.expected_stderr.is_none()
+        && toml_config.expected_exit_code.is_none()
+    {
+        validation_errors.insert(TestCaseValidationError::ExpectationRequired);
+    }
 
-        let description = read_from_config_value(&mut validation_errors, self.description, data);
+    // Read fields
 
-        let mut program_name = String::from("");
-        if let Some(p) = read_from_config_value(&mut validation_errors, self.program, data) {
-            program_name = p;
-        }
+    let description = read_from_config_value(&mut validation_errors, toml_config.description, data);
 
-        let mut arguments = vec![];
-        for arg in self.program_arguments.unwrap_or(vec![]) {
-            match arg.read(data) {
-                Ok(arg) => {
-                    arguments.push(arg);
-                }
-                Err(err) => {
-                    validation_errors.insert(err);
-                }
+    let mut program_name = String::from("");
+    if let Some(p) = read_from_config_value(&mut validation_errors, toml_config.program, data) {
+        program_name = p;
+    }
+
+    let mut arguments = vec![];
+    for arg in toml_config.program_arguments.unwrap_or_default() {
+        match arg.read(data) {
+            Ok(arg) => {
+                arguments.push(arg);
+            }
+            Err(err) => {
+                validation_errors.insert(err);
             }
         }
+    }
 
-        let stdin = read_from_config_value(&mut validation_errors, self.stdin, data);
+    let stdin = read_from_config_value(&mut validation_errors, toml_config.stdin, data);
 
-        let expected_stdout =
-            read_from_config_value(&mut validation_errors, self.expected_stdout, data);
-        let expected_stderr =
-            read_from_config_value(&mut validation_errors, self.expected_stderr, data);
-        let expected_exit_code =
-            read_from_config_value(&mut validation_errors, self.expected_exit_code, data);
+    let expected_stdout =
+        read_from_config_value(&mut validation_errors, toml_config.expected_stdout, data);
+    let expected_stderr =
+        read_from_config_value(&mut validation_errors, toml_config.expected_stderr, data);
+    let expected_exit_code =
+        read_from_config_value(&mut validation_errors, toml_config.expected_exit_code, data);
 
-        // Validate fields
-        let mut program = PathBuf::new();
-        if program_name.is_empty() == false {
-            if let Ok(p) =
-                file::find_executable_path(&program_name, current_dir.to_logical_path("."))
-            {
-                program = p;
-            } else {
-                validation_errors.insert(TestCaseValidationError::ProgramNotFound(
-                    program_name.clone(),
-                ));
-            }
-        }
-
-        if validation_errors.is_empty() {
-            Ok(TestCase {
-                source_file,
-                id,
-                description,
-                program,
-                arguments,
-                stdin,
-                expected_stdout,
-                expected_stderr,
-                expected_exit_code,
-            })
+    // Validate fields
+    let mut program = PathBuf::new();
+    if !program_name.is_empty() {
+        if let Ok(p) = file::find_executable_path(&program_name, current_dir.to_logical_path(".")) {
+            program = p;
         } else {
-            Err(validation_errors)
+            validation_errors.insert(TestCaseValidationError::ProgramNotFound(
+                program_name.clone(),
+            ));
         }
+    }
+
+    if validation_errors.is_empty() {
+        Ok(TestCase {
+            source_file,
+            id,
+            description,
+            program,
+            arguments,
+            stdin,
+            expected_stdout,
+            expected_stderr,
+            expected_exit_code,
+        })
+    } else {
+        Err(validation_errors)
     }
 }
 

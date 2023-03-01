@@ -19,6 +19,10 @@ impl TestIdContainer {
         self.ids
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.ids.is_empty()
+    }
+
     pub fn len(&self) -> usize {
         self.ids.len()
     }
@@ -32,8 +36,7 @@ impl TestIdContainer {
         }
 
         // Remove any elements that are contained by the new element
-        self.ids
-            .retain(|existing_id| new_id.contains(existing_id) == false);
+        self.ids.retain(|existing_id| !new_id.contains(existing_id));
 
         // Add new element and sort list
         self.ids.push(new_id);

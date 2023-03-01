@@ -50,7 +50,7 @@ fn write_tree_element(f: &mut dyn Write, tree: &Tree, level: &Vec<usize>) -> fmt
     match tree {
         Node(title, children) => {
             let mut d = children.len();
-            write!(f, "{}\n", title)?;
+            writeln!(f, "{}", title)?;
             for s in children {
                 let mut lnext = level.clone();
                 lnext.push(d);

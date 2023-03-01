@@ -43,7 +43,7 @@ pub fn print_not_ok_diagnostics(
         indent = indent_level
     );
 
-    if diagnostics.is_empty() == false {
+    if !diagnostics.is_empty() {
         print_diagnostics(diagnostics)
     }
 }
@@ -75,7 +75,8 @@ fn format_test_result(test_result: &TestResult) -> String {
         diagnostics.insert("exit-code", show_i32_diff(expected, got));
     }
 
-    serde_yaml::to_string(&diagnostics).unwrap_or(String::from("Failed to convert to YAML\n"))
+    serde_yaml::to_string(&diagnostics)
+        .unwrap_or_else(|_| String::from("Failed to convert to YAML\n"))
 }
 
 fn show_string_diff(expected: &String, got: &String) -> BTreeMap<&'static str, Value> {

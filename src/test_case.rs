@@ -24,7 +24,7 @@ impl TestCase {
         let file_path = self.source_file.to_string();
 
         if self.id.is_root() {
-            file_path.to_string()
+            file_path
         } else {
             format!("{}:{}", file_path, self.id.to_string())
         }
