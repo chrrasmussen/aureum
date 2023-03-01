@@ -1,0 +1,20 @@
+program = { env = "AUREUM_TEST_EXEC" }
+program_arguments = [
+  "--show-all-tests",
+  "--verbose",
+  "verbose-helpers/*.toml",
+]
+expected_stdout = """
+Running 1 tests:
+.
+
+✅ verbose-helpers/passing-test.toml
+
+Test result: OK (1 passed, 0 failed)
+"""
+expected_stderr = """
+🔍 Found 1 config files
+└─ verbose-helpers/passing-test.toml
+
+"""
+expected_exit_code = 0

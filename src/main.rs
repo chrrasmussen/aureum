@@ -1,5 +1,6 @@
 mod cli;
 
+use aureum::formats::tree::{self, Leaf, Node};
 use aureum::test_runner::{ReportConfig, ReportFormat};
 use aureum::toml_config::TomlConfigError;
 use cli::error;
@@ -24,6 +25,19 @@ fn main() {
     if source_files.is_empty() {
         eprintln!("error: No config files found for the given paths");
         exit(INVALID_USER_INPUT_EXIT_CODE);
+    }
+
+    if args.verbose {
+        let heading = format!("🔍 Found {} config files", source_files.len());
+        let tree = Node(
+            heading,
+            source_files
+                .iter()
+                .map(|x| Leaf(vec![x.to_string()]))
+                .collect(),
+        );
+        eprint!("{}", tree::draw_tree(&tree).expect("Unable to draw tree")); // Already contains newline
+        eprintln!();
     }
 
     let mut all_test_cases = vec![];

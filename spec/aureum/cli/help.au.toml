@@ -13,5 +13,6 @@ Options:
       --output-format <OUTPUT_FORMAT>  Options: summary, tap [default: summary]
       --show-all-tests                 Show all tests in summary, regardless of test status
       --run-tests-in-parallel          Run tests in parallel
+      --verbose                        Print extra information about config files
   -h, --help                           Print help information
 """

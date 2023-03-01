@@ -31,6 +31,10 @@ pub struct Args {
     /// Run tests in parallel
     #[arg(long)]
     pub run_tests_in_parallel: bool,
+
+    /// Print extra information about config files
+    #[arg(long)]
+    pub verbose: bool,
 }
 
 impl FromStr for TestPath {
