@@ -22,7 +22,7 @@ pub fn print_files_found(source_files: &[RelativePathBuf]) {
 
 pub fn print_config_details(source_file: RelativePathBuf, config: &ValidTomlConfig) {
     let errors = test_cases_errors(config);
-    let tree = Node(source_file.to_string(), errors);
+    let tree = Node(config_heading(source_file), errors);
 
     print_tree(tree);
 }
@@ -32,7 +32,10 @@ pub fn print_toml_config_error(source_file: RelativePathBuf, error: TomlConfigEr
         TomlConfigError::FailedToReadFile(_) => "Failed to read file",
         TomlConfigError::FailedToParseTomlConfig(_) => "Failed to parse config file",
     };
-    let tree = Node(source_file.to_string(), vec![Leaf(vec![msg.to_owned()])]);
+    let tree = Node(
+        config_heading(source_file),
+        vec![Leaf(vec![msg.to_owned()])],
+    );
 
     print_tree(tree);
 }
@@ -42,6 +45,10 @@ fn print_tree(tree: Tree) {
 
     eprint!("{}", content); // Already contains newline
     eprintln!()
+}
+
+fn config_heading(source_file: RelativePathBuf) -> String {
+    format!("📋 {}", source_file)
 }
 
 pub fn any_issues_in_toml_config(config: &ValidTomlConfig) -> bool {

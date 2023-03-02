@@ -8,7 +8,7 @@ Running 0 tests:
 Test result: OK (0 passed, 0 failed)
 """
 expected_stderr = """
-helpers/missing-program.toml
+📋 helpers/missing-program.toml
 └─ Validation errors
    ├─ test1
    │  └─ The field 'program' is required
