@@ -37,19 +37,28 @@ F
 │  │  ╭
 │  │  │ STDOUT
 │  │  ╰ (No newline at end)
-│  └─ Got
+│  ├─ Got
+│  │  ╭
+│  │  │ Hello world
+│  │  ╰ (No newline at end)
+│  └─ Diff
 │     ╭
-│     │ Hello world
-│     ╰ (No newline at end)
+│     │ -STDOUT
+│     │ +Hello world
+│     ╰
 ├─ Standard error
 │  ├─ Expected
 │  │  ╭
 │  │  │ STDERR
 │  │  ╰ (No newline at end)
-│  └─ Got
+│  ├─ Got
+│  │  ╭
+│  │  │ 
+│  │  ╰ (No newline at end)
+│  └─ Diff
 │     ╭
-│     │ 
-│     ╰ (No newline at end)
+│     │ -STDERR
+│     ╰
 └─ Exit code
    ├─ Expected
    │  └─ 42

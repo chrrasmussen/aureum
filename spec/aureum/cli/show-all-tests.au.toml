@@ -3,9 +3,9 @@ program = { env = "AUREUM_TEST_EXEC" }
 
 [tests.show-all-tests]
 program_arguments = [
-  "--show-all-tests",
-  "basic-helpers/passing-test.toml",
-  "basic-helpers/failing-test.toml",
+   "--show-all-tests",
+   "basic-helpers/passing-test.toml",
+   "basic-helpers/failing-test.toml",
 ]
 expected_stdout = """
 🚀 Running 2 tests:
@@ -17,19 +17,28 @@ F.
 │  │  ╭
 │  │  │ STDOUT
 │  │  ╰ (No newline at end)
-│  └─ Got
+│  ├─ Got
+│  │  ╭
+│  │  │ Hello world
+│  │  ╰ (No newline at end)
+│  └─ Diff
 │     ╭
-│     │ Hello world
-│     ╰ (No newline at end)
+│     │ -STDOUT
+│     │ +Hello world
+│     ╰
 ├─ Standard error
 │  ├─ Expected
 │  │  ╭
 │  │  │ STDERR
 │  │  ╰ (No newline at end)
-│  └─ Got
+│  ├─ Got
+│  │  ╭
+│  │  │ 
+│  │  ╰ (No newline at end)
+│  └─ Diff
 │     ╭
-│     │ 
-│     ╰ (No newline at end)
+│     │ -STDERR
+│     ╰
 └─ Exit code
    ├─ Expected
    │  └─ 42
@@ -44,7 +53,10 @@ expected_exit_code = 1
 
 
 [tests.default]
-program_arguments = ["basic-helpers/passing-test.toml", "basic-helpers/failing-test.toml"]
+program_arguments = [
+   "basic-helpers/passing-test.toml",
+   "basic-helpers/failing-test.toml",
+]
 expected_stdout = """
 🚀 Running 2 tests:
 F.
@@ -55,19 +67,28 @@ F.
 │  │  ╭
 │  │  │ STDOUT
 │  │  ╰ (No newline at end)
-│  └─ Got
+│  ├─ Got
+│  │  ╭
+│  │  │ Hello world
+│  │  ╰ (No newline at end)
+│  └─ Diff
 │     ╭
-│     │ Hello world
-│     ╰ (No newline at end)
+│     │ -STDOUT
+│     │ +Hello world
+│     ╰
 ├─ Standard error
 │  ├─ Expected
 │  │  ╭
 │  │  │ STDERR
 │  │  ╰ (No newline at end)
-│  └─ Got
+│  ├─ Got
+│  │  ╭
+│  │  │ 
+│  │  ╰ (No newline at end)
+│  └─ Diff
 │     ╭
-│     │ 
-│     ╰ (No newline at end)
+│     │ -STDERR
+│     ╰
 └─ Exit code
    ├─ Expected
    │  └─ 42

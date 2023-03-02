@@ -2,6 +2,7 @@ use crate::ascii_tree;
 pub use crate::ascii_tree::Tree::{self, Leaf, Node};
 use crate::test_result::{TestResult, ValueComparison};
 use crate::utils::string;
+use colored::Colorize;
 use std::fmt::Error;
 
 pub fn draw_tree(tree: &Tree) -> Result<String, Error> {
@@ -53,7 +54,22 @@ fn show_string_diff(expected: &str, got: &str) -> Vec<Tree> {
     let expected_lines = string_to_lines(&format!("Expected\n{}", text_block(expected)));
     let got_lines = string_to_lines(&format!("Got\n{}", text_block(got)));
 
-    vec![Leaf(expected_lines), Leaf(got_lines)]
+    let mut diff_output = String::new();
+    for diff in diff::lines(expected, got) {
+        match diff {
+            diff::Result::Left(l) => {
+                diff_output.push_str(&format!("{}\n", (String::from("-") + l).red()))
+            }
+            diff::Result::Both(l, _) => diff_output.push_str(&format!(" {}\n", l)),
+            diff::Result::Right(r) => {
+                diff_output.push_str(&format!("{}\n", (String::from("+") + r).green()))
+            }
+        }
+    }
+
+    let diff_lines = string_to_lines(&format!("Diff\n{}", text_block(&diff_output)));
+
+    vec![Leaf(expected_lines), Leaf(got_lines), Leaf(diff_lines)]
 }
 
 fn string_to_lines(str: &str) -> Vec<String> {
