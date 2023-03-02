@@ -5,22 +5,40 @@ program_arguments = [
   "verbose-helpers/*.toml",
 ]
 expected_stdout = """
-🚀 Running 1 tests:
-.
+🚀 Running 3 tests:
+...
 
-✅ verbose-helpers/passing-test.toml
+✅ verbose-helpers/many-requirements.toml:env-var-exists
+✅ verbose-helpers/many-requirements.toml:external-file-exists
+✅ verbose-helpers/no-requirements.toml
 
-Test result: OK (1 passed, 0 failed)
+Test result: OK (3 passed, 0 failed)
 """
 expected_stderr = """
-🔍 Found 1 config files
-└─ verbose-helpers/passing-test.toml
+🔍 Found 2 config files
+├─ verbose-helpers/many-requirements.toml
+└─ verbose-helpers/no-requirements.toml
 
-📋 verbose-helpers/passing-test.toml
+📋 verbose-helpers/many-requirements.toml
+├─ Requirements
+│  ├─ Files
+│  │  ├─ ❌ aureum-test-file-does-not-exist
+│  │  └─ ✅ hello-world.txt
+│  └─ Environment
+│     ├─ ❌ AUREUM_TEST_ENV_VAR_DOES_NOT_EXIST
+│     └─ ✅ AUREUM_TEST_HELLO_WORLD
+└─ Validation errors
+   ├─ env-var-missing
+   │  └─ ❌ Missing environment variable 'AUREUM_TEST_ENV_VAR_DOES_NOT_EXIST'
+   └─ external-file-missing
+      └─ ❌ Missing external file 'aureum-test-file-does-not-exist'
+
+📋 verbose-helpers/no-requirements.toml
 ├─ Requirements
 │  └─ ✅ None
 └─ Validation errors
    └─ ✅ None
 
+Some config files contain errors (See above)
 """
-expected_exit_code = 0
+expected_exit_code = 1

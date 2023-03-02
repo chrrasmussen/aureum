@@ -82,9 +82,8 @@ fn config_heading(source_file: RelativePathBuf) -> String {
 fn requirements_map(requirements: &TomlConfigData) -> Vec<Tree> {
     let mut categories = vec![];
 
-    let any_files_missing = requirements.any_missing_file_requirements();
     let files = requirements.file_requirements();
-    if any_files_missing && !files.is_empty() {
+    if !files.is_empty() {
         categories.push(Node(
             String::from("Files"),
             files
@@ -94,9 +93,8 @@ fn requirements_map(requirements: &TomlConfigData) -> Vec<Tree> {
         ));
     }
 
-    let any_env_missing = requirements.any_missing_env_requirements();
     let env = requirements.env_requirements();
-    if any_env_missing && !env.is_empty() {
+    if !env.is_empty() {
         categories.push(Node(
             String::from("Environment"),
             env.into_iter()
@@ -157,7 +155,7 @@ fn show_validation_error(validation_error: &TestCaseValidationError) -> String {
 }
 
 fn show_presence(value: bool) -> String {
-    String::from(if value { "✔️" } else { "❌" })
+    String::from(if value { "✅" } else { "❌" })
 }
 
 fn str_to_tree(msg: &str) -> Tree {
