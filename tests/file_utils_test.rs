@@ -87,3 +87,44 @@ fn assert_split_file_name(input_path: &str, expected_path: &str, expected_suffix
     assert_eq!(output_path, PathBuf::from(expected_path));
     assert_eq!(suffix, expected_suffix.map(|x| x.to_owned()));
 }
+
+// SECTION: display_path
+
+#[test]
+fn test_display_path_with_absolute_path() {
+    let path = if cfg!(windows) {
+        r"C:\example"
+    } else {
+        "/example"
+    };
+    let displayed_path = file::display_path(path);
+
+    assert_eq!(displayed_path, "<absolute path to 'example'>");
+}
+
+#[test]
+fn test_display_path_with_root_dir() {
+    let path = if cfg!(windows) { r"C:\" } else { "/" };
+    let displayed_path = file::display_path(path);
+
+    assert_eq!(displayed_path, "<root directory>");
+}
+
+#[test]
+fn test_display_path_with_file_name() {
+    let displayed_path = file::display_path("example");
+
+    assert_eq!(displayed_path, "example");
+}
+
+#[test]
+fn test_display_path_with_relative_path() {
+    let path = if cfg!(windows) {
+        r"sub_dir\example"
+    } else {
+        "sub_dir/example"
+    };
+    let displayed_path = file::display_path(path);
+
+    assert_eq!(displayed_path, "sub_dir/example");
+}

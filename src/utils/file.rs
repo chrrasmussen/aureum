@@ -1,6 +1,7 @@
 use relative_path::{RelativePath, RelativePathBuf};
 use std::path::{Path, PathBuf};
 
+/// Get parent directory of path
 pub fn parent_dir<P>(path: P) -> RelativePathBuf
 where
     P: AsRef<RelativePath>,
@@ -47,4 +48,24 @@ pub fn split_file_name(p: &Path) -> (PathBuf, Option<String>) {
     }
 
     (p.to_path_buf(), None)
+}
+
+/// Get a platform-independent version of a file path
+pub fn display_path<P>(path: P) -> String
+where
+    P: AsRef<Path>,
+{
+    let path = path.as_ref();
+    if path.is_absolute() {
+        if let Some(file_name) = path.file_name() {
+            format!("<absolute path to '{}'>", file_name.to_string_lossy())
+        } else {
+            String::from("<root directory>")
+        }
+    } else {
+        match RelativePathBuf::from_path(path) {
+            Ok(relative_path) => relative_path.to_string(),
+            Err(_) => String::from("<invalid path>"),
+        }
+    }
 }
