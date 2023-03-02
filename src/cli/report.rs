@@ -1,5 +1,3 @@
-use std::collections::BTreeSet;
-
 use aureum::formats::tree;
 use aureum::formats::tree::Tree::{self, Leaf, Node};
 use aureum::toml_config::{
@@ -7,14 +5,14 @@ use aureum::toml_config::{
 };
 use colored::Colorize;
 use relative_path::RelativePathBuf;
+use std::collections::BTreeSet;
 
 const NONE_MSG: &str = "✅ None";
 
 pub fn print_no_config_files() {
     eprintln!(
-        "{} {}",
+        "{} No config files found for the given paths",
         "error:".red().bold(),
-        "No config files found for the given paths"
     );
 }
 
