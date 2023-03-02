@@ -1,10 +1,8 @@
 mod cli;
 
-use aureum::formats::tree::{self, Leaf, Node};
 use aureum::test_runner::{ReportConfig, ReportFormat};
-use aureum::toml_config::TomlConfigError;
-use cli::error;
 use cli::file;
+use cli::report;
 use cli::{Args, OutputFormat};
 use std::env;
 use std::process::exit;
@@ -28,44 +26,29 @@ fn main() {
     }
 
     if args.verbose {
-        let heading = format!("🔍 Found {} config files", source_files.len());
-        let tree = Node(
-            heading,
-            source_files
-                .iter()
-                .map(|x| Leaf(vec![x.to_string()]))
-                .collect(),
-        );
-        eprint!("{}", tree::draw_tree(&tree).expect("Unable to draw tree")); // Already contains newline
-        eprintln!();
+        report::print_files_found(&source_files);
     }
 
     let mut all_test_cases = vec![];
-    let mut failed_configs = vec![];
+    let mut any_failed_configs = false;
 
     for source_file in source_files {
-        match aureum::toml_config::test_cases_from_file(&source_file) {
-            Ok(result) => {
-                let errors = error::test_cases_errors(&result);
-                if !errors.is_empty() {
-                    failed_configs.push(error::report_error(source_file, errors));
+        match aureum::toml_config::parse_toml_config(&source_file) {
+            Ok(config) => {
+                let any_issues = report::any_issues_in_toml_config(&config);
+                if any_issues {
+                    report::print_config_details(source_file, &config);
+
+                    any_failed_configs = true;
                 }
 
-                all_test_cases.extend(result.test_cases);
+                all_test_cases.extend(config.test_cases);
             }
-            Err(err) => {
-                let msg = match err {
-                    TomlConfigError::FailedToReadFile(_) => "Failed to read file",
-                    TomlConfigError::FailedToParseTomlConfig(_) => "Failed to parse config file",
-                };
-                failed_configs.push(error::report_error_message(source_file, msg));
+            Err(error) => {
+                report::print_toml_config_error(source_file, error);
+                any_failed_configs = true;
             }
         }
-    }
-
-    for failed_config in &failed_configs {
-        eprint!("{}", failed_config); // Already contains newline
-        eprintln!();
     }
 
     let report_config = ReportConfig {
@@ -79,7 +62,6 @@ fn main() {
         args.run_tests_in_parallel,
     );
 
-    let any_failed_configs = !failed_configs.is_empty();
     if any_failed_configs {
         eprintln!("Some config files contain errors (See above)");
     }

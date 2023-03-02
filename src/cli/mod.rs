@@ -1,5 +1,5 @@
-pub mod error;
 pub mod file;
+pub mod report;
 
 use aureum::test_id::TestId;
 use aureum::utils::file as file_utils;

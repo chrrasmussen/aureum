@@ -1,41 +1,54 @@
 use aureum::formats::tree;
 use aureum::formats::tree::Tree::{self, Leaf, Node};
 use aureum::test_id::TestId;
-use aureum::toml_config::{TestCaseValidationError, TestCases, TomlConfigData};
+use aureum::toml_config::{
+    TestCaseValidationError, TomlConfigData, TomlConfigError, ValidTomlConfig,
+};
 use relative_path::RelativePathBuf;
 use std::collections::BTreeSet;
-use std::fmt::{Display, Formatter};
 
-pub struct ConfigError {
-    source_file: RelativePathBuf,
-    errors: Vec<Tree>,
+pub fn print_files_found(source_files: &[RelativePathBuf]) {
+    let heading = format!("🔍 Found {} config files", source_files.len());
+    let tree = Node(
+        heading,
+        source_files
+            .iter()
+            .map(|x| Leaf(vec![x.to_string()]))
+            .collect(),
+    );
+
+    print_tree(tree);
 }
 
-impl Display for ConfigError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let source_file = self.source_file.to_string();
-        let content = Node(source_file, self.errors.clone());
-        let output =
-            tree::draw_tree(&content).unwrap_or_else(|_| String::from("Failed to draw tree\n"));
-        write!(f, "{}", output)
-    }
+pub fn print_config_details(source_file: RelativePathBuf, config: &ValidTomlConfig) {
+    let errors = test_cases_errors(config);
+    let tree = Node(source_file.to_string(), errors);
+
+    print_tree(tree);
 }
 
-pub fn report_error(source_file: RelativePathBuf, errors: Vec<Tree>) -> ConfigError {
-    ConfigError {
-        source_file,
-        errors,
-    }
+pub fn print_toml_config_error(source_file: RelativePathBuf, error: TomlConfigError) {
+    let msg = match error {
+        TomlConfigError::FailedToReadFile(_) => "Failed to read file",
+        TomlConfigError::FailedToParseTomlConfig(_) => "Failed to parse config file",
+    };
+    let tree = Node(source_file.to_string(), vec![Leaf(vec![msg.to_owned()])]);
+
+    print_tree(tree);
 }
 
-pub fn report_error_message(source_file: RelativePathBuf, msg: &str) -> ConfigError {
-    ConfigError {
-        source_file,
-        errors: vec![Leaf(vec![String::from(msg)])],
-    }
+fn print_tree(tree: Tree) {
+    let content = tree::draw_tree(&tree).unwrap_or_else(|_| String::from("Failed to draw tree\n"));
+
+    eprint!("{}", content); // Already contains newline
+    eprintln!()
 }
 
-pub fn test_cases_errors(test_cases: &TestCases) -> Vec<Tree> {
+pub fn any_issues_in_toml_config(config: &ValidTomlConfig) -> bool {
+    !config.validation_errors.is_empty()
+}
+
+pub fn test_cases_errors(test_cases: &ValidTomlConfig) -> Vec<Tree> {
     let mut categories = vec![];
 
     let requirements = requirements_map(&test_cases.requirements);

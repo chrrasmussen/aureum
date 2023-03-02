@@ -12,7 +12,7 @@ use std::str::FromStr;
 
 // READ CONFIG FILE
 
-pub struct TestCases {
+pub struct ValidTomlConfig {
     pub requirements: TomlConfigData,
     pub validation_errors: Vec<(TestId, BTreeSet<TestCaseValidationError>)>,
     pub test_cases: Vec<TestCase>,
@@ -23,7 +23,7 @@ pub enum TomlConfigError {
     FailedToParseTomlConfig(toml::de::Error),
 }
 
-pub fn test_cases_from_file(source_file: &RelativePath) -> Result<TestCases, TomlConfigError> {
+pub fn parse_toml_config(source_file: &RelativePath) -> Result<ValidTomlConfig, TomlConfigError> {
     let source_path = source_file.to_logical_path(".");
 
     let toml_content =
@@ -37,7 +37,7 @@ pub fn test_cases_from_file(source_file: &RelativePath) -> Result<TestCases, Tom
 
     let (test_cases, validation_errors) = build_test_cases(toml_config, source_file, &data);
 
-    Ok(TestCases {
+    Ok(ValidTomlConfig {
         requirements: data,
         validation_errors,
         test_cases,
