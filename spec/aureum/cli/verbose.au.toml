@@ -2,10 +2,7 @@ program = { env = "AUREUM_TEST_EXEC" }
 
 
 [tests.verbose-mode]
-program_arguments = [
-  "--verbose",
-  "verbose-helpers/*.toml",
-]
+program_arguments = ["--verbose", "verbose-helpers/*.toml"]
 expected_stdout = """
 🚀 Running 3 tests:
 ...
@@ -19,11 +16,9 @@ expected_stderr = """
 
 📋 verbose-helpers/many-requirements.toml
 ├─ :env-var-exists
-│  ├─ Requirements
-│  │  └─ Environment
-│  │     └─ ✅ AUREUM_TEST_HELLO_WORLD
-│  └─ Validation errors
-│     └─ ✅ None
+│  └─ Requirements
+│     └─ Environment
+│        └─ ✅ AUREUM_TEST_HELLO_WORLD
 ├─ :env-var-missing
 │  ├─ Requirements
 │  │  └─ Environment
@@ -31,11 +26,9 @@ expected_stderr = """
 │  └─ Validation errors
 │     └─ ❌ Missing environment variable 'AUREUM_TEST_ENV_VAR_DOES_NOT_EXIST'
 ├─ :external-file-exists
-│  ├─ Requirements
-│  │  └─ Files
-│  │     └─ ✅ hello-world.txt
-│  └─ Validation errors
-│     └─ ✅ None
+│  └─ Requirements
+│     └─ Files
+│        └─ ✅ hello-world.txt
 └─ :external-file-missing
    ├─ Requirements
    │  └─ Files
@@ -44,10 +37,6 @@ expected_stderr = """
       └─ ❌ Missing external file 'aureum-test-file-does-not-exist'
 
 📋 verbose-helpers/no-requirements.toml
-├─ Requirements
-│  └─ ✅ None
-└─ Validation errors
-   └─ ✅ None
 
 Some config files contain errors (See above)
 """
@@ -55,9 +44,7 @@ expected_exit_code = 1
 
 
 [tests.default]
-program_arguments = [
-  "verbose-helpers/*.toml",
-]
+program_arguments = ["verbose-helpers/*.toml"]
 expected_stdout = """
 🚀 Running 3 tests:
 ...
@@ -67,14 +54,10 @@ Test result: OK (3 passed, 0 failed)
 expected_stderr = """
 📋 verbose-helpers/many-requirements.toml
 ├─ :env-var-exists
-│  └─ Validation errors
-│     └─ ✅ None
 ├─ :env-var-missing
 │  └─ Validation errors
 │     └─ ❌ Missing environment variable 'AUREUM_TEST_ENV_VAR_DOES_NOT_EXIST'
 ├─ :external-file-exists
-│  └─ Validation errors
-│     └─ ✅ None
 └─ :external-file-missing
    └─ Validation errors
       └─ ❌ Missing external file 'aureum-test-file-does-not-exist'

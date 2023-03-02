@@ -7,8 +7,6 @@ use colored::Colorize;
 use relative_path::RelativePathBuf;
 use std::collections::BTreeSet;
 
-const NONE_MSG: &str = "✅ None";
-
 pub fn print_no_config_files() {
     eprintln!(
         "{} No config files found for the given paths",
@@ -44,30 +42,23 @@ pub fn print_config_details(
         let mut categories = vec![];
 
         if verbose {
+            // Requirements
             let requirements = requirements_map(&test_details.requirements, &config.data);
-            let nodes = if requirements.is_empty() {
-                vec![str_to_tree(NONE_MSG)]
-            } else {
-                requirements
-            };
-
-            let heading = String::from("Requirements");
-            categories.push(Node(heading, nodes));
+            if !requirements.is_empty() {
+                let heading = String::from("Requirements");
+                categories.push(Node(heading, requirements));
+            }
         }
 
+        // Validation errors
         let heading = String::from("Validation errors");
-        match &test_details.test_case {
-            Ok(_) => {
-                categories.push(Node(heading, vec![str_to_tree(NONE_MSG)]));
-            }
-            Err(validation_errors) => {
-                let nodes = validation_errors
-                    .iter()
-                    .map(|err| str_to_tree(&show_validation_error(err)))
-                    .collect();
+        if let Err(validation_errors) = &test_details.test_case {
+            let nodes = validation_errors
+                .iter()
+                .map(|err| str_to_tree(&show_validation_error(err)))
+                .collect();
 
-                categories.push(Node(heading, nodes));
-            }
+            categories.push(Node(heading, nodes));
         }
 
         tests.push((test_id, categories))
