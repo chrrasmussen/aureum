@@ -1,16 +1,16 @@
+use std::collections::BTreeSet;
+
 use aureum::formats::tree;
 use aureum::formats::tree::Tree::{self, Leaf, Node};
-use aureum::test_id::TestId;
 use aureum::toml_config::{
-    TestCaseValidationError, TomlConfigData, TomlConfigError, ValidTomlConfig,
+    ParsedTomlConfig, Requirement, TestCaseValidationError, TomlConfigData, TomlConfigError,
 };
 use relative_path::RelativePathBuf;
-use std::collections::BTreeSet;
 
 const NONE_MSG: &str = "✅ None";
 
-pub fn any_issues_in_toml_config(config: &ValidTomlConfig) -> bool {
-    !config.validation_errors.is_empty()
+pub fn any_issues_in_toml_config(config: &ParsedTomlConfig) -> bool {
+    config.tests.values().any(|x| x.test_case.is_err())
 }
 
 pub fn print_files_found(source_files: &[RelativePathBuf]) {
@@ -26,34 +26,57 @@ pub fn print_files_found(source_files: &[RelativePathBuf]) {
     print_tree(tree);
 }
 
-pub fn print_config_details(source_file: RelativePathBuf, config: &ValidTomlConfig, verbose: bool) {
-    let mut categories = vec![];
+pub fn print_config_details(
+    source_file: RelativePathBuf,
+    config: &ParsedTomlConfig,
+    verbose: bool,
+) {
+    let mut tests = Vec::new();
 
-    if verbose {
-        let requirements = requirements_map(&config.requirements);
-        let nodes = if requirements.is_empty() {
-            vec![str_to_tree(NONE_MSG)]
-        } else {
-            requirements
-        };
+    for (test_id, test_details) in &config.tests {
+        let mut categories = vec![];
 
-        let heading = String::from("Requirements");
-        categories.push(Node(heading, nodes));
-    }
+        if verbose {
+            let requirements = requirements_map(&test_details.requirements, &config.data);
+            let nodes = if requirements.is_empty() {
+                vec![str_to_tree(NONE_MSG)]
+            } else {
+                requirements
+            };
 
-    {
-        let validation_errors = validation_errors_map(&config.validation_errors);
-        let nodes = if validation_errors.is_empty() {
-            vec![str_to_tree(NONE_MSG)]
-        } else {
-            validation_errors
-        };
+            let heading = String::from("Requirements");
+            categories.push(Node(heading, nodes));
+        }
 
         let heading = String::from("Validation errors");
-        categories.push(Node(heading, nodes));
+        match &test_details.test_case {
+            Ok(_) => {
+                categories.push(Node(heading, vec![str_to_tree(NONE_MSG)]));
+            }
+            Err(validation_errors) => {
+                let nodes = validation_errors
+                    .iter()
+                    .map(|err| str_to_tree(&show_validation_error(err)))
+                    .collect();
+
+                categories.push(Node(heading, nodes));
+            }
+        }
+
+        tests.push((test_id, categories))
     }
 
-    let tree = Node(config_heading(source_file), categories);
+    let is_root = tests.len() == 1 && tests[0].0.is_root();
+    let nodes: Vec<Tree> = if is_root {
+        tests.into_iter().next().unwrap().1
+    } else {
+        tests
+            .into_iter()
+            .map(|(test_id, children)| Node(test_id.to_prefixed_string(), children))
+            .collect()
+    };
+
+    let tree = Node(config_heading(source_file), nodes);
 
     print_tree(tree);
 }
@@ -79,10 +102,25 @@ fn config_heading(source_file: RelativePathBuf) -> String {
     format!("📋 {}", source_file)
 }
 
-fn requirements_map(requirements: &TomlConfigData) -> Vec<Tree> {
+fn requirements_map(requirements: &BTreeSet<Requirement>, data: &TomlConfigData) -> Vec<Tree> {
+    let mut files = vec![];
+    let mut env_vars = vec![];
+
+    for requirement in requirements {
+        match requirement {
+            Requirement::ExternalFile(path) => {
+                let has_value = data.get_file(path).is_some();
+                files.push((path, has_value));
+            }
+            Requirement::EnvVar(var_name) => {
+                let has_value = data.get_env_var(var_name).is_some();
+                env_vars.push((var_name, has_value));
+            }
+        }
+    }
+
     let mut categories = vec![];
 
-    let files = requirements.file_requirements();
     if !files.is_empty() {
         categories.push(Node(
             String::from("Files"),
@@ -93,44 +131,17 @@ fn requirements_map(requirements: &TomlConfigData) -> Vec<Tree> {
         ));
     }
 
-    let env = requirements.env_requirements();
-    if !env.is_empty() {
+    if !env_vars.is_empty() {
         categories.push(Node(
             String::from("Environment"),
-            env.into_iter()
+            env_vars
+                .into_iter()
                 .map(|(x, y)| str_to_tree(&format!("{} {}", show_presence(y), x)))
                 .collect(),
         ));
     }
 
     categories
-}
-
-fn validation_errors_map(
-    validation_errors: &Vec<(TestId, BTreeSet<TestCaseValidationError>)>,
-) -> Vec<Tree> {
-    if validation_errors.len() == 1 {
-        let (maybe_root, errs) = &validation_errors[0];
-        if maybe_root.is_root() {
-            return errs
-                .iter()
-                .map(|err| str_to_tree(&show_validation_error(err)))
-                .collect::<Vec<_>>();
-        }
-    }
-
-    let mut test_cases = vec![];
-
-    for (test_id, errs) in validation_errors {
-        test_cases.push(Node(
-            test_id.to_string(),
-            errs.iter()
-                .map(|err| str_to_tree(&show_validation_error(err)))
-                .collect(),
-        ));
-    }
-
-    test_cases
 }
 
 fn show_validation_error(validation_error: &TestCaseValidationError) -> String {

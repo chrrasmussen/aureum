@@ -44,7 +44,7 @@ fn main() {
                     }
                 }
 
-                all_test_cases.extend(config.test_cases);
+                all_test_cases.extend(config.tests.into_values().filter_map(|x| x.test_case.ok()));
             }
             Err(error) => {
                 report::print_toml_config_error(source_file, error);

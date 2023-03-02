@@ -37,6 +37,10 @@ impl TestId {
     pub fn is_root(&self) -> bool {
         self.id_path.is_empty()
     }
+
+    pub fn to_prefixed_string(&self) -> String {
+        format!(":{}", self.to_string())
+    }
 }
 
 impl ToString for TestId {

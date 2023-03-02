@@ -12,10 +12,14 @@ use std::str::FromStr;
 
 // READ CONFIG FILE
 
-pub struct ValidTomlConfig {
-    pub requirements: TomlConfigData,
-    pub validation_errors: Vec<(TestId, BTreeSet<TestCaseValidationError>)>,
-    pub test_cases: Vec<TestCase>,
+pub struct ParsedTomlConfig {
+    pub data: TomlConfigData,
+    pub tests: BTreeMap<TestId, TestDetails>,
+}
+
+pub struct TestDetails {
+    pub requirements: BTreeSet<Requirement>,
+    pub test_case: Result<TestCase, BTreeSet<TestCaseValidationError>>,
 }
 
 pub enum TomlConfigError {
@@ -23,7 +27,7 @@ pub enum TomlConfigError {
     FailedToParseTomlConfig(toml::de::Error),
 }
 
-pub fn parse_toml_config(source_file: &RelativePath) -> Result<ValidTomlConfig, TomlConfigError> {
+pub fn parse_toml_config(source_file: &RelativePath) -> Result<ParsedTomlConfig, TomlConfigError> {
     let source_path = source_file.to_logical_path(".");
 
     let toml_content =
@@ -41,21 +45,18 @@ pub fn parse_toml_config(source_file: &RelativePath) -> Result<ValidTomlConfig, 
     let source_dir = file::parent_dir(source_file).to_logical_path(".");
     let data = gather_requirements(&requirements, &source_dir);
 
-    let mut test_cases = vec![];
-    let mut validation_errors = vec![];
+    let mut tests = BTreeMap::new();
 
     for (test_id, toml_config) in toml_configs {
-        match build_test_case(toml_config, source_file.to_owned(), test_id.clone(), &data) {
-            Ok(test_case) => test_cases.push(test_case),
-            Err(err) => validation_errors.push((test_id, err)),
-        }
+        let test_details = TestDetails {
+            requirements: get_requirements_from_leaf_config(&toml_config),
+            test_case: build_test_case(toml_config, source_file.to_owned(), test_id.clone(), &data),
+        };
+
+        tests.insert(test_id, test_details);
     }
 
-    Ok(ValidTomlConfig {
-        requirements: data,
-        validation_errors,
-        test_cases,
-    })
+    Ok(ParsedTomlConfig { data, tests })
 }
 
 // TOML STRUCTURE
@@ -141,35 +142,11 @@ impl TomlConfigData {
         }
     }
 
-    pub fn any_missing_file_requirements(&self) -> bool {
-        self.files.iter().any(|(_key, value)| value.is_none())
-    }
-
-    pub fn file_requirements(&self) -> Vec<(String, bool)> {
-        Vec::from_iter(
-            self.files
-                .iter()
-                .map(|(key, value)| (key.to_owned(), value.is_some())),
-        )
-    }
-
-    pub fn any_missing_env_requirements(&self) -> bool {
-        self.env.iter().any(|(_key, value)| value.is_none())
-    }
-
-    pub fn env_requirements(&self) -> Vec<(String, bool)> {
-        Vec::from_iter(
-            self.env
-                .iter()
-                .map(|(key, value)| (key.to_owned(), value.is_some())),
-        )
-    }
-
-    fn get_file(&self, key: &String) -> Option<String> {
+    pub fn get_file(&self, key: &String) -> Option<String> {
         self.files.get(key).and_then(|x| x.to_owned())
     }
 
-    fn get_env(&self, key: &String) -> Option<String> {
+    pub fn get_env_var(&self, key: &String) -> Option<String> {
         self.env.get(key).and_then(|x| x.to_owned())
     }
 }
@@ -372,7 +349,7 @@ where
                 }
             }
             Self::FetchFromEnv { env: var_name } => {
-                if let Some(str) = data.get_env(&var_name) {
+                if let Some(str) = data.get_env_var(&var_name) {
                     let value = str
                         .parse()
                         .map_err(|_err| TestCaseValidationError::FailedToParseString)?;

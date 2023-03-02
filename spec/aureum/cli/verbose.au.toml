@@ -20,17 +20,29 @@ expected_stderr = """
 └─ verbose-helpers/no-requirements.toml
 
 📋 verbose-helpers/many-requirements.toml
-├─ Requirements
-│  ├─ Files
-│  │  ├─ ❌ aureum-test-file-does-not-exist
-│  │  └─ ✅ hello-world.txt
-│  └─ Environment
-│     ├─ ❌ AUREUM_TEST_ENV_VAR_DOES_NOT_EXIST
-│     └─ ✅ AUREUM_TEST_HELLO_WORLD
-└─ Validation errors
-   ├─ env-var-missing
-   │  └─ ❌ Missing environment variable 'AUREUM_TEST_ENV_VAR_DOES_NOT_EXIST'
-   └─ external-file-missing
+├─ :env-var-exists
+│  ├─ Requirements
+│  │  └─ Environment
+│  │     └─ ✅ AUREUM_TEST_HELLO_WORLD
+│  └─ Validation errors
+│     └─ ✅ None
+├─ :env-var-missing
+│  ├─ Requirements
+│  │  └─ Environment
+│  │     └─ ❌ AUREUM_TEST_ENV_VAR_DOES_NOT_EXIST
+│  └─ Validation errors
+│     └─ ❌ Missing environment variable 'AUREUM_TEST_ENV_VAR_DOES_NOT_EXIST'
+├─ :external-file-exists
+│  ├─ Requirements
+│  │  └─ Files
+│  │     └─ ✅ hello-world.txt
+│  └─ Validation errors
+│     └─ ✅ None
+└─ :external-file-missing
+   ├─ Requirements
+   │  └─ Files
+   │     └─ ❌ aureum-test-file-does-not-exist
+   └─ Validation errors
       └─ ❌ Missing external file 'aureum-test-file-does-not-exist'
 
 📋 verbose-helpers/no-requirements.toml

@@ -9,10 +9,11 @@ Test result: OK (0 passed, 0 failed)
 """
 expected_stderr = """
 📋 helpers/missing-program.toml
-└─ Validation errors
-   ├─ test1
-   │  └─ ❌ The field 'program' is required
-   └─ test2
+├─ :test1
+│  └─ Validation errors
+│     └─ ❌ The field 'program' is required
+└─ :test2
+   └─ Validation errors
       └─ ❌ The field 'program' is required
 
 Some config files contain errors (See above)
