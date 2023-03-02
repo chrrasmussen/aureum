@@ -11,9 +11,9 @@ expected_stderr = """
 📋 helpers/missing-program.toml
 └─ Validation errors
    ├─ test1
-   │  └─ The field 'program' is required
+   │  └─ ❌ The field 'program' is required
    └─ test2
-      └─ The field 'program' is required
+      └─ ❌ The field 'program' is required
 
 Some config files contain errors (See above)
 """

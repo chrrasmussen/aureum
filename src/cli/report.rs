@@ -128,7 +128,7 @@ fn validation_errors_map(
 }
 
 fn show_validation_error(validation_error: &TestCaseValidationError) -> String {
-    match validation_error {
+    let msg = match validation_error {
         TestCaseValidationError::MissingExternalFile(file_path) => {
             format!("Missing external file '{}'", file_path)
         }
@@ -143,7 +143,9 @@ fn show_validation_error(validation_error: &TestCaseValidationError) -> String {
         TestCaseValidationError::ExpectationRequired => {
             String::from("At least one expectation is required")
         }
-    }
+    };
+
+    format!("❌ {}", msg)
 }
 
 fn show_presence(value: bool) -> String {
