@@ -3,6 +3,7 @@ use aureum::formats::tree::Tree::{self, Leaf, Node};
 use aureum::toml_config::{
     ParsedTomlConfig, Requirement, TestCaseValidationError, TomlConfigData, TomlConfigError,
 };
+use aureum::utils::file;
 use colored::Colorize;
 use relative_path::RelativePathBuf;
 use std::collections::BTreeSet;
@@ -35,6 +36,7 @@ pub fn print_config_details(
     source_file: RelativePathBuf,
     config: &ParsedTomlConfig,
     verbose: bool,
+    hide_absolute_paths: bool,
 ) {
     let mut tests = Vec::new();
 
@@ -44,7 +46,11 @@ pub fn print_config_details(
         if verbose {
             // Program to run
             if let Ok(test_case) = &test_details.test_case {
-                let program_path = test_case.program.display().to_string();
+                let program_path = if hide_absolute_paths {
+                    file::display_path(&test_case.program)
+                } else {
+                    test_case.program.display().to_string()
+                };
                 let nodes = vec![str_to_tree(&format!("✅ {}", program_path))];
 
                 let heading = String::from("Program to run");

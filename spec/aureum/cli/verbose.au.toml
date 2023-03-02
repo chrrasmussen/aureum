@@ -2,7 +2,11 @@ program = { env = "AUREUM_TEST_EXEC" }
 
 
 [tests.verbose-mode]
-program_arguments = ["--verbose", "verbose-helpers/*.toml"]
+program_arguments = [
+   "--verbose",
+   "--hide-absolute-paths",
+   "verbose-helpers/*.toml",
+]
 expected_stdout = """
 🚀 Running 3 tests:
 ...
@@ -17,7 +21,7 @@ expected_stderr = """
 📋 verbose-helpers/many-requirements.toml
 ├─ :env-var-exists
 │  ├─ Program to run
-│  │  └─ ✅ /bin/echo
+│  │  └─ ✅ <absolute path to 'echo'>
 │  └─ Requirements
 │     └─ Environment
 │        └─ ✅ AUREUM_TEST_HELLO_WORLD
@@ -29,7 +33,7 @@ expected_stderr = """
 │     └─ ❌ Missing environment variable 'AUREUM_TEST_ENV_VAR_DOES_NOT_EXIST'
 ├─ :external-file-exists
 │  ├─ Program to run
-│  │  └─ ✅ /bin/echo
+│  │  └─ ✅ <absolute path to 'echo'>
 │  └─ Requirements
 │     └─ Files
 │        └─ ✅ hello-world.txt
@@ -42,7 +46,7 @@ expected_stderr = """
 
 📋 verbose-helpers/no-requirements.toml
 └─ Program to run
-   └─ ✅ /bin/echo
+   └─ ✅ <absolute path to 'echo'>
 
 Some config files contain errors (See above)
 """

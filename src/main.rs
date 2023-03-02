@@ -37,7 +37,12 @@ fn main() {
             Ok(config) => {
                 let any_issues = report::any_issues_in_toml_config(&config);
                 if any_issues || args.verbose {
-                    report::print_config_details(source_file, &config, args.verbose);
+                    report::print_config_details(
+                        source_file,
+                        &config,
+                        args.verbose,
+                        args.hide_absolute_paths,
+                    );
 
                     if any_issues {
                         any_failed_configs = true;

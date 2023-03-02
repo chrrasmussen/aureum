@@ -28,6 +28,10 @@ pub struct Args {
     #[arg(long)]
     pub show_all_tests: bool,
 
+    /// Replace absolute paths with a platform-independent placeholder
+    #[arg(long)]
+    pub hide_absolute_paths: bool,
+
     /// Run tests in parallel
     #[arg(long)]
     pub run_tests_in_parallel: bool,
