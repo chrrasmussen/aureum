@@ -31,11 +31,15 @@ pub fn parse_toml_config(source_file: &RelativePath) -> Result<ValidTomlConfig, 
     let toml_config = toml::from_str::<TomlConfig>(&toml_content)
         .map_err(TomlConfigError::FailedToParseTomlConfig)?;
 
-    let requirements = toml_config.get_requirements();
+    let toml_configs = split_toml_config(toml_config);
+
+    let mut requirements = BTreeSet::new();
+    for toml_config in toml_configs.values() {
+        requirements.extend(get_requirements_from_leaf_config(toml_config));
+    }
+
     let source_dir = file::parent_dir(source_file).to_logical_path(".");
     let data = gather_requirements(&requirements, &source_dir);
-
-    let toml_configs = split_toml_config(toml_config);
 
     let mut test_cases = vec![];
     let mut validation_errors = vec![];
@@ -80,38 +84,31 @@ enum ConfigValue<T> {
 // REQUIREMENTS
 
 #[derive(PartialEq, Eq, PartialOrd, Ord)]
-enum Requirement {
+pub enum Requirement {
     ExternalFile(String),
     EnvVar(String),
 }
 
-impl TomlConfig {
-    fn get_requirements(&self) -> BTreeSet<Requirement> {
-        let mut requirements = BTreeSet::new();
+fn get_requirements_from_leaf_config(config: &TomlConfig) -> BTreeSet<Requirement> {
+    let mut requirements = BTreeSet::new();
 
-        add_requirement(&mut requirements, &self.description);
-        add_requirement(&mut requirements, &self.program);
-        add_requirement(&mut requirements, &self.stdin);
-        add_requirement(&mut requirements, &self.expected_stdout);
-        add_requirement(&mut requirements, &self.expected_stderr);
-        add_requirement(&mut requirements, &self.expected_exit_code);
+    add_requirement(&mut requirements, &config.description);
+    add_requirement(&mut requirements, &config.program);
+    add_requirement(&mut requirements, &config.stdin);
+    add_requirement(&mut requirements, &config.expected_stdout);
+    add_requirement(&mut requirements, &config.expected_stderr);
+    add_requirement(&mut requirements, &config.expected_exit_code);
 
-        if let Some(arguments) = &self.program_arguments {
-            for argument in arguments {
-                let requirement = get_requirement(argument);
-                requirements.extend(requirement)
-            }
+    if let Some(arguments) = &config.program_arguments {
+        for argument in arguments {
+            let requirement = get_requirement(argument);
+            requirements.extend(requirement)
         }
-
-        if let Some(tests) = &self.tests {
-            for sub_toml_config in tests.values() {
-                let mut sub_requirements = sub_toml_config.get_requirements();
-                requirements.append(&mut sub_requirements)
-            }
-        }
-
-        requirements
     }
+
+    // Skips `config.tests` as this should be empty
+
+    requirements
 }
 
 fn add_requirement<T>(requirements: &mut BTreeSet<Requirement>, value: &Option<ConfigValue<T>>) {
