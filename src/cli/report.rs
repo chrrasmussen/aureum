@@ -5,9 +5,18 @@ use aureum::formats::tree::Tree::{self, Leaf, Node};
 use aureum::toml_config::{
     ParsedTomlConfig, Requirement, TestCaseValidationError, TomlConfigData, TomlConfigError,
 };
+use colored::Colorize;
 use relative_path::RelativePathBuf;
 
 const NONE_MSG: &str = "✅ None";
+
+pub fn print_no_config_files() {
+    eprintln!(
+        "{} {}",
+        "error:".red().bold(),
+        "No config files found for the given paths"
+    );
+}
 
 pub fn any_issues_in_toml_config(config: &ParsedTomlConfig) -> bool {
     config.tests.values().any(|x| x.test_case.is_err())

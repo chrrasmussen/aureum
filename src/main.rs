@@ -21,7 +21,7 @@ fn main() {
         .collect::<Vec<_>>();
 
     if source_files.is_empty() {
-        eprintln!("error: No config files found for the given paths");
+        report::print_no_config_files();
         exit(INVALID_USER_INPUT_EXIT_CODE);
     }
 
