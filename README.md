@@ -66,8 +66,8 @@ expected_stdout = "Hello world"
 
 Running the command `aureum hello.au.toml` will output the following:
 
-```bash
-Running 1 tests:
+```
+🚀 Running 1 tests:
 .
 
 Test result: OK (1 passed, 0 failed)
@@ -119,8 +119,8 @@ expected_stdout = "Test 2"
 
 Running the command `aureum multiple-tests.au.toml` will output the following:
 
-```bash
-Running 2 tests:
+```
+🚀 Running 2 tests:
 ..
 
 Test result: OK (2 passed, 0 failed)

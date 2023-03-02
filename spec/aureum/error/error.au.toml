@@ -24,7 +24,7 @@ expected_exit_code = 2
 [tests.invalid-config]
 program_arguments = ["helpers/invalid-config.toml"]
 expected_stdout = """
-Running 0 tests:
+🚀 Running 0 tests:
 
 
 Test result: OK (0 passed, 0 failed)
@@ -40,7 +40,7 @@ Some config files contain errors (See above)
 [tests.empty-config]
 program_arguments = ["helpers/empty-config.toml"]
 expected_stdout = """
-Running 0 tests:
+🚀 Running 0 tests:
 
 
 Test result: OK (0 passed, 0 failed)
@@ -58,7 +58,7 @@ Some config files contain errors (See above)
 [tests.no-program-specified]
 program_arguments = ["helpers/no-test-program.toml"]
 expected_stdout = """
-Running 0 tests:
+🚀 Running 0 tests:
 
 
 Test result: OK (0 passed, 0 failed)
@@ -75,7 +75,7 @@ Some config files contain errors (See above)
 [tests.unknown-test-program]
 program_arguments = ["helpers/unknown-test-program.toml"]
 expected_stdout = """
-Running 0 tests:
+🚀 Running 0 tests:
 
 
 Test result: OK (0 passed, 0 failed)
@@ -92,7 +92,7 @@ Some config files contain errors (See above)
 [tests.no-expectations]
 program_arguments = ["helpers/no-expectations.toml"]
 expected_stdout = """
-Running 0 tests:
+🚀 Running 0 tests:
 
 
 Test result: OK (0 passed, 0 failed)
@@ -109,7 +109,7 @@ Some config files contain errors (See above)
 [tests.missing-env-var]
 program_arguments = ["helpers/missing-env-var.toml"]
 expected_stdout = """
-Running 0 tests:
+🚀 Running 0 tests:
 
 
 Test result: OK (0 passed, 0 failed)
@@ -129,7 +129,7 @@ Some config files contain errors (See above)
 [tests.missing-external-file]
 program_arguments = ["helpers/missing-external-file.toml"]
 expected_stdout = """
-Running 0 tests:
+🚀 Running 0 tests:
 
 
 Test result: OK (0 passed, 0 failed)

@@ -111,7 +111,7 @@ fn report_summary(report_config: &ReportConfig, run_results: &[RunResult]) {
 // SUMMARY HELPERS
 
 fn summary_print_start(number_of_tests: usize) {
-    println!("Running {} tests:", number_of_tests)
+    println!("🚀 Running {} tests:", number_of_tests)
 }
 
 fn summary_print_test_case(result: &Result<TestResult, RunError>) {

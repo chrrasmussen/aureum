@@ -2,7 +2,7 @@ program = { env = "AUREUM_TEST_BASH" }
 program_arguments = ["helpers/absolute-path.sh"]
 
 expected_stdout = """
-Running 1 tests:
+🚀 Running 1 tests:
 .
 
 ✅ helpers/dir1/test1.toml

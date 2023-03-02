@@ -2,7 +2,7 @@ program = { env = "AUREUM_TEST_EXEC" }
 program_arguments = ["--show-all-tests", "helpers/missing-program.toml"]
 
 expected_stdout = """
-Running 0 tests:
+🚀 Running 0 tests:
 
 
 Test result: OK (0 passed, 0 failed)

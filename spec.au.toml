@@ -2,7 +2,7 @@ program = { env = "AUREUM_TEST_EXEC" }
 program_arguments = ["--show-all-tests", "spec"]
 
 expected_stdout = """
-Running 34 tests:
+🚀 Running 34 tests:
 ..................................
 
 ✅ spec/aureum/cli/help.au.toml

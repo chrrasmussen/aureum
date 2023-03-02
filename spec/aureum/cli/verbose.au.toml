@@ -5,7 +5,7 @@ program_arguments = [
   "verbose-helpers/*.toml",
 ]
 expected_stdout = """
-Running 1 tests:
+🚀 Running 1 tests:
 .
 
 ✅ verbose-helpers/passing-test.toml

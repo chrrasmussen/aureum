@@ -8,7 +8,7 @@ program_arguments = [
   "helpers/failing-test.toml",
 ]
 expected_stdout = """
-Running 2 tests:
+🚀 Running 2 tests:
 F.
 
 ❌ helpers/failing-test.toml
@@ -46,7 +46,7 @@ expected_exit_code = 1
 [tests.default]
 program_arguments = ["helpers/passing-test.toml", "helpers/failing-test.toml"]
 expected_stdout = """
-Running 2 tests:
+🚀 Running 2 tests:
 F.
 
 ❌ helpers/failing-test.toml

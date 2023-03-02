@@ -6,7 +6,7 @@ program_arguments = [
 ]
 
 expected_stdout = """
-Running 2 tests:
+🚀 Running 2 tests:
 ..
 
 Test result: OK (2 passed, 0 failed)

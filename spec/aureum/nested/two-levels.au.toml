@@ -2,7 +2,7 @@ program = { env = "AUREUM_TEST_EXEC" }
 program_arguments = ["--show-all-tests", "helpers/two-levels.toml"]
 
 expected_stdout = """
-Running 2 tests:
+🚀 Running 2 tests:
 ..
 
 ✅ helpers/two-levels.toml:test1
