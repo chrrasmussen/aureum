@@ -36,10 +36,12 @@ fn main() {
         match aureum::toml_config::parse_toml_config(&source_file) {
             Ok(config) => {
                 let any_issues = report::any_issues_in_toml_config(&config);
-                if any_issues {
-                    report::print_config_details(source_file, &config);
+                if any_issues || args.verbose {
+                    report::print_config_details(source_file, &config, args.verbose);
 
-                    any_failed_configs = true;
+                    if any_issues {
+                        any_failed_configs = true;
+                    }
                 }
 
                 all_test_cases.extend(config.test_cases);

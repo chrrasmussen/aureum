@@ -116,9 +116,6 @@ Test result: OK (0 passed, 0 failed)
 """
 expected_stderr = """
 📋 helpers/missing-env-var.toml
-├─ Requirements
-│  └─ Environment
-│     └─ ❌ AUREUM_TEST_THIS_ENV_VAR_DOES_NOT_EXIST
 └─ Validation errors
    └─ ❌ Missing environment variable 'AUREUM_TEST_THIS_ENV_VAR_DOES_NOT_EXIST'
 
@@ -136,9 +133,6 @@ Test result: OK (0 passed, 0 failed)
 """
 expected_stderr = """
 📋 helpers/missing-external-file.toml
-├─ Requirements
-│  └─ Files
-│     └─ ❌ AUREUM_TEST_THIS_FILE_DOES_NOT_EXIST
 └─ Validation errors
    └─ ❌ Missing external file 'AUREUM_TEST_THIS_FILE_DOES_NOT_EXIST'
 

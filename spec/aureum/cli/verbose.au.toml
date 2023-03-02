@@ -16,5 +16,11 @@ expected_stderr = """
 🔍 Found 1 config files
 └─ verbose-helpers/passing-test.toml
 
+📋 verbose-helpers/passing-test.toml
+├─ Requirements
+│  └─ ✅ None
+└─ Validation errors
+   └─ ✅ None
+
 """
 expected_exit_code = 0
