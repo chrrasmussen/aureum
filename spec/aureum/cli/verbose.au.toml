@@ -16,6 +16,8 @@ expected_stderr = """
 
 📋 verbose-helpers/many-requirements.toml
 ├─ :env-var-exists
+│  ├─ Program to run
+│  │  └─ ✅ /bin/echo
 │  └─ Requirements
 │     └─ Environment
 │        └─ ✅ AUREUM_TEST_HELLO_WORLD
@@ -26,6 +28,8 @@ expected_stderr = """
 │  └─ Validation errors
 │     └─ ❌ Missing environment variable 'AUREUM_TEST_ENV_VAR_DOES_NOT_EXIST'
 ├─ :external-file-exists
+│  ├─ Program to run
+│  │  └─ ✅ /bin/echo
 │  └─ Requirements
 │     └─ Files
 │        └─ ✅ hello-world.txt
@@ -37,6 +41,8 @@ expected_stderr = """
       └─ ❌ Missing external file 'aureum-test-file-does-not-exist'
 
 📋 verbose-helpers/no-requirements.toml
+└─ Program to run
+   └─ ✅ /bin/echo
 
 Some config files contain errors (See above)
 """

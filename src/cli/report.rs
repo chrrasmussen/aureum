@@ -42,6 +42,15 @@ pub fn print_config_details(
         let mut categories = vec![];
 
         if verbose {
+            // Program to run
+            if let Ok(test_case) = &test_details.test_case {
+                let program_path = test_case.program.display().to_string();
+                let nodes = vec![str_to_tree(&format!("✅ {}", program_path))];
+
+                let heading = String::from("Program to run");
+                categories.push(Node(heading, nodes));
+            }
+
             // Requirements
             let requirements = requirements_map(&test_details.requirements, &config.data);
             if !requirements.is_empty() {
