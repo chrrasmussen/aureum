@@ -35,7 +35,17 @@ pub fn parse_toml_config(source_file: &RelativePath) -> Result<ValidTomlConfig, 
     let source_dir = file::parent_dir(source_file).to_logical_path(".");
     let data = gather_requirements(&requirements, &source_dir);
 
-    let (test_cases, validation_errors) = build_test_cases(toml_config, source_file, &data);
+    let toml_configs = split_toml_config(toml_config);
+
+    let mut test_cases = vec![];
+    let mut validation_errors = vec![];
+
+    for (test_id, toml_config) in toml_configs {
+        match build_test_case(toml_config, source_file.to_owned(), test_id.clone(), &data) {
+            Ok(test_case) => test_cases.push(test_case),
+            Err(err) => validation_errors.push((test_id, err)),
+        }
+    }
 
     Ok(ValidTomlConfig {
         requirements: data,
@@ -207,36 +217,6 @@ pub enum TestCaseValidationError {
     ExpectationRequired,
 }
 
-fn build_test_cases<P>(
-    toml_config: TomlConfig,
-    path: P,
-    data: &TomlConfigData,
-) -> (
-    Vec<TestCase>,
-    Vec<(TestId, BTreeSet<TestCaseValidationError>)>,
-)
-where
-    P: AsRef<RelativePath>,
-{
-    let source_file = path.as_ref();
-
-    let toml_configs = split_toml_configs(toml_config);
-
-    let mut test_cases = vec![];
-    let mut validation_errors = vec![];
-
-    for (id_path, toml_config) in toml_configs {
-        let test_id = TestId::new(id_path);
-
-        match build_test_case(toml_config, source_file.to_owned(), test_id.clone(), data) {
-            Ok(test_case) => test_cases.push(test_case),
-            Err(err) => validation_errors.push((test_id, err)),
-        }
-    }
-
-    (test_cases, validation_errors)
-}
-
 fn build_test_case(
     toml_config: TomlConfig,
     source_file: RelativePathBuf,
@@ -340,18 +320,18 @@ where
 }
 
 // Currently only merges a single level
-fn split_toml_configs(base_config: TomlConfig) -> Vec<(Vec<String>, TomlConfig)> {
+fn split_toml_config(base_config: TomlConfig) -> BTreeMap<TestId, TomlConfig> {
     if let Some(tests) = base_config.tests.clone() {
-        let mut toml_configs = vec![];
+        let mut toml_configs = BTreeMap::new();
 
         for (name, sub_config) in tests.into_iter() {
             let merged_toml_config = merge_toml_configs(base_config.clone(), sub_config);
-            toml_configs.push((vec![name], merged_toml_config))
+            toml_configs.insert(TestId::new(vec![name]), merged_toml_config);
         }
 
         toml_configs
     } else {
-        vec![(vec![], base_config)]
+        BTreeMap::from([(TestId::root(), base_config)])
     }
 }
 
