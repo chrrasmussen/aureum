@@ -1,4 +1,4 @@
-use crate::formats::tree::Node;
+use crate::formats::tree::{Leaf, Node};
 use crate::formats::{tap, tree};
 use crate::test_case::{self, RunError, TestCase};
 use crate::test_result::TestResult;
@@ -175,19 +175,18 @@ fn summary_print_result(run_result: &RunResult) {
     if run_result.is_success() {
         println!("✅ {}", message)
     } else {
-        match &run_result.result {
-            Ok(result) => {
-                let header = format!("❌ {}", message);
-                let tree = Node(header, tree::tree_from_test_result(result));
-                let content = tree::draw_tree(&tree)
-                    .unwrap_or_else(|_| String::from("Failed to draw tree\n"));
-                print!("{}", content);
-            }
+        let nodes = match &run_result.result {
+            Ok(result) => tree::nodes_from_test_result(result),
             Err(_) => {
-                println!("❌ {}", message);
-                println!("Failed to run test");
+                vec![Leaf(vec![String::from("Failed to run test")])]
             }
         };
+
+        let test_heading = format!("❌ {}", message);
+        let tree = Node(test_heading, nodes);
+        let content =
+            tree::draw_tree(&tree).unwrap_or_else(|_| String::from("Failed to draw tree\n"));
+        print!("{}", content); // Already contains newline
     }
 }
 
