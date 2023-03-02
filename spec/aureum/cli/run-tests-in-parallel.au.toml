@@ -1,8 +1,8 @@
 program = { env = "AUREUM_TEST_EXEC" }
 program_arguments = [
   "--run-tests-in-parallel",
-  "helpers/passing-test.toml",
-  "helpers/passing-test2.toml",
+  "basic-helpers/passing-test.toml",
+  "basic-helpers/passing-test2.toml",
 ]
 
 expected_stdout = """

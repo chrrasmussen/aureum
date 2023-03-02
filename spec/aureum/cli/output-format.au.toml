@@ -6,13 +6,13 @@ program_arguments = [
   "--show-all-tests",
   "--output-format",
   "summary",
-  "helpers/passing-test.toml",
+  "basic-helpers/passing-test.toml",
 ]
 expected_stdout = """
 🚀 Running 1 tests:
 .
 
-✅ helpers/passing-test.toml
+✅ basic-helpers/passing-test.toml
 
 Test result: OK (1 passed, 0 failed)
 """
@@ -25,13 +25,13 @@ program_arguments = [
   "--show-all-tests",
   "--output-format",
   "summary",
-  "helpers/failing-test.toml",
+  "basic-helpers/failing-test.toml",
 ]
 expected_stdout = """
 🚀 Running 1 tests:
 F
 
-❌ helpers/failing-test.toml
+❌ basic-helpers/failing-test.toml
 ├─ Standard output
 │  ├─ Expected
 │  │  ╭
@@ -63,22 +63,30 @@ expected_exit_code = 1
 
 
 [tests.tap-passing]
-program_arguments = ["--output-format", "tap", "helpers/passing-test.toml"]
+program_arguments = [
+  "--output-format",
+  "tap",
+  "basic-helpers/passing-test.toml",
+]
 expected_stdout = """
 TAP version 14
 1..1
-ok     1 - helpers/passing-test.toml
+ok     1 - basic-helpers/passing-test.toml
 """
 expected_stderr = ""
 expected_exit_code = 0
 
 
 [tests.tap-failing]
-program_arguments = ["--output-format", "tap", "helpers/failing-test.toml"]
+program_arguments = [
+  "--output-format",
+  "tap",
+  "basic-helpers/failing-test.toml",
+]
 expected_stdout = """
 TAP version 14
 1..1
-not ok 1 - helpers/failing-test.toml
+not ok 1 - basic-helpers/failing-test.toml
   ---
   exit-code:
     expected: 42
@@ -96,7 +104,11 @@ expected_exit_code = 1
 
 
 [tests.unknown]
-program_arguments = ["--output-format", "UNKNOWN", "helpers/passing-test.toml"]
+program_arguments = [
+  "--output-format",
+  "UNKNOWN",
+  "basic-helpers/passing-test.toml",
+]
 expected_stdout = ""
 expected_stderr = """
 error: Invalid value 'UNKNOWN' for '--output-format <OUTPUT_FORMAT>': Invalid output format
