@@ -58,7 +58,15 @@ where
     let path = path.as_ref();
     if path.is_absolute() {
         if let Some(file_name) = path.file_name() {
-            format!("<absolute path to '{}'>", file_name.to_string_lossy())
+            let display_name = file_name.to_string_lossy().to_string();
+
+            // Workaround for Windows: Remove .exe suffix
+            let display_name_without_exe: String = display_name
+                .clone()
+                .strip_suffix(".exe")
+                .map_or(display_name, String::from);
+
+            format!("<absolute path to '{}'>", display_name_without_exe)
         } else {
             String::from("<root directory>")
         }
