@@ -7,4 +7,4 @@ export AUREUM_TEST_BASH="${SHELL:-bash}" # Use the same shell that is executing 
 export AUREUM_TEST_EXEC="$PWD/target/debug/aureum"
 export AUREUM_TEST_HELLO_WORLD="Hello world" # Required by `basic/read-env-var.au.toml`
 
-cargo run -- "${@:-spec.au.toml}"
+cargo run -- "${@:-spec}"
