@@ -26,6 +26,8 @@ expected_stderr = """
 │     └─ Environment
 │        └─ ✅ AUREUM_TEST_HELLO_WORLD
 ├─ :env-var-missing
+│  ├─ Program to run
+│  │  └─ ✅ <absolute path to 'echo'>
 │  ├─ Requirements
 │  │  └─ Environment
 │  │     └─ ❌ AUREUM_TEST_ENV_VAR_DOES_NOT_EXIST
@@ -38,6 +40,8 @@ expected_stderr = """
 │     └─ Files
 │        └─ ✅ hello-world.txt
 └─ :external-file-missing
+   ├─ Program to run
+   │  └─ ✅ <absolute path to 'echo'>
    ├─ Requirements
    │  └─ Files
    │     └─ ❌ aureum-test-file-does-not-exist

@@ -19,7 +19,42 @@ pub struct ParsedTomlConfig {
 
 pub struct TestDetails {
     pub requirements: BTreeSet<Requirement>,
+    pub program_path: ProgramPath,
     pub test_case: Result<TestCase, BTreeSet<TestCaseValidationError>>,
+}
+
+pub enum ProgramPath {
+    NotSpecified,
+    MissingProgram {
+        requested_path: String,
+    },
+    ResolvedPath {
+        requested_path: String,
+        resolved_path: PathBuf,
+    },
+}
+
+impl ProgramPath {
+    fn get_resolved_path(&self) -> Option<PathBuf> {
+        match self {
+            ProgramPath::NotSpecified => None,
+            ProgramPath::MissingProgram { requested_path: _ } => None,
+            ProgramPath::ResolvedPath {
+                requested_path: _,
+                resolved_path,
+            } => Some(resolved_path.clone()),
+        }
+    }
+}
+
+#[derive(PartialEq, Eq, PartialOrd, Ord)]
+pub enum TestCaseValidationError {
+    MissingExternalFile(String),
+    MissingEnvVar(String),
+    FailedToParseString,
+    ProgramRequired,
+    ProgramNotFound(String),
+    ExpectationRequired,
 }
 
 pub enum TomlConfigError {
@@ -48,10 +83,8 @@ pub fn parse_toml_config(source_file: &RelativePath) -> Result<ParsedTomlConfig,
     let mut tests = BTreeMap::new();
 
     for (test_id, toml_config) in toml_configs {
-        let test_details = TestDetails {
-            requirements: get_requirements_from_leaf_config(&toml_config),
-            test_case: build_test_case(toml_config, source_file.to_owned(), test_id.clone(), &data),
-        };
+        let test_details =
+            build_test_details(toml_config, source_file.to_owned(), test_id.clone(), &data);
 
         tests.insert(test_id, test_details);
     }
@@ -181,30 +214,40 @@ fn read_from_env(var_name: &String) -> Result<String, env::VarError> {
 
 // CREATE TEST CASES
 
-#[derive(PartialEq, Eq, PartialOrd, Ord)]
-pub enum TestCaseValidationError {
-    MissingExternalFile(String),
-    MissingEnvVar(String),
-    FailedToParseString,
-    ProgramRequired,
-    ProgramNotFound(String),
-    ExpectationRequired,
-}
-
-fn build_test_case(
+fn build_test_details(
     toml_config: TomlConfig,
     source_file: RelativePathBuf,
     id: TestId,
     data: &TomlConfigData,
-) -> Result<TestCase, BTreeSet<TestCaseValidationError>> {
+) -> TestDetails {
     let current_dir = file::parent_dir(&source_file);
     let mut validation_errors = BTreeSet::new();
 
-    // Validate fields in config file
+    // Requirements
+    let requirements = get_requirements_from_leaf_config(&toml_config);
 
-    if toml_config.program.is_none() {
-        validation_errors.insert(TestCaseValidationError::ProgramRequired);
+    // Program path
+    let program = read_from_config_value(&mut validation_errors, toml_config.program, data);
+    let program_path = get_program_path(
+        program.unwrap_or_default(),
+        &current_dir.to_logical_path("."),
+    );
+    match &program_path {
+        ProgramPath::NotSpecified => {
+            validation_errors.insert(TestCaseValidationError::ProgramRequired);
+        }
+        ProgramPath::MissingProgram { requested_path } => {
+            validation_errors.insert(TestCaseValidationError::ProgramNotFound(
+                requested_path.clone(),
+            ));
+        }
+        ProgramPath::ResolvedPath {
+            requested_path: _,
+            resolved_path: _,
+        } => {}
     }
+
+    // Validate fields in config file
 
     if toml_config.expected_stdout.is_none()
         && toml_config.expected_stderr.is_none()
@@ -216,11 +259,6 @@ fn build_test_case(
     // Read fields
 
     let description = read_from_config_value(&mut validation_errors, toml_config.description, data);
-
-    let mut program_name = String::from("");
-    if let Some(p) = read_from_config_value(&mut validation_errors, toml_config.program, data) {
-        program_name = p;
-    }
 
     let mut arguments = vec![];
     for arg in toml_config.program_arguments.unwrap_or_default() {
@@ -243,19 +281,11 @@ fn build_test_case(
     let expected_exit_code =
         read_from_config_value(&mut validation_errors, toml_config.expected_exit_code, data);
 
-    // Validate fields
-    let mut program = PathBuf::new();
-    if !program_name.is_empty() {
-        if let Ok(p) = file::find_executable_path(&program_name, current_dir.to_logical_path(".")) {
-            program = p;
-        } else {
-            validation_errors.insert(TestCaseValidationError::ProgramNotFound(
-                program_name.clone(),
-            ));
-        }
-    }
+    let test_case = if validation_errors.is_empty() {
+        let program = program_path
+            .get_resolved_path()
+            .expect("Validation errors should not be empty if program path is not resolved");
 
-    if validation_errors.is_empty() {
         Ok(TestCase {
             source_file,
             id,
@@ -269,6 +299,27 @@ fn build_test_case(
         })
     } else {
         Err(validation_errors)
+    };
+
+    TestDetails {
+        requirements,
+        program_path,
+        test_case,
+    }
+}
+
+fn get_program_path(requested_path: String, in_dir: &Path) -> ProgramPath {
+    if requested_path.is_empty() {
+        return ProgramPath::NotSpecified;
+    }
+
+    if let Ok(resolved_path) = file::find_executable_path(&requested_path, in_dir) {
+        ProgramPath::ResolvedPath {
+            requested_path,
+            resolved_path,
+        }
+    } else {
+        ProgramPath::MissingProgram { requested_path }
     }
 }
 

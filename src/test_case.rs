@@ -11,7 +11,7 @@ pub struct TestCase {
     pub source_file: RelativePathBuf,
     pub id: TestId,
     pub description: Option<String>,
-    pub program: PathBuf,
+    pub program: PathBuf, // Expects an absolute path
     pub arguments: Vec<String>,
     pub stdin: Option<String>,
     pub expected_stdout: Option<String>,
