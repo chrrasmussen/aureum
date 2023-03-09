@@ -1,5 +1,4 @@
 use aureum::utils::file;
-use std::env;
 use std::path::{Path, PathBuf};
 
 // SECTION: find_executable_path
@@ -41,10 +40,7 @@ fn test_program_exists_at_absolute_path() {
 }
 
 fn assert_executable_exists(binary_name: &str) {
-    let current_dir = env::current_dir().unwrap(); // Returns path to project root
-    let helper_dir = current_dir.join("tests/file_utils");
-
-    let executable_path = file::find_executable_path(binary_name, helper_dir).unwrap();
+    let executable_path = file::find_executable_path(binary_name, "tests/file_utils").unwrap();
 
     assert!(executable_path.is_absolute());
 }

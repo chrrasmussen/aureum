@@ -25,7 +25,11 @@ where
     // Search local directory
     let mut local_executables = which::which_in_global(&binary_name, Some(paths))?;
     if let Some(path) = local_executables.next() {
-        return Ok(path);
+        let absolute_path = path
+            .canonicalize()
+            .map_err(|_| which::Error::CannotCanonicalize)?;
+
+        return Ok(absolute_path);
     }
 
     // Search PATH
