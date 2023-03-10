@@ -1,0 +1,3 @@
+program = "aureum_test_this_program_does_not_exist"
+
+expected_exit_code = 0

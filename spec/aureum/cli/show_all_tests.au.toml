@@ -1,17 +1,17 @@
 program = { env = "AUREUM_TEST_EXEC" }
 
 
-[tests.show-all-tests]
+[tests.show_all_tests]
 program_arguments = [
    "--show-all-tests",
-   "basic-helpers/passing-test.toml",
-   "basic-helpers/failing-test.toml",
+   "basic_helpers/passing_test.toml",
+   "basic_helpers/failing_test.toml",
 ]
 expected_stdout = """
 🚀 Running 2 tests:
 F.
 
-❌ basic-helpers/failing-test.toml
+❌ basic_helpers/failing_test.toml
 ├─ Standard output
 │  ├─ Expected
 │  │  ╭
@@ -44,7 +44,7 @@ F.
    │  └─ 42
    └─ Got
       └─ 0
-✅ basic-helpers/passing-test.toml
+✅ basic_helpers/passing_test.toml
 
 Test result: FAIL (1 passed, 1 failed)
 """
@@ -54,14 +54,14 @@ expected_exit_code = 1
 
 [tests.default]
 program_arguments = [
-   "basic-helpers/passing-test.toml",
-   "basic-helpers/failing-test.toml",
+   "basic_helpers/passing_test.toml",
+   "basic_helpers/failing_test.toml",
 ]
 expected_stdout = """
 🚀 Running 2 tests:
 F.
 
-❌ basic-helpers/failing-test.toml
+❌ basic_helpers/failing_test.toml
 ├─ Standard output
 │  ├─ Expected
 │  │  ╭

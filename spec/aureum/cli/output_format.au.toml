@@ -1,18 +1,18 @@
 program = { env = "AUREUM_TEST_EXEC" }
 
 
-[tests.summary-passing]
+[tests.summary_passing]
 program_arguments = [
   "--show-all-tests",
   "--output-format",
   "summary",
-  "basic-helpers/passing-test.toml",
+  "basic_helpers/passing_test.toml",
 ]
 expected_stdout = """
 🚀 Running 1 tests:
 .
 
-✅ basic-helpers/passing-test.toml
+✅ basic_helpers/passing_test.toml
 
 Test result: OK (1 passed, 0 failed)
 """
@@ -20,18 +20,18 @@ expected_stderr = ""
 expected_exit_code = 0
 
 
-[tests.summary-failing]
+[tests.summary_failing]
 program_arguments = [
   "--show-all-tests",
   "--output-format",
   "summary",
-  "basic-helpers/failing-test.toml",
+  "basic_helpers/failing_test.toml",
 ]
 expected_stdout = """
 🚀 Running 1 tests:
 F
 
-❌ basic-helpers/failing-test.toml
+❌ basic_helpers/failing_test.toml
 ├─ Standard output
 │  ├─ Expected
 │  │  ╭
@@ -71,31 +71,31 @@ expected_stderr = ""
 expected_exit_code = 1
 
 
-[tests.tap-passing]
+[tests.tap_passing]
 program_arguments = [
   "--output-format",
   "tap",
-  "basic-helpers/passing-test.toml",
+  "basic_helpers/passing_test.toml",
 ]
 expected_stdout = """
 TAP version 14
 1..1
-ok     1 - basic-helpers/passing-test.toml
+ok     1 - basic_helpers/passing_test.toml
 """
 expected_stderr = ""
 expected_exit_code = 0
 
 
-[tests.tap-failing]
+[tests.tap_failing]
 program_arguments = [
   "--output-format",
   "tap",
-  "basic-helpers/failing-test.toml",
+  "basic_helpers/failing_test.toml",
 ]
 expected_stdout = """
 TAP version 14
 1..1
-not ok 1 - basic-helpers/failing-test.toml
+not ok 1 - basic_helpers/failing_test.toml
   ---
   exit-code:
     expected: 42
@@ -116,7 +116,7 @@ expected_exit_code = 1
 program_arguments = [
   "--output-format",
   "UNKNOWN",
-  "basic-helpers/passing-test.toml",
+  "basic_helpers/passing_test.toml",
 ]
 expected_stdout = ""
 expected_stderr = """

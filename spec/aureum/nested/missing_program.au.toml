@@ -1,5 +1,5 @@
 program = { env = "AUREUM_TEST_EXEC" }
-program_arguments = ["--show-all-tests", "helpers/missing-program.toml"]
+program_arguments = ["--show-all-tests", "helpers/missing_program.toml"]
 
 expected_stdout = """
 🚀 Running 0 tests:
@@ -8,7 +8,7 @@ expected_stdout = """
 Test result: OK (0 passed, 0 failed)
 """
 expected_stderr = """
-📋 helpers/missing-program.toml
+📋 helpers/missing_program.toml
 ├─ :test1
 │  └─ Validation errors
 │     └─ ❌ The field 'program' is required

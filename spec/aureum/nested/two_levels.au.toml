@@ -1,13 +1,12 @@
 program = { env = "AUREUM_TEST_EXEC" }
-program_arguments = [
-  "--run-tests-in-parallel",
-  "basic-helpers/passing-test.toml",
-  "basic-helpers/passing-test2.toml",
-]
+program_arguments = ["--show-all-tests", "helpers/two_levels.toml"]
 
 expected_stdout = """
 🚀 Running 2 tests:
 ..
+
+✅ helpers/two_levels.toml:test1
+✅ helpers/two_levels.toml:test2
 
 Test result: OK (2 passed, 0 failed)
 """

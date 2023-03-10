@@ -3,26 +3,26 @@ expected_stdout = ""
 expected_exit_code = 1
 
 
-[tests.missing-config]
-program_arguments = ["AUREUM-THIS-FILE-DOES-NOT-EXIST"]
+[tests.missing_config]
+program_arguments = ["aureum_test_this_file_does_not_exist"]
 expected_stderr = """
 error: No config files found for the given paths
 """
 expected_exit_code = 2
 
 
-[tests.missing-config-with-test-id]
-program_arguments = ["AUREUM-THIS-FILE-DOES-NOT-EXIST:sub1"]
+[tests.missing_config_with_test_id]
+program_arguments = ["aureum_test_this_file_does_not_exist:sub1"]
 expected_stderr = """
-error: Invalid value 'AUREUM-THIS-FILE-DOES-NOT-EXIST:sub1' for '<PATHS>...': Invalid path to config file
+error: Invalid value 'aureum_test_this_file_does_not_exist:sub1' for '<PATHS>...': Invalid path to config file
 
 For more information try '--help'
 """
 expected_exit_code = 2
 
 
-[tests.invalid-config]
-program_arguments = ["helpers/invalid-config.toml"]
+[tests.invalid_config]
+program_arguments = ["helpers/invalid_config.toml"]
 expected_stdout = """
 🚀 Running 0 tests:
 
@@ -30,15 +30,15 @@ expected_stdout = """
 Test result: OK (0 passed, 0 failed)
 """
 expected_stderr = """
-📋 helpers/invalid-config.toml
+📋 helpers/invalid_config.toml
 └─ Failed to parse config file
 
 Some config files contain errors (See above)
 """
 
 
-[tests.empty-config]
-program_arguments = ["helpers/empty-config.toml"]
+[tests.empty_config]
+program_arguments = ["helpers/empty_config.toml"]
 expected_stdout = """
 🚀 Running 0 tests:
 
@@ -46,7 +46,7 @@ expected_stdout = """
 Test result: OK (0 passed, 0 failed)
 """
 expected_stderr = """
-📋 helpers/empty-config.toml
+📋 helpers/empty_config.toml
 └─ Validation errors
    ├─ ❌ The field 'program' is required
    └─ ❌ At least one expectation is required
@@ -55,8 +55,8 @@ Some config files contain errors (See above)
 """
 
 
-[tests.no-program-specified]
-program_arguments = ["helpers/no-test-program.toml"]
+[tests.no_program_specified]
+program_arguments = ["helpers/no_test_program.toml"]
 expected_stdout = """
 🚀 Running 0 tests:
 
@@ -64,7 +64,7 @@ expected_stdout = """
 Test result: OK (0 passed, 0 failed)
 """
 expected_stderr = """
-📋 helpers/no-test-program.toml
+📋 helpers/no_test_program.toml
 └─ Validation errors
    └─ ❌ The field 'program' is required
 
@@ -72,8 +72,8 @@ Some config files contain errors (See above)
 """
 
 
-[tests.unknown-test-program]
-program_arguments = ["helpers/unknown-test-program.toml"]
+[tests.unknown_test_program]
+program_arguments = ["helpers/unknown_test_program.toml"]
 expected_stdout = """
 🚀 Running 0 tests:
 
@@ -81,16 +81,16 @@ expected_stdout = """
 Test result: OK (0 passed, 0 failed)
 """
 expected_stderr = """
-📋 helpers/unknown-test-program.toml
+📋 helpers/unknown_test_program.toml
 └─ Validation errors
-   └─ ❌ The program 'AUREUM-THIS-PROGRAM-DOES-NOT-EXIST' was not found
+   └─ ❌ The program 'aureum_test_this_program_does_not_exist' was not found
 
 Some config files contain errors (See above)
 """
 
 
-[tests.no-expectations]
-program_arguments = ["helpers/no-expectations.toml"]
+[tests.no_expectations]
+program_arguments = ["helpers/no_expectations.toml"]
 expected_stdout = """
 🚀 Running 0 tests:
 
@@ -98,7 +98,7 @@ expected_stdout = """
 Test result: OK (0 passed, 0 failed)
 """
 expected_stderr = """
-📋 helpers/no-expectations.toml
+📋 helpers/no_expectations.toml
 └─ Validation errors
    └─ ❌ At least one expectation is required
 
@@ -106,8 +106,8 @@ Some config files contain errors (See above)
 """
 
 
-[tests.missing-env-var]
-program_arguments = ["helpers/missing-env-var.toml"]
+[tests.missing_env_var]
+program_arguments = ["helpers/missing_env_var.toml"]
 expected_stdout = """
 🚀 Running 0 tests:
 
@@ -115,7 +115,7 @@ expected_stdout = """
 Test result: OK (0 passed, 0 failed)
 """
 expected_stderr = """
-📋 helpers/missing-env-var.toml
+📋 helpers/missing_env_var.toml
 └─ Validation errors
    └─ ❌ Missing environment variable 'AUREUM_TEST_THIS_ENV_VAR_DOES_NOT_EXIST'
 
@@ -123,8 +123,8 @@ Some config files contain errors (See above)
 """
 
 
-[tests.missing-external-file]
-program_arguments = ["helpers/missing-external-file.toml"]
+[tests.missing_external_file]
+program_arguments = ["helpers/missing_external_file.toml"]
 expected_stdout = """
 🚀 Running 0 tests:
 
@@ -132,9 +132,9 @@ expected_stdout = """
 Test result: OK (0 passed, 0 failed)
 """
 expected_stderr = """
-📋 helpers/missing-external-file.toml
+📋 helpers/missing_external_file.toml
 └─ Validation errors
-   └─ ❌ Missing external file 'AUREUM_TEST_THIS_FILE_DOES_NOT_EXIST'
+   └─ ❌ Missing external file 'aureum_test_this_file_does_not_exist'
 
 Some config files contain errors (See above)
 """

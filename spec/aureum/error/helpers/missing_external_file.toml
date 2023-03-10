@@ -1,0 +1,3 @@
+program = "echo"
+
+expected_stdout = { file = "aureum_test_this_file_does_not_exist" }

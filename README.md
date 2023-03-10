@@ -101,11 +101,11 @@ Recommended file extension: `.au.toml`
 
 ### Multiple tests per file
 
-An Aureum config file may contain multiple tests. To specify a sub-test you can add a heading using the following format: `[tests.<name-of-test>]` and configure a test as normal.
+An Aureum config file may contain multiple tests. To specify a sub-test you can add a heading using the following format: `[tests.<name_of_test>]` and configure a test as normal.
 
 Note that fields specified at the level above the sub-test will get inherited by the sub-tests. Because of this, only the leaf nodes are considered a test. The following example configures two tests, where both tests run the program `/bin/echo`:
 
-Filename: ``multiple-tests.au.toml``
+Filename: ``multiple_tests.au.toml``
 
 ```toml
 program = "echo"
@@ -119,7 +119,7 @@ program_arguments = ["-n", "Test 2"]
 expected_stdout = "Test 2"
 ```
 
-Running the command `aureum multiple-tests.au.toml` will output the following:
+Running the command `aureum multiple_tests.au.toml` will output the following:
 
 ```
 🚀 Running 2 tests:

@@ -1,11 +1,11 @@
 program = { env = "AUREUM_TEST_EXEC" }
 
 
-[tests.verbose-mode]
+[tests.verbose_mode]
 program_arguments = [
    "--verbose",
    "--hide-absolute-paths",
-   "verbose-helpers/*.toml",
+   "verbose_helpers/*.toml",
 ]
 expected_stdout = """
 🚀 Running 3 tests:
@@ -15,17 +15,17 @@ Test result: OK (3 passed, 0 failed)
 """
 expected_stderr = """
 🔍 Found 2 config files
-├─ verbose-helpers/many-requirements.toml
-└─ verbose-helpers/no-requirements.toml
+├─ verbose_helpers/many_requirements.toml
+└─ verbose_helpers/no_requirements.toml
 
-📋 verbose-helpers/many-requirements.toml
-├─ :env-var-exists
+📋 verbose_helpers/many_requirements.toml
+├─ :env_var_exists
 │  ├─ Program to run
 │  │  └─ ✅ <absolute path to 'echo'>
 │  └─ Requirements
 │     └─ Environment
 │        └─ ✅ AUREUM_TEST_HELLO_WORLD
-├─ :env-var-missing
+├─ :env_var_missing
 │  ├─ Program to run
 │  │  └─ ✅ <absolute path to 'echo'>
 │  ├─ Requirements
@@ -33,22 +33,22 @@ expected_stderr = """
 │  │     └─ ❌ AUREUM_TEST_ENV_VAR_DOES_NOT_EXIST
 │  └─ Validation errors
 │     └─ ❌ Missing environment variable 'AUREUM_TEST_ENV_VAR_DOES_NOT_EXIST'
-├─ :external-file-exists
+├─ :external_file_exists
 │  ├─ Program to run
 │  │  └─ ✅ <absolute path to 'echo'>
 │  └─ Requirements
 │     └─ Files
-│        └─ ✅ hello-world.txt
-└─ :external-file-missing
+│        └─ ✅ hello_world.txt
+└─ :external_file_missing
    ├─ Program to run
    │  └─ ✅ <absolute path to 'echo'>
    ├─ Requirements
    │  └─ Files
-   │     └─ ❌ aureum-test-file-does-not-exist
+   │     └─ ❌ aureum_test_this_file_does_not_exist
    └─ Validation errors
-      └─ ❌ Missing external file 'aureum-test-file-does-not-exist'
+      └─ ❌ Missing external file 'aureum_test_this_file_does_not_exist'
 
-📋 verbose-helpers/no-requirements.toml
+📋 verbose_helpers/no_requirements.toml
 └─ Program to run
    └─ ✅ <absolute path to 'echo'>
 
@@ -58,7 +58,7 @@ expected_exit_code = 1
 
 
 [tests.default]
-program_arguments = ["verbose-helpers/*.toml"]
+program_arguments = ["verbose_helpers/*.toml"]
 expected_stdout = """
 🚀 Running 3 tests:
 ...
@@ -66,15 +66,15 @@ expected_stdout = """
 Test result: OK (3 passed, 0 failed)
 """
 expected_stderr = """
-📋 verbose-helpers/many-requirements.toml
-├─ :env-var-exists
-├─ :env-var-missing
+📋 verbose_helpers/many_requirements.toml
+├─ :env_var_exists
+├─ :env_var_missing
 │  └─ Validation errors
 │     └─ ❌ Missing environment variable 'AUREUM_TEST_ENV_VAR_DOES_NOT_EXIST'
-├─ :external-file-exists
-└─ :external-file-missing
+├─ :external_file_exists
+└─ :external_file_missing
    └─ Validation errors
-      └─ ❌ Missing external file 'aureum-test-file-does-not-exist'
+      └─ ❌ Missing external file 'aureum_test_this_file_does_not_exist'
 
 Some config files contain errors (See above)
 """
